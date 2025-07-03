@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant Vocal iPhone Style Ultra-Rapide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '4xl': '2rem',
+                        '5xl': '2.5rem',
+                    },
+                    keyframes: {
+                        pulse: {
+                            '0%, 100%': { boxShadow: '0 0 0 0 rgba(74, 222, 128, 0.7)' },
+                            '70%': { boxShadow: '0 0 0 10px rgba(74, 222, 128, 0)' },
+                        },
+                        'tts-pulse': {
+                            '0%, 100%': { boxShadow: '0 0 0 0 rgba(168, 85, 247, 0.7)' },
+                            '70%': { boxShadow: '0 0 0 10px rgba(168, 85, 247, 0)' },
+                        },
+                        'interrupt-flash': {
+                            '0%': { boxShadow: '0 0 0 0 rgba(239, 68, 68, 0.8)' },
+                            '50%': { boxShadow: '0 0 0 15px rgba(239, 68, 68, 0.4)' },
+                            '100%': { boxShadow: '0 0 0 0 rgba(239, 68, 68, 0)' },
+                        },
+                        'processing-spin': {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(360deg)' },
+                        },
+                    },
+                    animation: {
+                        pulse: 'pulse 2s infinite',
+                        'tts-pulse': 'tts-pulse 1.5s infinite',
+                        'interrupt-flash': 'interrupt-flash 0.5s ease-out',
+                        'processing-spin': 'processing-spin 1s linear infinite',
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
+        
+        .ultra-fast-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(45deg, #00ff00, #ffff00);
+            color: black;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-[#667eea] to-[#764ba2] min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <div class="w-[375px] h-[812px] bg-black rounded-5xl p-2 shadow-2xl shadow-black/50 relative">
+        <div class="ultra-fast-indicator">⚡ ULTRA-RAPIDE</div>
+        
+        <div class="w-full h-full bg-gradient-to-br from-[#1e3c72] to-[#2a5298] rounded-4xl relative overflow-hidden flex flex-col">
+            
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[150px] h-[30px] bg-black rounded-b-2xl z-10"></div>
+            
+            <div class="flex-shrink-0">
+                <div class="flex justify-between items-center px-5 py-3 text-white text-sm font-semibold">
+                    <div>9:41</div>
+                    <div>Assistant Vocal Pro</div>
+                    <div>🔋100%</div>
+                </div>
+            </div>
+            
+            <div class="px-5 flex-1 flex flex-col min-h-0">
+                <div class="bg-white/10 backdrop-blur-xl rounded-2xl p-5 my-5 border border-white/20 flex-shrink-0">
+                    <input type="password" id="apiKey" placeholder="Clé API Groq" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder-white/60 focus:outline-none focus:border-green-400/50 focus:bg-white/15">
+                    
+                    <div class="flex gap-2 items-center mt-3 text-xs">
+                        <div class="flex items-center gap-1">
+                            <span class="text-white">Auto TTS</span>
+                            <label class="relative inline-block w-[40px] h-[24px]">
+                                <input type="checkbox" id="autoSpeak" class="opacity-0 w-0 h-0 peer" checked>
+                                <span class="absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-white/30 rounded-full transition-colors peer-checked:bg-green-400 before:absolute before:content-[''] before:h-[18px] before:w-[18px] before:left-[3px] before:bottom-[3px] before:bg-white before:rounded-full before:transition-transform peer-checked:before:translate-x-4"></span>
+                            </label>
+                        </div>
+                        
+                        <select id="voiceSelect" class="bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-white text-xs appearance-none">
+                            <option value="fr-FR-DeniseNeural">Denise</option>
+                            <option value="fr-FR-EloiseNeural">Eloise</option>
+                            <option value="fr-FR-FabriceNeural">Fabrice</option>
+                            <option value="fr-FR-HenriNeural">Henri</option>
+                        </select>
+                        
+                        <div class="flex items-center gap-1">
+                            <label class="relative inline-block w-[40px] h-[24px]">
+                                <input type="checkbox" id="allowInterrupt" class="opacity-0 w-0 h-0 peer" checked>
+                                <span class="absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-white/30 rounded-full transition-colors peer-checked:bg-green-400 before:absolute before:content-[''] before:h-[18px] before:w-[18px] before:left-[3px] before:bottom-[3px] before:bg-white before:rounded-full before:transition-transform peer-checked:before:translate-x-4"></span>
+                            </label>
+                            <span class="text-white">Interrupt</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 flex justify-between text-xs text-white/60">
+                        <div>Cache: <span id="cache-hits" class="text-green-400">0</span></div>
+                        <div>Latence: <span id="latency" class="text-blue-400">0ms</span></div>
+                        <div>Qualité: <span id="quality" class="text-yellow-400">0%</span></div>
+                    </div>
+                </div>
+                
+                <div class="relative flex-shrink-0">
+                    <div id="voice-circle" class="w-[200px] h-[200px] rounded-full mx-auto mt-10 mb-2.5 flex items-center justify-center text-6xl transition-all duration-300 bg-white/10 backdrop-blur-xl border-2 border-white/20">😴</div>
+                    <div id="status-text" class="text-center text-white text-lg font-medium">En attente...</div>
+                    <div id="interrupt-indicator" class="absolute top-[220px] left-1/2 -translate-x-1/2 bg-red-500/80 text-white px-4 py-2 rounded-full text-xs opacity-0 transition-opacity duration-300">Interruption détectée!</div>
+                    <div id="processing-indicator" class="absolute top-[250px] left-1/2 -translate-x-1/2 bg-blue-500/80 text-white px-4 py-2 rounded-full text-xs opacity-0 transition-opacity duration-300">⚡ Traitement ultra-rapide...</div>
+                </div>
+                
+                <div id="conversation-area" class="flex-1 bg-white/5 backdrop-blur-xl rounded-2xl p-4 my-5 border border-white/10 overflow-y-auto min-h-0">
+                    <div id="conversation">
+                        <div class="text-white/60 text-center italic mt-10">
+                            Appuyez sur démarrer et commencez à parler...<br>
+                            <small class="mt-2 block">⚡ Mode Ultra-Rapide activé!</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex-shrink-0 flex gap-3 mb-5">
+                    <button id="startButton" class="flex-1 py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl bg-green-500/80 text-white disabled:opacity-50 disabled:cursor-not-allowed">🚀 Démarrer</button>
+                    <button id="stopButton" class="flex-1 py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl bg-red-500/80 text-white disabled:opacity-50 disabled:cursor-not-allowed" disabled>⏹️ Arrêter</button>
+                    <button id="clearButton" class="flex-1 py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl bg-white/20 text-white border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed">🗑️ Effacer</button>
+                </div>
+                
+                <div id="debug" class="flex-shrink-0 bg-black/20 rounded-xl p-2.5 mb-2 text-xs text-white/70 h-[80px] overflow-y-auto">
+                    <div>⚡ Système ultra-rapide prêt...</div>
+                </div>
+            </div>
+            
+            <nav class="flex-shrink-0 w-full h-16 bg-black/30 backdrop-blur-lg border-t border-white/10">
+                <div class="flex justify-around items-center h-full">
+                    
+                    <a href="index.html" class="flex flex-col items-center gap-1 text-green-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        <span class="text-xs font-medium">Assistant</span>
+                    </a>
+
+                    <a href="#" class="flex flex-col items-center gap-1 text-white/50 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span class="text-xs font-medium">Paramètres</span>
+                    </a>
+
+                </div>
+            </nav>
+            </div>
+    </div>
+
+    <audio id="ttsAudio" style="display: none;" preload="none"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.22/dist/bundle.min.js"></script>
+    
+    <script>
+        // =============================================
+        // 🚀 ASSISTANT VOCAL ULTRA-RAPIDE OPTIMISÉ
+        // =============================================
+        
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const clearButton = document.getElementById('clearButton');
+        const voiceCircle = document.getElementById('voice-circle');
+        const statusText = document.getElementById('status-text');
+        const debug = document.getElementById('debug');
+        const conversation = document.getElementById('conversation');
+        const apiKeyInput = document.getElementById('apiKey');
+        const autoSpeakCheckbox = document.getElementById('autoSpeak');
+        const allowInterruptCheckbox = document.getElementById('allowInterrupt');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const ttsAudio = document.getElementById('ttsAudio');
+        const interruptIndicator = document.getElementById('interrupt-indicator');
+        const processingIndicator = document.getElementById('processing-indicator');
+        const cacheHitsElement = document.getElementById('cache-hits');
+        const latencyElement = document.getElementById('latency');
+        const qualityElement = document.getElementById('quality');
+
+        let myVad = null;
+        let conversationHistory = [];
+        let isPlaying = false;
+        let processingStartTime = 0;
+        let cacheHits = 0;
+        let totalRequests = 0;
+        
+        const transcriptionCache = new Map();
+        const MAX_CACHE_SIZE = 50;
+        
+        const baseCircleClasses = "w-[200px] h-[200px] rounded-full mx-auto mt-10 mb-2.5 flex items-center justify-center text-6xl transition-all duration-300 backdrop-blur-xl";
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const emoji = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '⚡';
+            const logMessage = `${timestamp} ${emoji} ${message}`;
+            
+            console.log(logMessage);
+            const newLine = document.createElement('div');
+            newLine.textContent = logMessage;
+            newLine.className = type === 'error' ? 'text-red-300' : type === 'success' ? 'text-green-300' : type === 'warning' ? 'text-yellow-300' : '';
+            debug.insertBefore(newLine, debug.firstChild);
+            
+            while (debug.children.length > 10) {
+                debug.removeChild(debug.lastChild);
+            }
+        }
+
+        function updateStatus(text, emoji, stateClass) {
+            statusText.textContent = text;
+            voiceCircle.textContent = emoji;
+            let stateClasses = "";
+            
+            switch (stateClass) {
+                case "listening": stateClasses = "bg-green-400/20 border-2 border-green-400/40 animate-pulse"; break;
+                case "speaking": stateClasses = "bg-green-600/30 border-2 border-green-600/50"; break;
+                case "processing":
+                    stateClasses = "bg-amber-400/20 border-2 border-amber-400/40 animate-processing-spin";
+                    processingIndicator.classList.add('opacity-100');
+                    break;
+                case "tts-playing": stateClasses = "bg-purple-500/20 border-2 border-purple-500/40 animate-tts-pulse"; break;
+                case "interrupted": stateClasses = "bg-red-500/20 border-2 border-red-500/40 animate-interrupt-flash"; break;
+                default:
+                    stateClasses = "bg-white/10 border-2 border-white/20";
+                    processingIndicator.classList.remove('opacity-100');
+            }
+            voiceCircle.className = `${baseCircleClasses} ${stateClasses}`;
+        }
+
+        function analyzeAudioQuality(audioData) {
+            const energy = audioData.reduce((sum, sample) => sum + sample * sample, 0) / audioData.length;
+            if (energy < 0.0008) {
+                log('Audio trop silencieux, ignoré', 'warning');
+                return { quality: 0, pass: false };
+            }
+            const mean = audioData.reduce((sum, sample) => sum + sample, 0) / audioData.length;
+            const variance = audioData.reduce((sum, sample) => sum + Math.pow(sample - mean, 2), 0) / audioData.length;
+            if (variance < 0.00005) {
+                log('Audio monotone détecté, ignoré', 'warning');
+                return { quality: 0, pass: false };
+            }
+            const quality = Math.min(100, Math.floor((energy * 10000) + (variance * 100000)));
+            return { quality, pass: quality > 15 };
+        }
+
+        function compressAudio(audioData, targetSampleRate = 16000) {
+            const maxSamples = targetSampleRate * 15;
+            if (audioData.length > maxSamples) {
+                const ratio = Math.ceil(audioData.length / maxSamples);
+                const compressed = [];
+                for (let i = 0; i < audioData.length; i += ratio) {
+                    compressed.push(audioData[i]);
+                }
+                log(`Audio compressé: ${audioData.length} → ${compressed.length} échantillons`, 'success');
+                return new Float32Array(compressed);
+            }
+            return audioData;
+        }
+
+        function hashAudio(audioData) {
+            const sampleSize = Math.min(500, audioData.length);
+            const step = Math.max(1, Math.floor(audioData.length / sampleSize));
+            let hash = 0;
+            for (let i = 0; i < audioData.length; i += step) {
+                const sample = Math.floor((audioData[i] + 1) * 127.5);
+                hash = ((hash << 5) - hash + sample) & 0xffffffff;
+            }
+            return hash.toString(36);
+        }
+
+        function getCachedTranscription(audioHash) {
+            if (transcriptionCache.has(audioHash)) {
+                cacheHits++;
+                updateCacheStats();
+                return transcriptionCache.get(audioHash);
+            }
+            return null;
+        }
+
+        function setCachedTranscription(audioHash, transcription) {
+            if (transcriptionCache.size >= MAX_CACHE_SIZE) {
+                const firstKey = transcriptionCache.keys().next().value;
+                transcriptionCache.delete(firstKey);
+            }
+            transcriptionCache.set(audioHash, transcription);
+        }
+
+        function updateCacheStats() {
+            cacheHitsElement.textContent = cacheHits;
+            totalRequests++;
+            const cacheRate = totalRequests > 0 ? Math.round((cacheHits / totalRequests) * 100) : 0;
+            cacheHitsElement.className = cacheRate > 20 ? 'text-green-400' : 'text-yellow-400';
+        }
+
+        function updateLatency(latency) {
+            latencyElement.textContent = `${latency}ms`;
+            latencyElement.className = latency < 2000 ? 'text-green-400' : latency < 4000 ? 'text-yellow-400' : 'text-red-400';
+        }
+
+        function updateQuality(quality) {
+            qualityElement.textContent = `${quality}%`;
+            qualityElement.className = quality > 70 ? 'text-green-400' : quality > 40 ? 'text-yellow-400' : 'text-red-400';
+        }
+
+        function encodeWAV(samples, sampleRate = 16000) {
+            const buffer = new ArrayBuffer(44 + samples.length * 2);
+            const view = new DataView(buffer);
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i));
+            };
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + samples.length * 2, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(36, 'data');
+            view.setUint32(40, samples.length * 2, true);
+            let offset = 44;
+            for (let i = 0; i < samples.length; i++, offset += 2) {
+                view.setInt16(offset, Math.max(-1, Math.min(1, samples[i])) * 0x7FFF, true);
+            }
+            return buffer;
+        }
+
+        async function transcribeAudioUltraFast(audioData) {
+            const startTime = performance.now();
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                alert('Veuillez entrer votre clé API Groq');
+                return;
+            }
+
+            try {
+                const qualityResult = analyzeAudioQuality(audioData);
+                updateQuality(qualityResult.quality);
+                if (!qualityResult.pass) {
+                    updateStatus("En écoute...", "👂", "listening");
+                    return;
+                }
+
+                const audioHash = hashAudio(audioData);
+                const cachedResult = getCachedTranscription(audioHash);
+                if (cachedResult) {
+                    log('Transcription récupérée du cache', 'success');
+                    updateLatency(Math.round(performance.now() - startTime));
+                    addToConversation('user', cachedResult);
+                    const aiResponse = await getLLMResponse(cachedResult);
+                    if (aiResponse) addToConversation('assistant', aiResponse);
+                    return;
+                }
+
+                const compressedAudio = compressAudio(audioData);
+                log(`Transcription audio (${compressedAudio.length} échantillons, qualité: ${qualityResult.quality}%)`, 'info');
+                updateStatus("Transcription ultra-rapide...", "⚡", "processing");
+
+                const wavBuffer = encodeWAV(compressedAudio);
+                const formData = new FormData();
+                formData.append('file', new Blob([wavBuffer], { type: 'audio/wav' }), 'audio.wav');
+                formData.append('model', 'whisper-large-v3');
+                formData.append('response_format', 'json');
+                formData.append('language', 'fr');
+                formData.append('temperature', '0');
+
+                const controller = new AbortController();
+                setTimeout(() => controller.abort(), 10000);
+
+                const transResponse = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${apiKey}` },
+                    body: formData,
+                    signal: controller.signal
+                });
+
+                if (!transResponse.ok) throw new Error(`Transcription failed: ${transResponse.status}`);
+                
+                const transResult = await transResponse.json();
+                const userText = transResult.text?.trim();
+
+                if (!userText) {
+                    log('Aucune parole détectée', 'warning');
+                    updateStatus("En écoute...", "👂", "listening");
+                    return;
+                }
+                
+                if (userText.toLowerCase().includes('fin de discussion')) {
+                    log('Commande "Fin de discussion" détectée. Arrêt du système.', 'info');
+                    stop();
+                    addSystemMessage('Session terminée par commande vocale.');
+                    return;
+                }
+
+                setCachedTranscription(audioHash, userText);
+                updateLatency(Math.round(performance.now() - startTime));
+                updateCacheStats();
+                log(`Transcription réussie: "${userText}"`, 'success');
+                addToConversation('user', userText);
+
+                const aiResponse = await getLLMResponse(userText);
+                if (aiResponse) addToConversation('assistant', aiResponse);
+
+            } catch (error) {
+                console.error('Erreur transcription:', error);
+                log(`Erreur transcription: ${error.message}`, 'error');
+                updateLatency(Math.round(performance.now() - startTime));
+                updateStatus("En écoute...", "👂", "listening");
+            }
+        }
+
+        async function getLLMResponse(userMessage) {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) return null;
+
+            try {
+                log('Génération réponse LLM...', 'info');
+                updateStatus("IA réfléchit...", "🤔", "processing");
+
+                const messages = [
+                    { role: "system", content: "Tu es un assistant IA ultra-rapide et efficace. Réponds en français de manière naturelle, concise et conversationnelle." },
+                    ...conversationHistory.slice(-8)
+                ];
+
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages, model: 'gemma2-9b-it', temperature: 0.7, max_tokens: 400, stream: false })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const result = await response.json();
+                const aiResponse = result.choices[0]?.message?.content || 'Désolé, je n\'ai pas pu générer de réponse.';
+                log('Réponse LLM générée', 'success');
+                return aiResponse;
+
+            } catch (error) {
+                console.error('Erreur LLM:', error);
+                log(`Erreur LLM: ${error.message}`, 'error');
+                return `Erreur: ${error.message}`;
+            }
+        }
+
+        async function speakText(text, buttonElement = null) {
+            if (isPlaying) return;
+            try {
+                isPlaying = true;
+                if (buttonElement) { buttonElement.textContent = '⏸️'; buttonElement.disabled = true; }
+                updateStatus("IA parle...", "🔊", "tts-playing");
+
+                const response = await fetch("https://chatbot-20102024-8c94bbb4eddf.herokuapp.com/synthesize", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: text.substring(0, 500), voice: voiceSelect.value }),
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                ttsAudio.src = audioUrl;
+
+                const resetUI = () => {
+                    URL.revokeObjectURL(audioUrl);
+                    isPlaying = false;
+                    if (buttonElement) { buttonElement.textContent = '🔊'; buttonElement.disabled = false; }
+                    updateStatus("En écoute...", "👂", "listening");
+                };
+                
+                ttsAudio.onloadeddata = () => { if (isPlaying) ttsAudio.play(); };
+                ttsAudio.onended = resetUI;
+                ttsAudio.onerror = () => { log('Erreur lecture audio', 'error'); resetUI(); };
+
+            } catch (error) {
+                console.error('Erreur TTS:', error);
+                log(`Erreur TTS: ${error.message}`, 'error');
+                isPlaying = false;
+                if (buttonElement) { buttonElement.textContent = '🔊'; buttonElement.disabled = false; }
+                updateStatus("En écoute...", "👂", "listening");
+            }
+        }
+        window.speakText = speakText;
+
+       function showInterruptIndicator() {
+           interruptIndicator.classList.add('opacity-100');
+           setTimeout(() => interruptIndicator.classList.remove('opacity-100'), 1500);
+       }
+
+       function interruptTTS() {
+           if (isPlaying && allowInterruptCheckbox.checked) {
+               log('INTERRUPTION TTS détectée!', 'warning');
+               ttsAudio.pause();
+               ttsAudio.currentTime = 0;
+               if (ttsAudio.src) URL.revokeObjectURL(ttsAudio.src);
+               isPlaying = false;
+               updateStatus("Interruption!", "⚡️", "interrupted");
+               showInterruptIndicator();
+               addInterruptionMessage();
+               setTimeout(() => updateStatus("En écoute...", "👂", "listening"), 800);
+               return true;
+           }
+           return false;
+       }
+       
+       function addSystemMessage(content) {
+           if (conversation.querySelector('.italic')) conversation.innerHTML = '';
+           const div = document.createElement('div');
+           div.className = 'my-4 text-center text-xs text-white/50 italic animate-in fade-in duration-500';
+           div.textContent = `--- ${content} ---`;
+           conversation.appendChild(div);
+           conversation.scrollTop = conversation.scrollHeight;
+       }
+
+       function addInterruptionMessage() {
+           const div = document.createElement('div');
+           div.className = 'mb-3 p-3 rounded-lg border bg-red-500/10 border-red-500/30 text-white/70 italic';
+           div.innerHTML = `<div class="text-xs opacity-80 mb-1">Système • ${new Date().toLocaleTimeString()}</div><div>⚡️ Réponse interrompue</div>`;
+           conversation.appendChild(div);
+           conversation.scrollTop = conversation.scrollHeight;
+       }
+
+       function addToConversation(type, content) {
+           if (conversation.querySelector('.italic')) conversation.innerHTML = '';
+           const div = document.createElement('div');
+           const baseClasses = 'mb-3 px-4 py-3 rounded-2xl max-w-[85%] break-words';
+           let specificClasses = '';
+           let header = '';
+           if (type === 'user') {
+               specificClasses = 'bg-blue-500/80 text-white ml-auto rounded-br-md';
+               header = `<div class="text-xs opacity-80 mb-1">Vous • ${new Date().toLocaleTimeString()}</div>`;
+           } else {
+               specificClasses = 'bg-white/90 text-gray-800 mr-auto rounded-bl-md';
+               header = `<div class="text-xs opacity-70 mb-1 flex justify-between items-center"><span>Assistant • ${new Date().toLocaleTimeString()}</span><button onclick="speakText('${content.replace(/'/g, "\\'")}', this)" class="bg-transparent border-none cursor-pointer text-lg hover:scale-110 transition-transform">🔊</button></div>`;
+           }
+           div.className = `${baseClasses} ${specificClasses}`;
+           div.innerHTML = `${header}<div>${content}</div>`;
+           conversation.appendChild(div);
+           conversation.scrollTop = conversation.scrollHeight;
+           conversationHistory.push({ role: type, content: content });
+           if (conversationHistory.length > 12) conversationHistory.splice(0, conversationHistory.length - 12);
+           if (type === 'assistant' && autoSpeakCheckbox.checked) setTimeout(() => speakText(content), 300);
+       }
+
+       async function start() {
+           if (!apiKeyInput.value.trim()) {
+               alert('Veuillez entrer votre clé API Groq d\'abord');
+               return;
+           }
+           startButton.disabled = true;
+           updateStatus("Initialisation...", "⚡", "processing");
+           try {
+               myVad = await vad.MicVAD.new({
+                   positiveSpeechThreshold: 0.45, minSpeechFrames: 2, preSpeechPadFrames: 1, redemptionFrames: 3, frameSamples: 512,
+                   onSpeechStart: () => {
+                       log("Parole détectée", 'success');
+                       if (!interruptTTS()) updateStatus("Vous parlez!", "🗣️", "speaking");
+                   },
+                   onSpeechEnd: (audio) => {
+                       log(`Fin de parole (${audio.length} échantillons)`, 'info');
+                       if (!isPlaying && audio.length > 600) transcribeAudioUltraFast(audio);
+                       else updateStatus("En écoute...", "👂", "listening");
+                   },
+                   onVADMisfire: () => log('Fausse détection VAD', 'warning')
+               });
+               myVad.start();
+               updateStatus("En écoute ultra-rapide...", "👂", "listening");
+               stopButton.disabled = false;
+               log("Système activé! Parlez maintenant!", 'success');
+           } catch (error) {
+               console.error("Erreur VAD:", error);
+               log(`Erreur VAD: ${error.message}`, 'error');
+               updateStatus("Erreur", "❌", "");
+               startButton.disabled = false;
+           }
+       }
+
+       function stop() {
+           if (myVad) { myVad.pause(); myVad = null; log("VAD arrêté", 'info'); }
+           if (isPlaying) { ttsAudio.pause(); isPlaying = false; log("TTS arrêté", 'info'); }
+           updateStatus("Arrêté", "😴", "");
+           startButton.disabled = false;
+           stopButton.disabled = true;
+           processingIndicator.classList.remove('opacity-100');
+       }
+
+       function clearConversation() {
+           conversation.innerHTML = `<div class="text-white/60 text-center italic mt-10">Appuyez sur démarrer...<br><small class="mt-2 block">⚡ Mode Ultra-Rapide activé!</small></div>`;
+           conversationHistory = [];
+           cacheHits = 0;
+           totalRequests = 0;
+           updateCacheStats();
+           updateLatency(0);
+           updateQuality(0);
+           transcriptionCache.clear();
+           log("Conversation et cache effacés", 'info');
+       }
+
+       startButton.onclick = start;
+       stopButton.onclick = stop;
+       clearButton.onclick = clearConversation;
+
+       apiKeyInput.onchange = () => localStorage.setItem('groq_api_key', apiKeyInput.value);
+       autoSpeakCheckbox.onchange = () => localStorage.setItem('auto_speak', autoSpeakCheckbox.checked);
+       allowInterruptCheckbox.onchange = () => localStorage.setItem('allow_interrupt', allowInterruptCheckbox.checked);
+       voiceSelect.onchange = () => localStorage.setItem('selected_voice', voiceSelect.value);
+
+       window.onload = () => {
+           apiKeyInput.value = localStorage.getItem('groq_api_key') || '';
+           autoSpeakCheckbox.checked = localStorage.getItem('auto_speak') !== 'false';
+           allowInterruptCheckbox.checked = localStorage.getItem('allow_interrupt') !== 'false';
+           voiceSelect.value = localStorage.getItem('selected_voice') || 'fr-FR-DeniseNeural';
+           log('🚀 Système ultra-rapide prêt!', 'success');
+       };
+
+       window.addEventListener('beforeunload', stop);
+
+   </script>
+</body>
+</html>
