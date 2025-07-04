@@ -1008,7 +1008,7 @@ if (conversation.querySelector('.italic') && conversationHistory.length === 0) {
        async function processUserMessage(userText) {
            if (!userText) return;
 
-           if (userText.toLowerCase().includes('silence please')) {
+           if (userText.toLowerCase().includes('silence now')) {
                log('Commande "Fin de discussion" détectée.', 'info');
                stop();
                addSystemMessage('Session terminée par commande vocale.');
