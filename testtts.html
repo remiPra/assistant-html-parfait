@@ -223,8 +223,12 @@
         let conversationHistory = [];
         let isPlaying = false;
         let discussionModalOpen = false;
+        let ttsQueue = [];
+        let isProcessingTTS = false;
+        let currentAudioUrl = null;
         
         const transcriptionCache = new Map();
+        const ttsCache = new Map();
         const MAX_CACHE_SIZE = 50;
         const baseCircleClasses = "w-[200px] h-[200px] rounded-full mx-auto mt-10 mb-2.5 flex items-center justify-center text-6xl transition-all duration-300 backdrop-blur-xl";
     
@@ -352,6 +356,207 @@
             return buffer; 
         }
     
+        // NOUVEAU SYSTÈME TTS PHRASE PAR PHRASE
+        function splitIntoSentences(text) {
+            // Découpe intelligente en phrases
+            const sentences = text
+                .replace(/([.!?])\s+/g, '$1|SPLIT|')
+                .split('|SPLIT|')
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+            
+            log(`Texte découpé en ${sentences.length} phrases`, 'info');
+            return sentences;
+        }
+    
+        function hashText(text) {
+            let hash = 0;
+            for (let i = 0; i < text.length; i++) {
+                const char = text.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return hash.toString(36);
+        }
+    
+        async function generateTTSForSentence(sentence, voice) {
+            const cacheKey = `${hashText(sentence)}_${voice}`;
+            
+            // Vérifier le cache TTS
+            if (ttsCache.has(cacheKey)) {
+                log('TTS du cache utilisé', 'success');
+                return ttsCache.get(cacheKey);
+            }
+    
+            try {
+                const response = await fetch("https://chatbot-20102024-8c94bbb4eddf.herokuapp.com/synthesize", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: sentence, voice: voice }),
+                });
+    
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                
+                // Mettre en cache
+                if (ttsCache.size >= MAX_CACHE_SIZE) {
+                    const firstKey = ttsCache.keys().next().value;
+                    const oldUrl = ttsCache.get(firstKey);
+                    URL.revokeObjectURL(oldUrl);
+                    ttsCache.delete(firstKey);
+                }
+                ttsCache.set(cacheKey, audioUrl);
+                
+                log(`TTS généré pour: "${sentence.substring(0, 30)}..."`, 'success');
+                return audioUrl;
+            } catch (error) {
+                log(`Erreur TTS pour phrase: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+    
+        async function playNextSentence() {
+            if (ttsQueue.length === 0 || !isProcessingTTS) {
+                isProcessingTTS = false;
+                isPlaying = false;
+                if (!myVad) updateStatus("Arrêté", "😴", "");
+                else updateStatus("En écoute...", "👂", "listening");
+                log('Fin de la lecture TTS', 'info');
+                return;
+            }
+    
+            const sentenceData = ttsQueue.shift();
+            if (!sentenceData) {
+                playNextSentence();
+                return;
+            }
+    
+            try {
+                updateStatus("IA parle...", "🔊", "tts-playing");
+                
+                // Générer l'audio si pas encore fait
+                if (!sentenceData.audioUrl) {
+                    sentenceData.audioUrl = await generateTTSForSentence(sentenceData.sentence, sentenceData.voice);
+                }
+    
+                // Nettoyer l'URL précédente
+                if (currentAudioUrl) {
+                    URL.revokeObjectURL(currentAudioUrl);
+                }
+                currentAudioUrl = sentenceData.audioUrl;
+    
+                ttsAudio.src = sentenceData.audioUrl;
+    
+                ttsAudio.onloadeddata = () => {
+                    if (isProcessingTTS) {
+                        ttsAudio.play();
+                    }
+                };
+    
+                ttsAudio.onended = () => {
+                    log(`Phrase terminée: "${sentenceData.sentence.substring(0, 30)}..."`, 'info');
+                    // Petite pause entre les phrases
+                    setTimeout(() => playNextSentence(), 100);
+                };
+    
+                ttsAudio.onerror = () => {
+                    log('Erreur lecture phrase, passage à la suivante', 'error');
+                    playNextSentence();
+                };
+    
+            } catch (error) {
+                log(`Erreur lors de la lecture: ${error.message}`, 'error');
+                playNextSentence();
+            }
+        }
+    
+        async function speakTextByPhrases(text, buttonElement = null) {
+            if (isProcessingTTS) {
+                log('TTS déjà en cours, ajout à la queue', 'warning');
+                return;
+            }
+    
+            try {
+                isProcessingTTS = true;
+                isPlaying = true;
+    
+                if (buttonElement) {
+                    buttonElement.textContent = '⏸️';
+                    buttonElement.disabled = true;
+                }
+    
+                // Découper en phrases
+                const sentences = splitIntoSentences(text);
+                
+                // Ajouter toutes les phrases à la queue
+                ttsQueue = sentences.map(sentence => ({
+                    sentence: sentence,
+                    voice: voiceSelect.value,
+                    audioUrl: null
+                }));
+    
+                log(`${sentences.length} phrases ajoutées à la queue TTS`, 'info');
+    
+                // Commencer la lecture immédiatement
+                await playNextSentence();
+    
+                if (buttonElement) {
+                    buttonElement.textContent = '🔊';
+                    buttonElement.disabled = false;
+                }
+    
+            } catch (error) {
+                console.error('Erreur TTS par phrases:', error);
+                log(`Erreur TTS: ${error.message}`, 'error');
+                isProcessingTTS = false;
+                isPlaying = false;
+                if (buttonElement) {
+                    buttonElement.textContent = '🔊';
+                    buttonElement.disabled = false;
+                }
+                updateStatus("En écoute...", "👂", "listening");
+            }
+        }
+    
+        // Version simple pour les boutons individuels
+        async function speakText(text, buttonElement = null) {
+            return speakTextByPhrases(text, buttonElement);
+        }
+        window.speakText = speakText;
+    
+        function showInterruptIndicator() { 
+            interruptIndicator.classList.add('opacity-100'); 
+            setTimeout(() => interruptIndicator.classList.remove('opacity-100'), 1500); 
+        }
+    
+        function interruptTTS() { 
+            if ((isProcessingTTS || isPlaying) && allowInterruptCheckbox.checked) { 
+                log('INTERRUPTION TTS détectée!', 'warning'); 
+                
+                // Arrêter tout
+                isProcessingTTS = false;
+                isPlaying = false;
+                ttsQueue = []; // Vider la queue
+                
+                ttsAudio.pause(); 
+                ttsAudio.currentTime = 0; 
+                
+                if (currentAudioUrl) {
+                    URL.revokeObjectURL(currentAudioUrl);
+                    currentAudioUrl = null;
+                }
+                
+                updateStatus("Interruption!", "⚡️", "interrupted"); 
+                showInterruptIndicator(); 
+                addInterruptionMessage(); 
+                setTimeout(() => updateStatus("En écoute...", "👂", "listening"), 800); 
+                return true; 
+            } 
+            return false; 
+        }
+    
         // TRANSCRIPTION
         async function transcribeAudioUltraFast(audioData) {
             const startTime = performance.now();
@@ -427,72 +632,6 @@
             }
         }
     
-        // TTS
-        async function speakText(text, buttonElement = null) { 
-            if (isPlaying) return; 
-            try { 
-                isPlaying = true; 
-                if (buttonElement) { 
-                    buttonElement.textContent = '⏸️'; 
-                    buttonElement.disabled = true; 
-                } 
-                updateStatus("IA parle...", "🔊", "tts-playing"); 
-                const response = await fetch("https://chatbot-20102024-8c94bbb4eddf.herokuapp.com/synthesize", { 
-                    method: "POST", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify({ text: text.substring(0, 500), voice: voiceSelect.value }), 
-                }); 
-                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`); 
-                const audioBlob = await response.blob(); 
-                const audioUrl = URL.createObjectURL(audioBlob); 
-                ttsAudio.src = audioUrl; 
-                const resetUI = () => { 
-                    URL.revokeObjectURL(audioUrl); 
-                    isPlaying = false; 
-                    if (buttonElement) { 
-                        buttonElement.textContent = '🔊'; 
-                        buttonElement.disabled = false; 
-                    } 
-                    if (!myVad) updateStatus("Arrêté", "😴", ""); 
-                    else updateStatus("En écoute...", "👂", "listening");
-                }; 
-                ttsAudio.onloadeddata = () => { if (isPlaying) ttsAudio.play(); }; 
-                ttsAudio.onended = resetUI; 
-                ttsAudio.onerror = () => { log('Erreur lecture audio', 'error'); resetUI(); }; 
-            } catch (error) { 
-                console.error('Erreur TTS:', error); 
-                log(`Erreur TTS: ${error.message}`, 'error'); 
-                isPlaying = false; 
-                if (buttonElement) { 
-                    buttonElement.textContent = '🔊'; 
-                    buttonElement.disabled = false; 
-                } 
-                updateStatus("En écoute...", "👂", "listening"); 
-            } 
-        }
-        window.speakText = speakText;
-    
-        function showInterruptIndicator() { 
-            interruptIndicator.classList.add('opacity-100'); 
-            setTimeout(() => interruptIndicator.classList.remove('opacity-100'), 1500); 
-        }
-    
-        function interruptTTS() { 
-            if (isPlaying && allowInterruptCheckbox.checked) { 
-                log('INTERRUPTION TTS détectée!', 'warning'); 
-                ttsAudio.pause(); 
-                ttsAudio.currentTime = 0; 
-                if (ttsAudio.src) URL.revokeObjectURL(ttsAudio.src); 
-                isPlaying = false; 
-                updateStatus("Interruption!", "⚡️", "interrupted"); 
-                showInterruptIndicator(); 
-                addInterruptionMessage(); 
-                setTimeout(() => updateStatus("En écoute...", "👂", "listening"), 800); 
-                return true; 
-            } 
-            return false; 
-        }
-    
         // CONVERSATION
         function addSystemMessage(content) { 
             if (conversation.querySelector('.italic')) conversation.innerHTML = ''; 
@@ -531,7 +670,9 @@
             if(type === 'user') conversationHistory.push({ role: 'user', content: content }); 
             else conversationHistory.push({ role: 'assistant', content: content }); 
             if (conversationHistory.length > 12) conversationHistory.splice(0, conversationHistory.length - 12); 
-            if (type === 'assistant' && autoSpeakCheckbox.checked && !isPlaying) setTimeout(() => speakText(content), 300); 
+            if (type === 'assistant' && autoSpeakCheckbox.checked && !isProcessingTTS) {
+                setTimeout(() => speakTextByPhrases(content), 300);
+            }
         }
     
         // TRAITEMENT DES MESSAGES
@@ -606,7 +747,7 @@
                 myVad = await vad.MicVAD.new({
                     positiveSpeechThreshold: 0.45, minSpeechFrames: 2, preSpeechPadFrames: 1, redemptionFrames: 3,
                     onSpeechStart: () => { log("Parole détectée", 'success'); if (!interruptTTS()) updateStatus("Vous parlez!", "🗣️", "speaking"); },
-                    onSpeechEnd: (audio) => { log(`Fin de parole`, 'info'); if (!isPlaying && audio.length > 600) transcribeAudioUltraFast(audio); else if (myVad) updateStatus("En écoute...", "👂", "listening"); },
+                    onSpeechEnd: (audio) => { log(`Fin de parole`, 'info'); if (!isProcessingTTS && audio.length > 600) transcribeAudioUltraFast(audio); else if (myVad) updateStatus("En écoute...", "👂", "listening"); },
                 });
                 myVad.start();
                 updateStatus("En écoute...", "👂", "listening");
@@ -622,10 +763,21 @@
     
         function stop() {
             if (myVad) { myVad.pause(); myVad = null; log("VAD arrêté", 'info'); }
-            if (isPlaying) { ttsAudio.pause(); isPlaying = false; log("TTS arrêté", 'info'); }
+            
+            // Arrêter le TTS complètement
+            isProcessingTTS = false;
+            isPlaying = false;
+            ttsQueue = [];
+            if (ttsAudio) { ttsAudio.pause(); }
+            if (currentAudioUrl) {
+                URL.revokeObjectURL(currentAudioUrl);
+                currentAudioUrl = null;
+            }
+            
             updateStatus("Arrêté", "😴", "");
             startButton.disabled = false;
             stopButton.disabled = true;
+            log("TTS arrêté", 'info');
         }
     
         function clearConversation() {
@@ -687,7 +839,7 @@
             autoSpeakCheckbox.checked = localStorage.getItem('auto_speak') !== 'false';
             allowInterruptCheckbox.checked = localStorage.getItem('allow_interrupt') !== 'false';
             voiceSelect.value = localStorage.getItem('selected_voice') || 'fr-FR-DeniseNeural';
-            log('🚀 Système prêt!', 'success');
+            log('🚀 Système TTS phrase par phrase prêt!', 'success');
         };
         
         window.addEventListener('beforeunload', stop);
