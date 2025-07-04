@@ -12,6 +12,10 @@
       "dest": "/testp.html"
     },
     {
+      "src": "/english",
+      "dest": "/english.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
