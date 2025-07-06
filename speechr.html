@@ -224,7 +224,95 @@
         let processingIndicator, cacheHitsElement, latencyElement, qualityElement;
         let textInput, sendButton;
         
+        // 🚀 NOUVELLES VARIABLES SPEECHRECOGNITION
+let chromeSpeechRecognition = null;
+let isUsingSpeechRecognition = false;
+// 💭 NOUVELLES VARIABLES RÉFLEXIONS
+let reflectionAudios = new Map();
+let isPlayingReflection = false;
 
+
+const SMART_REFLECTIONS = {
+    question: [
+        "Bonne question !",
+        "Laissez-moi réfléchir...",
+        "Excellente question !"
+    ],
+    salutation: [
+        "Ah bonjour !",
+        "Salut !",
+        "Ravi de vous voir !"
+    ],
+    remerciement: [
+        "De rien !",
+        "Je vous en prie !",
+        "Avec plaisir !"
+    ],
+    probleme: [
+        "Je vois le problème...",
+        "Ah d'accord...",
+        "Je comprends..."
+    ],
+    general: [
+        "Intéressant...",
+        "Je vois...",
+        "Hmm..."
+    ]
+};
+const REFLECTION_PHRASES = [
+    "Ah d'accord...",
+    "Je vois...", 
+    "d'accord...",
+    "Oui oui...",
+    "Hmm oui...",
+    "je comprends"
+];
+// =============================================
+// 🧠 ANALYSE INTELLIGENTE DU TEXTE
+// =============================================
+
+function analyzeTextForReflection(text) {
+    const lowerText = text.toLowerCase();
+    
+    // Détection de questions
+    const questionWords = ['comment', 'pourquoi', 'qu\'est-ce', 'quel', 'quelle', 'où', 'quand', 'qui'];
+    const hasQuestionWord = questionWords.some(word => lowerText.includes(word));
+    const endsWithQuestion = text.trim().endsWith('?');
+    
+    if (hasQuestionWord || endsWithQuestion) {
+        return 'question';
+    }
+    
+    // Détection de salutations
+    const greetingWords = ['bonjour', 'salut', 'hello', 'bonsoir', 'bonne nuit'];
+    if (greetingWords.some(word => lowerText.includes(word))) {
+        return 'salutation';
+    }
+    
+    // Détection de remerciements
+    const thankWords = ['merci', 'merci beaucoup', 'je vous remercie'];
+    if (thankWords.some(word => lowerText.includes(word))) {
+        return 'remerciement';
+    }
+    
+    // Détection de problèmes
+    const problemWords = ['problème', 'bug', 'erreur', 'ne marche pas', 'ne fonctionne pas', 'cassé'];
+    if (problemWords.some(word => lowerText.includes(word))) {
+        return 'probleme';
+    }
+    
+    // Par défaut
+    return 'general';
+}
+
+function getSmartReflection(text) {
+    const category = analyzeTextForReflection(text);
+    const reflections = SMART_REFLECTIONS[category];
+    const randomReflection = reflections[Math.floor(Math.random() * reflections.length)];
+    
+    log(`🧠 Analyse: "${text.substring(0, 20)}..." → Catégorie: ${category} → "${randomReflection}"`, 'info');
+    return randomReflection;
+}
           // AJOUTEZ CETTE LIGNE À LA FIN
     lucide.createIcons();
 
@@ -419,10 +507,194 @@ function isLikelyBackgroundNoise(audioData) {
             return buffer; 
         }
 
-        // =============================================
-        // 🔧 SYSTÈME TTS PIPELINE
-        // =============================================
 
+
+// =============================================
+// 💭 SYSTÈME DE RÉFLEXIONS IMMÉDIATES
+// =============================================
+async function preGenerateReflections() {
+    log('💭 Pré-génération des réflexions intelligentes...', 'info');
+    
+    // Pré-générer toutes les réflexions de toutes les catégories
+    for (const [category, phrases] of Object.entries(SMART_REFLECTIONS)) {
+        for (const phrase of phrases) {
+            try {
+                const audioUrl = await generateTTSForSentence(phrase, voiceSelect.value, 0);
+                reflectionAudios.set(phrase, audioUrl);
+                log(`✅ Réflexion ${category}: "${phrase}"`, 'success');
+            } catch (error) {
+                log(`❌ Erreur réflexion: ${phrase}`, 'error');
+            }
+        }
+    }
+    
+    log(`🎉 ${reflectionAudios.size} réflexions intelligentes pré-générées !`, 'success');
+}
+function playSmartReflection(text) {
+    if (isPlayingReflection || reflectionAudios.size === 0) return;
+    
+    const smartReflection = getSmartReflection(text);
+    const audioUrl = reflectionAudios.get(smartReflection);
+    
+    if (audioUrl) {
+        isPlayingReflection = true;
+        log(`💭 Réflexion intelligente: "${smartReflection}"`, 'success');
+        
+        const reflectionAudio = new Audio(audioUrl);
+        reflectionAudio.play();
+        
+        reflectionAudio.onended = () => {
+            isPlayingReflection = false;
+            log('💭 Réflexion intelligente terminée', 'info');
+        };
+    }
+}
+
+
+// =============================================
+// 🔥 CHROME SPEECHRECOGNITION ULTRA-RAPIDE
+// =============================================
+
+// Vérifier si Chrome SpeechRecognition est disponible
+function isSpeechRecognitionAvailable() {
+    return 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+}
+
+async function initializeChromeSTT() {
+    if (!isSpeechRecognitionAvailable()) {
+        log('SpeechRecognition non disponible, utilisation de Groq STT', 'warning');
+        return false;
+    }
+
+    try {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        chromeSpeechRecognition = new SpeechRecognition();
+        
+        // 🔥 CONFIGURATION ULTRA-RAPIDE
+        chromeSpeechRecognition.continuous = true;        // Écoute continue
+        chromeSpeechRecognition.interimResults = true;    // Résultats en temps réel
+        chromeSpeechRecognition.lang = 'fr-FR';           // Français
+        chromeSpeechRecognition.maxAlternatives = 1;      // Une seule alternative
+        
+        // 🎯 ÉVÉNEMENTS ULTRA-OPTIMISÉS
+        chromeSpeechRecognition.onstart = () => {
+            log('🎙️ Chrome STT activé', 'success');
+            updateStatus("En écoute Chrome...", "👂", "listening");
+            isUsingSpeechRecognition = true;
+        };
+
+        chromeSpeechRecognition.onresult = (event) => {
+    let finalTranscript = '';
+    let interimTranscript = '';
+    
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        
+        if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+        } else {
+            interimTranscript += transcript;
+        }
+    }
+    
+    // 🚀 TRAITEMENT IMMÉDIAT DU RÉSULTAT FINAL
+    if (finalTranscript.trim()) {
+        // 🧠 RÉFLEXION INTELLIGENTE basée sur le texte !
+        playSmartReflection(finalTranscript.trim());
+        
+        log(`Chrome STT: "${finalTranscript}"`, 'success');
+        processUserMessageOptimized(finalTranscript.trim());
+    }
+    
+    // Affichage en temps réel des résultats intermédiaires
+    if (interimTranscript.trim()) {
+        updateStatus(`Écoute: "${interimTranscript.substring(0, 30)}..."`, "🎯", "processing");
+    }
+};
+
+
+chromeSpeechRecognition.onerror = (event) => {
+            log(`Chrome STT erreur: ${event.error}`, 'error');
+            
+            if (event.error === 'no-speech' || event.error === 'aborted') {
+                // Redémarrer automatiquement
+                setTimeout(() => {
+                    if (isUsingSpeechRecognition) {
+                        chromeSpeechRecognition.start();
+                    }
+                }, 100);
+            } else {
+                log('Fallback vers Groq STT', 'warning');
+                initializeGroqSTTFallback();
+            }
+        };
+
+        chromeSpeechRecognition.onend = () => {
+            if (isUsingSpeechRecognition) {
+                // Redémarrage automatique pour écoute continue
+                setTimeout(() => {
+                    if (isUsingSpeechRecognition && !isProcessingTTS) {
+                        chromeSpeechRecognition.start();
+                    }
+                }, 100);
+            }
+        };
+
+        return true;
+    } catch (error) {
+        log(`Erreur Chrome STT: ${error.message}`, 'error');
+        return false;
+    }
+}
+
+function startChromeSTT() {
+    if (chromeSpeechRecognition && !isUsingSpeechRecognition) {
+        try {
+            chromeSpeechRecognition.start();
+        } catch (error) {
+            log(`Erreur démarrage Chrome STT: ${error.message}`, 'error');
+            initializeGroqSTTFallback();
+        }
+    }
+}
+
+function stopChromeSTT() {
+    if (chromeSpeechRecognition && isUsingSpeechRecognition) {
+        isUsingSpeechRecognition = false;
+        chromeSpeechRecognition.stop();
+        log('Chrome STT arrêté', 'info');
+    }
+}
+
+// Fallback vers le système VAD/Groq actuel
+// Fallback vers le système VAD/Groq actuel
+async function initializeGroqSTTFallback() {
+    log('Utilisation du système VAD/Groq comme fallback', 'info');
+    myVad = await vad.MicVAD.new({
+        positiveSpeechThreshold: 0.8,
+        minSpeechFrames: 6,
+        preSpeechPadFrames: 1,
+        redemptionFrames: 2,
+        onSpeechStart: () => { 
+            log("Parole détectée", 'success'); 
+            if (!interruptTTS()) updateStatus("Vous parlez!", "🗣️", "speaking"); 
+        },
+        onSpeechEnd: (audio) => { 
+            log(`Fin de parole`, 'info');
+            
+            // 💭 JOUER RÉFLEXION IMMÉDIATEMENT !
+            playRandomReflection();
+            
+            if (!isProcessingTTS && audio.length > 600) {
+                transcribeAudioUltraFast(audio);
+            } else if (myVad) {
+                updateStatus("En écoute...", "👂", "listening");
+            }
+        },
+    });
+    myVad.start();
+    updateStatus("En écoute VAD...", "👂", "listening");
+}
         function splitIntoSentences(text) {
             const sentences = text
                 .replace(/([.!?])\s+/g, '$1|SPLIT|')
@@ -659,29 +931,35 @@ function isLikelyBackgroundNoise(audioData) {
                setTimeout(() => interruptIndicator.classList.remove('opacity-100'), 1500); 
            }
        }
-
        function interruptTTS() { 
-           if ((isProcessingTTS || isPlaying) && allowInterruptCheckbox?.checked) { 
-               log('🛑 INTERRUPTION TTS pipeline détectée!', 'warning'); 
-               
-               pipelineActive = false;
-               
-               if (ttsAudio) {
-                   ttsAudio.pause(); 
-                   ttsAudio.currentTime = 0; 
-               }
-               
-               cleanupPipeline();
-               
-               updateStatus("Interruption!", "⚡️", "interrupted"); 
-               showInterruptIndicator(); 
-               addInterruptionMessage(); 
-               setTimeout(() => updateStatus("En écoute...", "👂", "listening"), 800); 
-               return true; 
-           } 
-           return false; 
-       }
-
+    if ((isProcessingTTS || isPlaying) && allowInterruptCheckbox?.checked) { 
+        log('🛑 INTERRUPTION TTS pipeline détectée!', 'warning'); 
+        
+        pipelineActive = false;
+        
+        if (ttsAudio) {
+            ttsAudio.pause(); 
+            ttsAudio.currentTime = 0; 
+        }
+        
+        cleanupPipeline();
+        
+        updateStatus("Interruption!", "⚡️", "interrupted"); 
+        showInterruptIndicator(); 
+        addInterruptionMessage(); 
+        
+        // Redémarrer l'écoute selon le mode
+        setTimeout(() => {
+            if (isUsingSpeechRecognition) {
+                startChromeSTT();
+            } else {
+                updateStatus("En écoute...", "👂", "listening");
+            }
+        }, 800); 
+        return true; 
+    } 
+    return false; 
+}
        // =============================================
        // 🔧 TRANSCRIPTION
        // =============================================
@@ -1001,75 +1279,64 @@ if (conversation.querySelector('.italic') && conversationHistory.length === 0) {
        // =============================================
        // 🔧 FONCTIONS PRINCIPALES
        // =============================================
-       
        async function start() {
-           const groqKey = groqApiKeyInput?.value?.trim();
-           const openaiKey = openaiApiKeyInput?.value?.trim();
-           
-           if (!groqKey || !openaiKey) { 
-               alert('Veuillez entrer vos clés API Groq et OpenAI !'); 
-               return; 
-           }
-           
-           console.log('🔑 Clés utilisées:', { groq: groqKey ? 'OK' : 'KO', openai: openaiKey ? 'OK' : 'KO' });
-           
-           startButton.disabled = true;
-           updateStatus("Initialisation...", "⚡", "processing");
-           
-           try {
-               myVad = await vad.MicVAD.new({
-                positiveSpeechThreshold: 0.8, // Plus strict
-    minSpeechFrames: 6, // Plus de frames requis
-    preSpeechPadFrames: 1,
-    redemptionFrames: 2, // Moins de tolérance
-                   onSpeechStart: () => { 
-                       log("Parole détectée", 'success'); 
-                       if (!interruptTTS()) updateStatus("Vous parlez!", "🗣️", "speaking"); 
-                   },
-                   onSpeechEnd: (audio) => { 
-                       log(`Fin de parole`, 'info'); 
-                       // 🔥 VÉRIFICATION ANTI-PARASITE
-    // if (isLikelyBackgroundNoise(audio)) {
-    //     log('Bruit de fond détecté, ignoré', 'warning');
-    //     if (myVad) updateStatus("En écoute...", "👂", "listening");
-    //     return;
-    // }
-                       if (!isProcessingTTS && audio.length > 600) {
-                           transcribeAudioUltraFast(audio);
-                       } else if (myVad) {
-                           updateStatus("En écoute...", "👂", "listening");
-                       }
-                   },
-               });
-               
-               myVad.start();
-               updateStatus("En écoute...", "👂", "listening");
-               stopButton.disabled = false;
-               log("Système vocal avec pipeline TTS activé!", 'success');
-               
-           } catch (error) { 
-               console.error("Erreur VAD:", error); 
-               log(`Erreur VAD: ${error.message}`, 'error'); 
-               updateStatus("Erreur", "❌", ""); 
-               startButton.disabled = false; 
-           }
-       }
-       
-       function stop() {
-           if (myVad) { 
-               myVad.pause(); 
-               myVad = null; 
-               log("VAD arrêté", 'info'); 
-           }
-           
-           cleanupPipeline();
-           
-           updateStatus("Arrêté", "😴", "");
-           startButton.disabled = false;
-           stopButton.disabled = true;
-           log("Pipeline TTS arrêté", 'info');
-       }
-       
+    const groqKey = groqApiKeyInput?.value?.trim();
+    
+    if (!groqKey) { 
+        alert('Veuillez entrer votre clé API Groq !'); 
+        return; 
+    }
+    
+    console.log('🔑 Clé Groq utilisée:', groqKey ? 'OK' : 'KO');
+    
+    startButton.disabled = true;
+    updateStatus("Initialisation...", "⚡", "processing");
+    
+    try {
+        // 💭 PRÉ-GÉNÉRER LES RÉFLEXIONS D'ABORD
+        await preGenerateReflections();
+        
+        // 🔥 PRIORISER CHROME SPEECHRECOGNITION
+        const chromeSTTAvailable = await initializeChromeSTT();
+        
+        if (chromeSTTAvailable) {
+            log('🚀 Mode Chrome SpeechRecognition ULTRA-RAPIDE activé!', 'success');
+            startChromeSTT();
+        } else {
+            log('🔄 Fallback vers système VAD/Groq', 'info');
+            await initializeGroqSTTFallback();
+        }
+        
+        stopButton.disabled = false;
+        log("Système vocal ultra-rapide avec réflexions activé!", 'success');
+        
+    } catch (error) { 
+        console.error("Erreur STT:", error); 
+        log(`Erreur STT: ${error.message}`, 'error'); 
+        updateStatus("Erreur", "❌", ""); 
+        startButton.disabled = false; 
+    }
+}
+function stop() {
+    // Arrêter Chrome SpeechRecognition si actif
+    if (isUsingSpeechRecognition) {
+        stopChromeSTT();
+    }
+    
+    // Arrêter VAD si actif
+    if (myVad) { 
+        myVad.pause(); 
+        myVad = null; 
+        log("VAD arrêté", 'info'); 
+    }
+    
+    cleanupPipeline();
+    
+    updateStatus("Arrêté", "😴", "");
+    startButton.disabled = false;
+    stopButton.disabled = true;
+    log("Système STT arrêté", 'info');
+}
        function clearConversation() {
            if (conversation) {
                conversation.innerHTML = `<div class="text-white/60 text-center italic mt-10">Appuyez sur démarrer ou envoyez un message...<br><small class="mt-2 block">⚡ Mode Ultra-Rapide activé!</small></div>`;
