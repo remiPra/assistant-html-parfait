@@ -233,22 +233,19 @@ let isPlayingReflection = false;
 
 // Liste simple de réflexions sans analyse
 const SIMPLE_REFLECTIONS = [
-"Ah oui, je vois...",
-"D'accord, très bien...",
-"OK,ok  je comprends...",
-"Hmm, intéressant...",
-"Oui, ok ,  effectivement...",
-"Ah, parfait...",
-
-"Très bien, ok ,ok ...",
-"OK, laissez-moi voir...",
-"D'accord, ok , ok ...",
-"Ah, bien sûr , Ok...",
-"Oui, d'accord,d'accord...",
-"Je comprends bien...",
-"Oui, tout à fait..."
+"Je vous écoute...",
+"Très bien...",
+"D'accord, je note...",
+"Parfait...",
+"Je comprends...",
+"Oui, effectivement...",
+"Bien sûr...",
+"Je vois, très bien...",
+"Entendu...",
+"C'est noté...",
+"Parfaitement...",
+"Tout à fait..."
 ];
-
         // AJOUTEZ CETTE LIGNE À LA FIN
     lucide.createIcons();
 
@@ -465,8 +462,8 @@ log(`🎉 ${reflectionAudios.size} réflexions simples pré-générées !`, 'suc
 
 
 function playRandomReflection() {
-    if (isPlayingReflection || reflectionAudios.size === 0) return;
-    
+    // if (isPlayingReflection || reflectionAudios.size === 0) return;
+    if (isPlayingReflection || reflectionAudios.size === 0 || Math.random() < 0.3) return;
     // Choisir une réflexion au hasard
     const randomReflection = SIMPLE_REFLECTIONS[Math.floor(Math.random() * SIMPLE_REFLECTIONS.length)];
     const audioUrl = reflectionAudios.get(randomReflection);
@@ -728,29 +725,11 @@ function playRandomReflection() {
             setTimeout(() => interruptIndicator.classList.remove('opacity-100'), 1500); 
         }
     }
-
     function interruptTTS() { 
-        if ((isProcessingTTS || isPlaying) && allowInterruptCheckbox?.checked) { 
-            log('🛑 INTERRUPTION TTS pipeline détectée!', 'warning'); 
-            
-            pipelineActive = false;
-            
-            if (ttsAudio) {
-                ttsAudio.pause(); 
-                ttsAudio.currentTime = 0; 
-            }
-            
-            cleanupPipeline();
-            
-            updateStatus("Interruption!", "⚡️", "interrupted"); 
-            showInterruptIndicator(); 
-            addInterruptionMessage(); 
-            setTimeout(() => updateStatus("En écoute...", "👂", "listening"), 800); 
-            return true; 
-        } 
-        return false; 
-    }
-
+    // DÉSACTIVÉ : Plus d'interruption automatique pour meilleure UX
+    log('🔇 Interruption désactivée pour meilleure UX', 'info'); 
+    return false; 
+}
     // =============================================
     // 🔧 TRANSCRIPTION
     // =============================================
@@ -862,16 +841,31 @@ async function getLLMResponseStreaming(userMessage) {
         const messages = [
             { 
                 role: "system", 
-                content: `Tu es un assistant vocal conversationnel naturel. Réponds en français parlé, comme dans une conversation normale entre humains.
+                content: `Tu es la secrétaire virtuelle professionnelle de Monsieur Prader. Tu réponds en français parlé, de manière courtoise et efficace.
 
 RÈGLES IMPORTANTES :
 - N'utilise JAMAIS d'émoticônes, d'astérisques, ou de symboles (❤️, 🔥, *, etc.)
-- Parle comme si tu étais une personne réelle au téléphone
-- Utilise un langage oral naturel avec des expressions comme "alors", "bon", "eh bien"
+- TERMINE TOUJOURS tes réponses par "C'est à vous." pour indiquer que tu as fini de parler
+- Ne peux pas être interrompue pendant que tu parles (c'est normal)
+- Présente-toi AUTOMATIQUEMENT au début : "Bonjour, je suis la secrétaire virtuelle de Monsieur Prader. Je peux prendre un rendez-vous pour vous ou enregistrer un message. Que souhaitez-vous ?"
+- Parle comme une vraie secrétaire professionnelle au téléphone
+- Utilise un langage courtois : "Très bien", "Parfait", "Je note"
 - Reste concis et direct, maximum 2-3 phrases
-- N'écris pas d'actions entre astérisques comme "*sourit*" ou "*réfléchit*"
-- Évite les listes à puces ou les formats structurés
-- Réponds simplement et naturellement comme dans une vraie conversation`
+- N'écris pas d'actions entre astérisques
+
+TES SERVICES :
+1. PRISE DE RENDEZ-VOUS : Disponibilités uniquement à partir du 5 juillet, jeudi et vendredi seulement
+2. PRISE DE MESSAGE : Enregistrer un message pour Monsieur Prader
+
+INFORMATIONS REQUISES :
+- Pour rendez-vous ET messages : Nom, Prénom, Numéro de téléphone
+- Pour rendez-vous : Date souhaitée (proposer jeudi ou vendredi après le 5 juillet)
+
+GESTION DES ANNULATIONS :
+- Si quelqu'un veut annuler : demander nom/prénom pour identifier le rendez-vous
+- Confirmer l'annulation et proposer un nouveau créneau si souhaité
+
+Sois naturelle, professionnelle et efficace comme une vraie secrétaire.`
             }, 
             ...conversationHistory.slice(-30),
             { role: 'user', content: userMessage }
@@ -942,9 +936,8 @@ RÈGLE ABSOLUE: Ne répète JAMAIS cette phrase dans ta réponse. Commence direc
         }
         
         const finalResponse = fullResponse.trim() || 'Désolé, je n\'ai pas pu répondre.';
-        
-        // NOUVELLE PARTIE - Nettoyer la réponse si elle répète la réflexion
-        let cleanedResponse = finalResponse;
+        const responseWithPrompt = finalResponse + " C'est à vous.";
+let cleanedResponse = responseWithPrompt
         if (lastPlayedReflection && lastPlayedReflection.trim() !== "") {
             // Vérifier si la réponse commence par la réflexion
             const reflectionLower = lastPlayedReflection.toLowerCase().trim();
@@ -1091,7 +1084,29 @@ if (conversation.querySelector('.italic') && conversationHistory.length === 0) {
     // =============================================
     // 🔧 FONCTIONS PRINCIPALES
     // =============================================
+    // =============================================
+// 🎯 MESSAGE DE PRÉSENTATION AUTOMATIQUE
+// =============================================
+// =============================================
+// 🎯 MESSAGE DE PRÉSENTATION AUTOMATIQUE
+// =============================================
+function showWelcomeMessage() {
+    // const welcomeText = "Bonjour, je suis la secrétaire virtuelle de Monsieur Prader. Je peux prendre un rendez-vous pour vous ou enregistrer un message. Que souhaitez-vous ?";
+    const welcomeText = "Bonjour, je suis la secrétaire virtuelle de Monsieur Prader. Je peux prendre un rendez-vous pour vous ou enregistrer un message. Attention : je ne peux pas être interrompue pendant que je parle. Vous pourrez répondre quand je dirai 'C'est à vous'. Que souhaitez-vous ? C'est à vous.";
+    // Ajouter à la conversation
+    addToConversation('assistant', welcomeText);
     
+    // Parler TOUJOURS automatiquement (même si auto TTS désactivé)
+    log('🎤 Lancement présentation immédiate', 'success');
+    setTimeout(() => {
+        speakTextWithPipeline(welcomeText);
+    }, 500); // Démarrer après 0.5 seconde
+    
+    log('🎤 Message de présentation activé', 'success');
+}
+
+
+
 async function start() {
     const groqKey = groqApiKeyInput?.value?.trim();
 const openaiKey = openaiApiKeyInput?.value?.trim();
@@ -1116,9 +1131,9 @@ console.log('🔑 Clés utilisées:', { groq: groqKey ? 'OK (STT)' : 'KO', opena
             preSpeechPadFrames: 1,
             redemptionFrames:10 ,
             onSpeechStart: () => { 
-                log("Parole détectée", 'success'); 
-                if (!interruptTTS()) updateStatus("Vous parlez!", "🗣️", "speaking"); 
-            },
+    log("Parole détectée", 'success'); 
+    updateStatus("Vous parlez!", "🗣️", "speaking"); 
+},
             onSpeechEnd: (audio) => { 
                 log(`Fin de parole`, 'info');
                 
@@ -1134,9 +1149,17 @@ console.log('🔑 Clés utilisées:', { groq: groqKey ? 'OK (STT)' : 'KO', opena
         });
         
         myVad.start();
-        updateStatus("En écoute...", "👂", "listening");
         stopButton.disabled = false;
         log("Système vocal avec réflexions activé!", 'success');
+        
+        // 🎯 MODIFICATION : Présentation IMMÉDIATE (sans attendre)
+        updateStatus("Secrétaire se présente...", "🎤", "tts-playing");
+        showWelcomeMessage();
+        
+        // Attendre que le TTS se termine avant de passer en écoute
+        setTimeout(() => {
+            updateStatus("En écoute...", "👂", "listening");
+        }, 8000); // 8 secondes pour laisser le temps à la présentation
         
     } catch (error) { 
         console.error("Erreur VAD:", error); 
@@ -1145,6 +1168,10 @@ console.log('🔑 Clés utilisées:', { groq: groqKey ? 'OK (STT)' : 'KO', opena
         startButton.disabled = false; 
     }
 }
+
+
+
+
 function stop() {
     if (myVad) { 
         myVad.pause(); 
