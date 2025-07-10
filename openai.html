@@ -54,6 +54,19 @@
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
         
+        #toggleButton {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+}
+
+#toggleButton:active {
+    transform: scale(0.95);
+}
+
+#toggleButton:disabled {
+    transform: scale(1);
+    opacity: 0.5;
+}
         .ultra-fast-indicator {
             position: absolute;
             top: 10px;
@@ -160,16 +173,28 @@
                 </div>
 
                 <div class="fixed bottom-0 left-0 w-full z-6 flex-shrink-0 my-2">
-                    <div class="flex gap-3 mb-3">
-                        <button id="startButton" class="flex-1 py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl bg-green-500/80 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                            <i data-lucide="mic"></i>
-                        </button>
-                        <button id="stopButton" class="flex-1 py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl bg-red-500/80 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
-                            <i data-lucide="mic-off"></i>
-                        </button>
-                        <button id="clearButton" class="flex-1 py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl bg-white/20 text-white border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    <div class=" gap-3 mb-3">
+                     <div class="flex justify-center items-center">
+
+                         <!-- NOUVEAU BOUTON TOGGLE UNIQUE -->
+                         <button id="toggleButton" class="flex-1 py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl bg-green-500/80 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center w-80 gap-2">
+                             <i data-lucide="mic" id="toggleIcon"></i>
+                             <span id="toggleText">Démarrer</span>
+                            </button>
+                        </div> 
+                            <div class="flex justify-center items-center mt-4 gap-2 ">
+
+                            <button id="modeContinu" class="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-green-500/80 text-white">
+                                🔄 Continu
+                            </button>
+                            <button id="modePushToTalk" class="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-white/20 text-white/70 hover:bg-white/30">
+                                🎤 Push-to-Talk
+                            </button>
+                        </div>
+                      
+                        <!-- <button id="clearButton" class="flex-1 py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl bg-white/20 text-white border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                             <i data-lucide="trash-2"></i>
-                        </button>
+                        </button> -->
                     
                     </div>
                     <div class="flex gap-2 mb-2">
@@ -199,7 +224,9 @@
         // =============================================
         // 🚀 ASSISTANT VOCAL ULTRA-RAPIDE COMPLET
         // =============================================
-        
+        // Variables pour le bouton toggle
+let isRecording = false;
+let toggleButton, toggleIcon, toggleText;
         // 🔧 VARIABLES GLOBALES
         let isSettingsExpanded = true;
         let myVad = null;
@@ -213,7 +240,11 @@
 
 
         let lastPlayedReflection = ""; // NOUVELLE LIGNE À AJOUTER
-        
+        // 🆕 NOUVEAU : Variables pour les modes d'enregistrement
+let recordingMode = 'continu'; // 'continu' ou 'push-to-talk'
+let isPushToTalkRecording = false;
+let pushToTalkAudio = [];
+let modeContinu, modePushToTalk;
         const transcriptionCache = new Map();
         const ttsCache = new Map();
         const MAX_CACHE_SIZE = 50;
@@ -363,7 +394,7 @@ function isLikelyBackgroundNoise(audioData) {
     return false;
 }
 
-        function compressAudio(audioData, targetSampleRate = 16000) { 
+        function compressAudio(audioData, targetSampleRate = 8000) { 
             const maxSamples = targetSampleRate * 15; 
             if (audioData.length > maxSamples) { 
                 const ratio = Math.ceil(audioData.length / maxSamples); 
@@ -754,8 +785,255 @@ function playRandomReflection() {
     // =============================================
     // 🔧 TRANSCRIPTION
     // =============================================
+// 🎯 NOUVELLE FONCTION TOGGLE
+async function toggleRecording() {
+    if (recordingMode === 'continu') {
+        // Mode continu (comme avant)
+        if (isRecording) {
+            await stopRecording();
+        } else {
+            await startRecording();
+        }
+    } else {
+        // Mode Push-to-Talk
+        await handlePushToTalk();
+    }
+}
+// 🆕 NOUVEAU : Gestion du Push-to-Talk
+async function handlePushToTalk() {
+    if (isPlaying || isProcessingTTS) {
+        // Si l'IA parle, couper l'audio
+        log('🛑 Interruption TTS par Push-to-Talk', 'warning');
+        interruptTTS();
+        return;
+    }
+    
+    if (isPushToTalkRecording) {
+        // Arrêter l'enregistrement et envoyer
+        await stopPushToTalkRecording();
+    } else {
+        // Démarrer l'enregistrement
+        await startPushToTalkRecording();
+    }
+}
 
-    async function transcribeAudioUltraFast(audioData) {
+async function startPushToTalkRecording() {
+    const groqKey = groqApiKeyInput?.value?.trim();
+    const openaiKey = openaiApiKeyInput?.value?.trim();
+
+    if (!groqKey || !openaiKey) { 
+        alert('Veuillez entrer vos clés API !'); 
+        return; 
+    }
+
+    try {
+        updateStatus("🎤 Parlez maintenant...", "🔴", "recording");
+        
+        // Créer un VAD pour le Push-to-Talk
+        myVad = await vad.MicVAD.new({
+            positiveSpeechThreshold: 0.6,
+            minSpeechFrames: 3,
+            preSpeechPadFrames: 1,
+            redemptionFrames: 5,
+            onSpeechStart: () => { 
+                log("🎤 Parole détectée en Push-to-Talk", 'info'); 
+            },
+            onSpeechEnd: (audio) => { 
+                // Accumuler l'audio au lieu de le traiter immédiatement
+                pushToTalkAudio.push(...audio);
+                log(`Audio accumulé: ${pushToTalkAudio.length} échantillons`, 'info');
+            },
+        });
+        
+        myVad.start();
+        pushToTalkAudio = [];
+        isPushToTalkRecording = true;
+        updateButtonState();
+        
+        log("🎤 Push-to-Talk démarré - cliquez à nouveau pour envoyer", 'success');
+        
+    } catch (error) {
+        log(`Erreur Push-to-Talk: ${error.message}`, 'error');
+        isPushToTalkRecording = false;
+        updateButtonState();
+    }
+}
+
+async function stopPushToTalkRecording() {
+    if (myVad) {
+        myVad.pause();
+        myVad = null;
+    }
+    
+    isPushToTalkRecording = false;
+    updateButtonState();
+    
+    if (pushToTalkAudio.length > 1000) { // Au moins 1000 échantillons
+        updateStatus("🔄 Traitement de votre message...", "⚡", "processing");
+        
+        // Traiter tout l'audio accumulé
+        const fullAudio = new Float32Array(pushToTalkAudio);
+        await transcribeAudioUltraFast(fullAudio);
+        
+        log(`✅ Push-to-Talk envoyé: ${fullAudio.length} échantillons`, 'success');
+    } else {
+        updateStatus("❌ Message trop court", "⚠️", "");
+        setTimeout(() => {
+            updateStatus("Prêt", "😴", "");
+        }, 2000);
+        log("Message Push-to-Talk trop court, ignoré", 'warning');
+    }
+    
+    pushToTalkAudio = [];
+}
+
+// 🆕 NOUVEAU : Gestion des modes
+function switchToMode(mode) {
+    recordingMode = mode;
+    
+    // Arrêter tout ce qui est en cours
+    if (isRecording || isPushToTalkRecording) {
+        if (recordingMode === 'continu') {
+            stopRecording();
+        } else {
+            stopPushToTalkRecording();
+        }
+    }
+    
+    // Mettre à jour l'interface
+    updateModeButtons();
+    updateButtonState();
+    
+    log(`Mode changé vers: ${mode}`, 'info');
+}
+
+function updateModeButtons() {
+    if (recordingMode === 'continu') {
+        modeContinu.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-green-500/80 text-white";
+        modePushToTalk.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-white/20 text-white/70 hover:bg-white/30";
+    } else {
+        modeContinu.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-white/20 text-white/70 hover:bg-white/30";
+        modePushToTalk.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-blue-500/80 text-white";
+    }
+}
+async function startRecording() {
+    const groqKey = groqApiKeyInput?.value?.trim();
+    const openaiKey = openaiApiKeyInput?.value?.trim();
+
+    if (!groqKey || !openaiKey) { 
+        alert('Veuillez entrer vos clés API Groq (STT) et OpenAI (GPT-4o Mini) !'); 
+        return; 
+    }
+
+    // Désactiver le bouton pendant l'initialisation
+    toggleButton.disabled = true;
+    updateStatus("Initialisation...", "⚡", "processing");
+    
+    try {
+        // Pré-générer les réflexions d'abord
+        await preGenerateSimpleReflections();
+        
+        myVad = await vad.MicVAD.new({
+            positiveSpeechThreshold: 0.8,
+            minSpeechFrames: 6,
+            preSpeechPadFrames: 1,
+            redemptionFrames: 10,
+            onSpeechStart: () => { 
+                log("Parole détectée", 'success'); 
+                if (!interruptTTS()) updateStatus("Vous parlez!", "🗣️", "speaking"); 
+            },
+            onSpeechEnd: (audio) => { 
+                log(`Fin de parole`, 'info');
+                playRandomReflection();
+                
+                if (!isProcessingTTS && audio.length > 600) {
+                    transcribeAudioUltraFast(audio);
+                } else if (myVad) {
+                    updateStatus("En écoute...", "👂", "listening");
+                }
+            },
+        });
+        
+        myVad.start();
+        
+        // Changer l'état du bouton
+        isRecording = true;
+        toggleButton.disabled = false;
+        updateButtonState();
+        
+        updateStatus("En écoute...", "👂", "listening");
+        log("🎤 Enregistrement démarré!", 'success');
+        
+    } catch (error) { 
+        console.error("Erreur VAD:", error); 
+        log(`Erreur VAD: ${error.message}`, 'error'); 
+        updateStatus("Erreur", "❌", ""); 
+        toggleButton.disabled = false;
+        isRecording = false;
+        updateButtonState();
+    }
+}
+
+async function stopRecording() {
+    if (myVad) { 
+        myVad.pause(); 
+        myVad = null; 
+        log("VAD arrêté", 'info'); 
+    }
+    
+    await cleanupPipeline();
+    
+    // Nettoyer les réflexions
+    for (const [key, url] of reflectionAudios) {
+        URL.revokeObjectURL(url);
+    }
+    reflectionAudios.clear();
+    isPlayingReflection = false;
+    
+    // Changer l'état du bouton
+    isRecording = false;
+    updateButtonState();
+    
+    updateStatus("Arrêté", "😴", "");
+    log("🛑 Enregistrement arrêté", 'info');
+}
+function updateButtonState() {
+    if (!toggleButton || !toggleIcon || !toggleText) return;
+    
+    if (recordingMode === 'push-to-talk') {
+        // Mode Push-to-Talk
+        if (isPushToTalkRecording) {
+            // En cours d'enregistrement
+            toggleButton.className = "flex-1 py-4 rounded-2xl font-semibold text-base transition-all duration-300 backdrop-blur-xl bg-red-500/80 hover:bg-red-600/80 text-white animate-pulse flex items-center justify-center gap-2";
+            toggleIcon.setAttribute('data-lucide', 'square');
+            toggleText.textContent = 'Envoyer';
+        } else {
+            // Prêt à enregistrer
+            toggleButton.className = "flex-1 py-4 rounded-2xl font-semibold text-base transition-all duration-300 backdrop-blur-xl bg-blue-500/80 hover:bg-blue-600/80 text-white flex items-center justify-center gap-2";
+            toggleIcon.setAttribute('data-lucide', 'mic');
+            toggleText.textContent = 'Maintenir & Parler';
+        }
+    } else {
+        // Mode continu (comme avant)
+        if (isRecording) {
+            // État "Arrêter" (bouton rouge)
+            toggleButton.className = "flex-1 py-4 rounded-2xl font-semibold text-base transition-all duration-300 backdrop-blur-xl bg-red-500/80 hover:bg-red-600/80 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2";
+            toggleIcon.setAttribute('data-lucide', 'mic-off');
+            toggleText.textContent = 'Arrêter';
+            log('🔴 Bouton en mode STOP', 'info');
+        } else {
+            // État "Démarrer" (bouton vert)
+            toggleButton.className = "flex-1 py-4 rounded-2xl font-semibold text-base transition-all duration-300 backdrop-blur-xl bg-green-500/80 hover:bg-green-600/80 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2";
+            toggleIcon.setAttribute('data-lucide', 'mic');
+            toggleText.textContent = 'Démarrer';
+            log('🟢 Bouton en mode START', 'info');
+        }
+    }
+    
+    // IMPORTANT : Mettre à jour les icônes Lucide
+    lucide.createIcons();
+}
+async function transcribeAudioUltraFast(audioData) {
         const startTime = performance.now();
         const groqKey = groqApiKeyInput?.value?.trim();
         
@@ -1111,10 +1389,12 @@ console.log('🔑 Clés utilisées:', { groq: groqKey ? 'OK (STT)' : 'KO', opena
         await preGenerateSimpleReflections();
         
         myVad = await vad.MicVAD.new({
-            positiveSpeechThreshold: 0.8,
-            minSpeechFrames: 6,
-            preSpeechPadFrames: 1,
-            redemptionFrames:10 ,
+            positiveSpeechThreshold: 0.6, // Baissé de 0.8 à 0.6
+    minSpeechFrames: 4, // Baissé de 6 à 4
+    preSpeechPadFrames: 0, // Réduit de 1 à 0
+    redemptionFrames: 6, // Baissé de 10 à 6
+    // Ajouter ces nouveaux paramètres
+    frameSamples: 512, // Plus petit = plus réactif
             onSpeechStart: () => { 
                 log("Parole détectée", 'success'); 
                 if (!interruptTTS()) updateStatus("Vous parlez!", "🗣️", "speaking"); 
@@ -1188,17 +1468,50 @@ function stop() {
     
     window.onload = () => {
 // Ajoute ça dans ton window.onload
+
+// 🔧 CORRECTION : Déclarer les variables AVANT de les utiliser
+const conversationToggle = document.getElementById('conversationToggle');
+const conversationDrawer = document.getElementById('conversationDrawer');
 const conversationDrawerClose = document.getElementById('conversationDrawerClose');
+
+function toggleConversationDrawer() {
+    if (conversationDrawer && conversationDrawer.classList.contains('-translate-x-full')) {
+        // Ouvrir
+        conversationDrawer.classList.remove('-translate-x-full');
+        log('Drawer conversations ouvert', 'info');
+    } else if (conversationDrawer) {
+        // Fermer
+        conversationDrawer.classList.add('-translate-x-full');
+        log('Drawer conversations fermé', 'info');
+    }
+}
+
+// Attacher les événements APRÈS avoir déclaré les variables
+if (conversationToggle) {
+    conversationToggle.onclick = toggleConversationDrawer;
+}
+
 if (conversationDrawerClose) {
     conversationDrawerClose.onclick = toggleConversationDrawer;
 }
-// Tu peux cacher/réduire la zone conversation principale
-document.getElementById('conversation-area').style.display = 'none';
-            // ✨ AJOUTE ÇA DANS TON window.onload, après les autres initialisations
-// Dans ton window.onload, après les autres initialisations, ajoute :
 
-const conversationToggle = document.getElementById('conversationToggle');
-const conversationDrawer = document.getElementById('conversationDrawer');
+// 🆕 NOUVEAU : Initialisation des modes
+modeContinu = document.getElementById('modeContinu');
+modePushToTalk = document.getElementById('modePushToTalk');
+
+// Événements des boutons de mode
+if (modeContinu) modeContinu.onclick = () => switchToMode('continu');
+if (modePushToTalk) modePushToTalk.onclick = () => switchToMode('push-to-talk');
+
+// Initialiser l'affichage des modes
+updateModeButtons();
+
+// Cacher la zone conversation principale
+if (document.getElementById('conversation-area')) {
+    document.getElementById('conversation-area').style.display = 'none';
+}
+
+
 
 function toggleConversationDrawer() {
     if (conversationDrawer.classList.contains('-translate-x-full')) {
@@ -1366,8 +1679,14 @@ console.log('✨ Drawer initialisé avec succès !');
         // ✅ RÉCUPÉRER TOUS LES ÉLÉMENTS
         groqApiKeyInput = document.getElementById('groqApiKey');
         openaiApiKeyInput = document.getElementById('openaiApiKey');
-        startButton = document.getElementById('startButton');
-        stopButton = document.getElementById('stopButton');
+       // REMPLACER CES LIGNES :
+// startButton = document.getElementById('startButton');
+// stopButton = document.getElementById('stopButton');
+
+// PAR CES NOUVELLES LIGNES :
+toggleButton = document.getElementById('toggleButton');
+toggleIcon = document.getElementById('toggleIcon');
+toggleText = document.getElementById('toggleText');
         clearButton = document.getElementById('clearButton');
         voiceCircle = document.getElementById('voice-circle');
         statusText = document.getElementById('status-text');
@@ -1428,8 +1747,12 @@ console.log('✨ Drawer initialisé avec succès !');
         }
         
         // ✅ ATTACHER LES ÉVÉNEMENTS DES BOUTONS
-        if (startButton) startButton.onclick = start;
-        if (stopButton) stopButton.onclick = stop;
+       // REMPLACER CES LIGNES :
+// if (startButton) startButton.onclick = start;
+// if (stopButton) stopButton.onclick = stop;
+
+// PAR CETTE NOUVELLE LIGNE :
+if (toggleButton) toggleButton.onclick = toggleRecording;
         if (clearButton) clearButton.onclick = clearConversation;
         if (sendButton) sendButton.onclick = handleTextInput;
         
