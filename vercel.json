@@ -12,6 +12,10 @@
       "dest": "/testp.html"
     },
     {
+      "src": "/nora",
+      "dest": "/test.html"
+    },
+    {
       "src": "/english",
       "dest": "/english.html"
     },
