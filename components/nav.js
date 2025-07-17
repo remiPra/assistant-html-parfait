@@ -9,6 +9,7 @@ class NavigationDrawer {
         const path = window.location.pathname;
         if (path.includes('/nav') || path.includes('testp.html')) return 'nav';
         if (path.includes('/nora') || path.includes('test.html')) return 'nora';
+        if (path.includes('/testo') || path.includes('speechr.html')) return 'testo';
         if (path.includes('/english')) return 'english';
         return 'home';
     }
@@ -41,7 +42,8 @@ class NavigationDrawer {
                 <!-- Menu Principal -->
                 <div class="p-6 space-y-2">
                     <h3 class="text-white/60 text-xs uppercase tracking-wider font-semibold mb-4">Pages Principales</h3>
-                    
+                    ${this.createDrawerLink('/testo', 'testo', '🧭', 'simple', 'super simple')}
+
                     ${this.createDrawerLink('/nav', 'nav', '🧭', 'Navigation', 'Interface de test navigation')}
                     ${this.createDrawerLink('/nora', 'nora', '🤖', 'Nora Assistant', 'Assistant vocal principal')}
                     ${this.createDrawerLink('/english', 'english', '🇬🇧', 'English Version', 'Version anglaise')}
