@@ -1778,7 +1778,28 @@ async function processUserMessageOptimized(userText) {
     // 🔧 FONCTIONS PRINCIPALES
     // =============================================
     
+// Ajoute cette fonction dans ton script
+async function requestMicrophonePermission() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop());
+        log('Permission microphone accordée', 'success');
+        return true;
+    } catch (error) {
+        log('Permission microphone refusée', 'error');
+        alert('Veuillez autoriser l\'accès au microphone dans les paramètres Safari');
+        return false;
+    }
+}
+
+
+
 async function start() {
+    const hasPermission = await requestMicrophonePermission();
+    if (!hasPermission) {
+        startButton.disabled = false;
+        return;
+    }
     const groqKey = groqApiKeyInput?.value?.trim();
 const openaiKey = openaiApiKeyInput?.value?.trim();
 
