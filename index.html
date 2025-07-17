@@ -786,7 +786,7 @@
                     
                     const controller = new AbortController();
                     setTimeout(() => controller.abort(), 10000);
-                    
+                    // playRandomReflection();
                     const transResponse = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${groqKey}` },
@@ -824,7 +824,7 @@
                         updateStatus("En écoute...", "👂", "listening"); 
                         return; 
                     }
-                    
+                    playRandomReflection();
                     setCachedTranscription(audioHash, userText);
                     updateLatency(Math.round(performance.now() - startTime));
                     await processUserMessageOptimized(userText);
@@ -1082,9 +1082,10 @@ RÈGLES IMPORTANTES :
                         log(`Fin de parole`, 'info');
                         
                         // 💭 JOUER RÉFLEXION IMMÉDIATEMENT !
-                        playRandomReflection();
+                       
                         
                         if (!isProcessingTTS && audio.length > 600) {
+                            // playRandomReflection();
                             transcribeAudioUltraFast(audio);
                         } else if (myVad) {
                             updateStatus("En écoute...", "👂", "listening");

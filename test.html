@@ -217,8 +217,10 @@
 
     <audio id="ttsAudio" style="display: none;" preload="none"></audio>
 
-    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.22/dist/bundle.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.22/dist/bundle.min.js"></script>
+    <script defer src="https://unpkg.com/@cartesia/cartesia-js@0.1.7/dist/bundle.min.js"></script>
+
     
     <script>
         // =============================================
@@ -227,6 +229,9 @@
         // Variables pour le bouton toggle
 let isRecording = false;
 let toggleButton, toggleIcon, toggleText;
+
+let cartesiaClient; // On va l'initialiser plus tard
+
         // 🔧 VARIABLES GLOBALES
         let isSettingsExpanded = true;
         let myVad = null;
@@ -273,19 +278,9 @@ let isPlayingReflection = false;
 // Liste simple de réflexions sans analyse
 const SIMPLE_REFLECTIONS = [
 "Ah oui, je vois...",
-"D'accord, très bien...",
-"OK,ok  je comprends...",
-"Hmm, intéressant...",
-"Oui, ok ,  effectivement...",
-"Ah, parfait...",
+"D'accord, très bien rémi, laisse moi le temps de reflechir...",
+"OK,ok  je comprends, rémi je te comprends ...",
 
-"Très bien, ok ,ok ...",
-"OK, laissez-moi voir...",
-"D'accord, ok , ok ...",
-"Ah, bien sûr , Ok...",
-"Oui, d'accord,d'accord...",
-"Je comprends bien...",
-"Oui, tout à fait..."
 ];
 
         // AJOUTEZ CETTE LIGNE À LA FIN
@@ -688,24 +683,28 @@ async function playMainResponseStreamingStyle() {
     if (myVad) updateStatus("En écoute...", "👂", "listening");
 }
 
+
 async function handleParallelPipeline(reflectionPromise, processingPromise) {
-    // Démarrer le traitement en arrière-plan
+    // 🔥 DÉMARRER IMMÉDIATEMENT LA RÉFLEXION (0ms)
+    if (reflectionPromise) {
+        reflectionPromise; // Pas d'await - joue immédiatement !
+        log('🎯 Réflexion IMMÉDIATE lancée', 'success');
+    }
+    
+    // 🔥 DÉMARRER LE PROCESSING EN PARALLÈLE TOTAL
     processingPromise;
     
-    // Attendre que la réflexion finisse (si elle existe)
-    if (reflectionPromise) {
-        await reflectionPromise;
-        log('🎯 Réflexion terminée, démarrage TTS principal', 'success');
-    } else {
-        // Si pas de réflexion, attendre un peu pour la première phrase
-        await new Promise(resolve => setTimeout(resolve, 200));
+    // 🔥 ATTENDRE MOINS LONGTEMPS (5ms au lieu de 20ms)
+    let attempts = 0;
+    while (!phrasePipeline[0]?.ready && attempts < 25) { // 25 x 5ms = 125ms max
+        await new Promise(resolve => setTimeout(resolve, 5)); // Plus rapide !
+        attempts++;
     }
     
-    // Démarrer le TTS principal en streaming
-    if (mainResponseReady) {
-        await playMainResponseStreamingStyle();
-    }
+    // 🔥 DÉMARRER TTS MÊME SI PAS PRÊT (risqué mais ultra-rapide)
+    playMainResponseStreamingStyle();
 }
+
 
 function cleanupPhrasePipeline() {
     phraseGenerationActive = false;
@@ -747,29 +746,29 @@ function cleanupPhrasePipeline() {
             return hash.toString(36);
         }
 
-
-        async function generateTTSForSentence(sentence, sentenceIndex) {
-    // ⚠️ Remplacez par votre clé API Cartesia si ce n'est pas déjà fait
-    const CARTESIA_API_KEY = "votre_cle_api_cartesia";
+        async function generateTTSForSentence(sentence, voice, sentenceIndex) {
+    // Clé API Cartesia - remplacez par la vôtre
+    const CARTESIA_API_KEY = "sk_car_j18nkdGqMkXxdvYwPJVJiJ";
     
-    // ID de la voix "Antoine" unique et fixé
-    const FIXED_VOICE_ID = "0b1380da-611b-4d00-83f4-8a969a53e4e0"; 
+    // ID de la voix "Antoine" (ou choisissez une autre voix)
+    const VOICE_ID = "0b1380da-611b-4d00-83f4-8a969a53e4e0";
     
-    const cacheKey = `${hashText(sentence)}_${FIXED_VOICE_ID}`;
+    const cacheKey = `${hashText(sentence)}_${VOICE_ID}`;
     
+    // Vérifier le cache
     if (ttsCache.has(cacheKey)) {
         log(`TTS cache hit pour phrase ${sentenceIndex}`, 'success');
         return ttsCache.get(cacheKey);
     }
 
     try {
-        log(`🔄 Génération TTS (Cartesia) phrase ${sentenceIndex}: "${sentence.substring(0, 30)}..."`, 'info');
+        log(`🔄 Génération TTS Cartesia phrase ${sentenceIndex}: "${sentence.substring(0, 30)}..."`, 'info');
         
         const response = await fetch("https://api.cartesia.ai/tts/bytes", {
             method: "POST",
             headers: {
                 "Cartesia-Version": "2024-06-10",
-                "X-API-Key": "sk_car_j18nkdGqMkXxdvYwPJVJiJ",
+                "X-API-Key": CARTESIA_API_KEY,
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -777,7 +776,7 @@ function cleanupPhrasePipeline() {
                 transcript: sentence,
                 voice: {
                     mode: "id",
-                    id: FIXED_VOICE_ID // Utilisation de l'ID fixé
+                    id: VOICE_ID
                 },
                 output_format: {
                     container: "raw",
@@ -798,9 +797,10 @@ function cleanupPhrasePipeline() {
         const audioBlob = new Blob([wavBuffer], { type: 'audio/wav' });
         const audioUrl = URL.createObjectURL(audioBlob);
         
+        // Mettre en cache
         ttsCache.set(cacheKey, audioUrl);
         
-        log(`✅ TTS (Cartesia) prêt pour phrase ${sentenceIndex}`, 'success');
+        log(`✅ TTS Cartesia prêt pour phrase ${sentenceIndex}`, 'success');
         return audioUrl;
 
     } catch (error) {
@@ -808,7 +808,6 @@ function cleanupPhrasePipeline() {
         throw error;
     }
 }
-
 async function pipelineWorker(sentences, voice, startIndex = 0) {
             for (let i = startIndex; i < sentences.length && pipelineActive; i++) {
                 while (readyAudioBuffer.size >= MAX_BUFFER_SIZE && pipelineActive) {
@@ -1106,9 +1105,8 @@ async function stopPushToTalkRecording() {
         log(`✅ Push-to-Talk envoyé: ${fullAudio.length} échantillons`, 'success');
     } else {
         updateStatus("❌ Message trop court", "⚠️", "");
-        setTimeout(() => {
-            updateStatus("Prêt", "😴", "");
-        }, 2000);
+      // REMPLACE PAR ça (immédiat) :
+updateStatus("En écoute...", "👂", "listening");
         log("Message Push-to-Talk trop court, ignoré", 'warning');
     }
     
@@ -1174,16 +1172,18 @@ async function startRecording() {
     log(`Fin de parole`, 'info');
     
     if (!isProcessingTTS && audio.length > 600) {
-        // 🔥 LANCER LES DEUX PROCESSUS EN PARALLÈLE
-        const reflectionPromise = playRandomReflectionAsync();
+        // 🔥 RÉFLEXION IMMÉDIATE (0ms de délai)
+        const reflectionPromise = playRandomReflectionAsync(); // Pas d'await !
+        
+        // 🔥 PROCESSING IMMÉDIAT EN PARALLÈLE
         const processingPromise = processUserMessageParallel(audio);
         
-        // Gérer l'enchaînement parallèle
+        // 🔥 LANCER TOUT SANS ATTENDRE
         handleParallelPipeline(reflectionPromise, processingPromise);
     } else if (myVad) {
         updateStatus("En écoute...", "👂", "listening");
     }
-},
+}
         });
         
         myVad.start();
@@ -1229,6 +1229,131 @@ async function stopRecording() {
     updateStatus("Arrêté", "😴", "");
     log("🛑 Enregistrement arrêté", 'info');
 }
+
+
+// =============================================
+// 🎵 NOUVELLE FONCTION DE PAROLE EN STREAMING
+// =============================================
+function addToConversation(type, content) {
+    const conversationDiv = document.getElementById('conversation'); // Cible le bon div
+
+    if (!conversationDiv) return;
+    
+    // Ne supprimer le message d'accueil qu'une seule fois
+    if (conversationDiv.querySelector('.italic')) {
+        conversationDiv.innerHTML = '';
+    }
+    
+    const div = document.createElement('div');
+    const baseClasses = 'mb-3 px-4 py-3 rounded-2xl max-w-[85%] break-words';
+    let specificClasses = '';
+    let header = '';
+
+    if (type === 'user') {
+        specificClasses = 'bg-blue-500/80 text-white ml-auto rounded-br-md';
+        header = `<div class="text-xs opacity-80 mb-1">Vous • ${new Date().toLocaleTimeString()}</div>`;
+        conversationHistory.push({ role: 'user', content: content });
+    } else { // 'assistant'
+        specificClasses = 'bg-white/90 text-gray-800 mr-auto rounded-bl-md';
+        // On passe le contenu à speakTextWithStreaming au lieu de l'ancien speakText
+        header = `<div class="text-xs opacity-70 mb-1 flex justify-between items-center"><span>Assistant • ${new Date().toLocaleTimeString()}</span><button onclick="speakTextWithStreaming('${content.replace(/'/g, "\\'")}', this)" class="bg-transparent border-none cursor-pointer text-lg hover:scale-110 transition-transform">🔊</button></div>`;
+        conversationHistory.push({ role: 'assistant', content: content });
+        
+        // ✨ MODIFICATION CI-DESSOUS ✨
+        // Déclencher la parole automatiquement si la case est cochée
+        if (autoSpeakCheckbox?.checked && !isProcessingTTS) {
+            // Un petit délai pour s'assurer que l'interface est à jour avant de parler
+            setTimeout(() => speakTextWithPipeline(content), 100);
+        }
+    }
+
+    div.className = `${baseClasses} ${specificClasses}`;
+    div.innerHTML = `${header}<div>${content}</div>`;
+    conversationDiv.appendChild(div);
+    conversationDiv.scrollTop = conversationDiv.scrollHeight;
+
+    // Limiter l'historique
+    if (conversationHistory.length > 30) {
+        conversationHistory.splice(0, conversationHistory.length - 30);
+    }
+}
+
+
+async function speakTextWithStreaming(text, buttonElement = null) {
+    // Vérifie si les clés sont là et initialise le client si ce n'est pas déjà fait
+    const cartesiaApiKey = "sk_car_j18nkdGqMkXxdvYwPJVJiJ"; // ⚠️ Remplace par ta vraie clé API Cartesia
+    if (!cartesiaApiKey) {
+        log("Clé API Cartesia manquante.", "error");
+        return;
+    }
+    if (!cartesiaClient) {
+        cartesiaClient = new cartesia.CartesiaClient({ apiKey: cartesiaApiKey });
+    }
+
+    if (isProcessingTTS) {
+        log('TTS (streaming) déjà en cours', 'warning');
+        return;
+    }
+
+    try {
+        isProcessingTTS = true;
+        isPlaying = true;
+
+        if (buttonElement) buttonElement.disabled = true;
+
+        log('⚡ Démarrage du streaming TTS via WebSocket...', 'info');
+        updateStatus("IA parle...", "🔊", "tts-playing");
+
+        // 1. Crée un lecteur audio pour le navigateur
+        const player = new cartesia.WebPlayer();
+
+        // 2. Ouvre la connexion WebSocket pour le TTS
+        const ttsStream = cartesiaClient.tts.websocket({
+            container: "raw",
+            encoding: "pcm_f32le",
+            sample_rate: 24000,
+        });
+
+        // 3. Envoie la demande de génération avec le texte complet
+        const { stream } = await ttsStream.send({
+            model_id: "sonic-2",
+            transcript: text,
+            voice: {
+                mode: "id",
+                id: "0b1380da-611b-4d00-83f4-8a969a53e4e0", // ID de la voix "Antoine"
+            },
+            // On peut ajouter un context_id pour garder la prosodie sur plusieurs tours
+        });
+
+        // 4. Joue le flux audio au fur et à mesure qu'il arrive
+        // Le `player.play` gère tout pour nous !
+        await player.play(stream);
+
+        // La lecture est terminée
+        log('✅ Streaming TTS terminé.', 'success');
+        
+    } catch (error) {
+        console.error('Erreur TTS streaming:', error);
+        log(`Erreur streaming TTS: ${error.message}`, 'error');
+    } finally {
+        // Nettoyage après la parole
+        isProcessingTTS = false;
+        isPlaying = false;
+
+        if (buttonElement) {
+            buttonElement.textContent = '🔊';
+            buttonElement.disabled = false;
+        }
+
+        if (myVad) { // Si le micro est toujours actif
+            updateStatus("En écoute...", "👂", "listening");
+        } else {
+            updateStatus("Arrêté", "😴", "");
+        }
+    }
+}
+
+
 function updateButtonState() {
     if (!toggleButton || !toggleIcon || !toggleText) return;
     
@@ -1375,6 +1500,7 @@ async function getLLMResponseStreaming(userMessage) {
                 content: `Tu es un assistant vocal conversationnel naturel. Réponds en français parlé, comme dans une conversation normale entre humains.
 
 RÈGLES IMPORTANTES :
+- COMMENCE TOUJOURS par une phrase très courte (3-5 mots maximum) etcontinue avec des phrases tres courtes.
 - N'utilise JAMAIS d'émoticônes, d'astérisques, ou de symboles (❤️, 🔥, *, etc.)
 - Parle comme si tu étais une personne réelle au téléphone
 - Utilise un langage oral naturel avec des expressions comme "alors", "bon", "eh bien"
@@ -1471,14 +1597,13 @@ RÈGLE ABSOLUE: Ne répète JAMAIS cette phrase dans ta réponse. Commence direc
         // Réinitialiser la réflexion pour la prochaine fois
         lastPlayedReflection = "";
         
-        // 🎵 JOUER LE TTS COMPLET UNE SEULE FOIS
-        if (autoSpeakCheckbox?.checked && cleanedResponse) {
-            log(`🎵 Lancement TTS pour réponse nettoyée: "${cleanedResponse.substring(0, 50)}..."`, 'info');
-            // Attendre un peu pour éviter les conflits
-            setTimeout(() => {
-                speakTextWithPipeline(cleanedResponse);
-            }, 300);
-        }
+//         // 🎵 JOUER LE TTS COMPLET UNE SEULE FOIS
+//         if (autoSpeakCheckbox?.checked && cleanedResponse) {
+//             log(`🎵 Lancement TTS pour réponse nettoyée: "${cleanedResponse.substring(0, 50)}..."`, 'info');
+//             // Attendre un peu pour éviter les conflits
+//            // REMPLACE PAR ça (sans délai) :
+// speakTextWithPipeline(cleanedResponse);
+//         }
         
         log('✅ Streaming OpenAI GPT-4o Mini terminé', 'success');
         return cleanedResponse; // Retourner la réponse nettoyée
@@ -1540,40 +1665,86 @@ async function processUserMessageOptimized(userText) {
         conversation.scrollTop = conversation.scrollHeight; 
     }
 
-    function addToConversation(type, content) {
-        const conversation = document.getElementById('conversationHistory');
 
-        if (!conversation) return;
-            // Ne supprimer le message d'accueil qu'une seule fois
-if (conversation.querySelector('.italic') && conversationHistory.length === 0) {
-    conversation.innerHTML = '';
-}           
-        const div = document.createElement('div'); 
-        const baseClasses = 'mb-3 px-4 py-3 rounded-2xl max-w-[85%] break-words'; 
-        let specificClasses = ''; 
-        let header = ''; 
-        
-        if (type === 'user') { 
-            specificClasses = 'bg-blue-500/80 text-white ml-auto rounded-br-md'; 
-            header = `<div class="text-xs opacity-80 mb-1">Vous • ${new Date().toLocaleTimeString()}</div>`; 
-        } else { 
-            specificClasses = 'bg-white/90 text-gray-800 mr-auto rounded-bl-md'; 
-            header = `<div class="text-xs opacity-70 mb-1 flex justify-between items-center"><span>Assistant • ${new Date().toLocaleTimeString()}</span><button onclick="speakText('${content.replace(/'/g, "\\'")}', this)" class="bg-transparent border-none cursor-pointer text-lg hover:scale-110 transition-transform">🔊</button></div>`; 
-        } 
-        
-        div.className = `${baseClasses} ${specificClasses}`; 
-        div.innerHTML = `${header}<div>${content}</div>`; 
-        conversation.appendChild(div); 
-        conversation.scrollTop = conversation.scrollHeight; 
-        
-        if(type === 'user') conversationHistory.push({ role: 'user', content: content }); 
-        else conversationHistory.push({ role: 'assistant', content: content }); 
-        // if (conversationHistory.length > 12) conversationHistory.splice(0, conversationHistory.length - 12); 
-        if (conversationHistory.length > 30) conversationHistory.splice(0, conversationHistory.length - 30);
-        if (type === 'assistant' && autoSpeakCheckbox?.checked && !isProcessingTTS) {
-            setTimeout(() => speakTextWithPipeline(content), 300);
-        }
+
+    async function startRecording() {
+    const groqKey = groqApiKeyInput?.value?.trim();
+    const openaiKey = openaiApiKeyInput?.value?.trim();
+
+    if (!groqKey || !openaiKey) {
+        alert('Veuillez entrer vos clés API Groq (STT) et OpenAI (LLM) !');
+        return;
     }
+
+    toggleButton.disabled = true;
+    updateStatus("Initialisation...", "⚡", "processing");
+
+    try {
+        // Tu peux garder la pré-génération des réflexions, c'est une bonne idée.
+        //await preGenerateSimpleReflections();
+
+        myVad = await vad.MicVAD.new({
+            positiveSpeechThreshold: 0.8,
+            minSpeechFrames: 6,
+            preSpeechPadFrames: 1,
+            redemptionFrames: 10,
+            onSpeechStart: () => {
+                log("Parole détectée", 'success');
+                if (!interruptTTS()) updateStatus("Vous parlez!", "🗣️", "speaking");
+            },
+            onSpeechEnd: async (audio) => {
+                log(`Fin de parole détectée.`, 'info');
+
+                if (isProcessingTTS || audio.length < 800) {
+                    if (myVad) updateStatus("En écoute...", "👂", "listening");
+                    return; // Ignore les sons trop courts ou si l'IA parle déjà
+                }
+
+                // ✨ NOUVELLE LOGIQUE SIMPLIFIÉE ✨
+                
+                // 1. Joue une réflexion en parallèle (fire-and-forget)
+                // playRandomReflectionAsync(); // Optionnel, tu peux décommenter si tu veux
+
+                // 2. Transcris l'audio de l'utilisateur
+                const userText = await transcribeAudioFromBuffer(audio);
+                if (!userText) {
+                    if (myVad) updateStatus("En écoute...", "👂", "listening");
+                    return;
+                }
+                
+                // 3. Ajoute le message de l'utilisateur à la conversation
+                addToConversation('user', userText);
+
+                // 4. Obtient la réponse de l'IA
+                const aiResponse = await getLLMResponseStreaming(userText);
+                if (!aiResponse) {
+                    if (myVad) updateStatus("En écoute...", "👂", "listening");
+                    return;
+                }
+
+                // 5. Ajoute la réponse de l'IA à la conversation
+                // Note: La fonction addToConversation va automatiquement lancer la parole en streaming !
+                addToConversation('assistant', aiResponse);
+            },
+        });
+
+        myVad.start();
+        isRecording = true;
+        toggleButton.disabled = false;
+        updateButtonState();
+        updateStatus("En écoute...", "👂", "listening");
+        log("🎤 Enregistrement démarré!", 'success');
+
+    } catch (error) {
+        console.error("Erreur VAD:", error);
+        log(`Erreur VAD: ${error.message}`, 'error');
+        updateStatus("Erreur", "❌", "");
+        toggleButton.disabled = false;
+        isRecording = false;
+        updateButtonState();
+    }
+}
+
 
     async function processUserMessage(userText) {
         if (!userText) return;

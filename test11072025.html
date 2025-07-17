@@ -54,6 +54,19 @@
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
         
+        #toggleButton {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+}
+
+#toggleButton:active {
+    transform: scale(0.95);
+}
+
+#toggleButton:disabled {
+    transform: scale(1);
+    opacity: 0.5;
+}
         .ultra-fast-indicator {
             position: absolute;
             top: 10px;
@@ -160,16 +173,28 @@
                 </div>
 
                 <div class="fixed bottom-0 left-0 w-full z-6 flex-shrink-0 my-2">
-                    <div class="flex gap-3 mb-3">
-                        <button id="startButton" class="flex-1 py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl bg-green-500/80 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                            <i data-lucide="mic"></i>
-                        </button>
-                        <button id="stopButton" class="flex-1 py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl bg-red-500/80 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
-                            <i data-lucide="mic-off"></i>
-                        </button>
-                        <button id="clearButton" class="flex-1 py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl bg-white/20 text-white border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    <div class=" gap-3 mb-3">
+                     <div class="flex justify-center items-center">
+
+                         <!-- NOUVEAU BOUTON TOGGLE UNIQUE -->
+                         <button id="toggleButton" class="flex-1 py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl bg-green-500/80 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center w-80 gap-2">
+                             <i data-lucide="mic" id="toggleIcon"></i>
+                             <span id="toggleText">Démarrer</span>
+                            </button>
+                        </div> 
+                            <div class="flex justify-center items-center mt-4 gap-2 ">
+
+                            <button id="modeContinu" class="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-green-500/80 text-white">
+                                🔄 Continu
+                            </button>
+                            <button id="modePushToTalk" class="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-white/20 text-white/70 hover:bg-white/30">
+                                🎤 Push-to-Talk
+                            </button>
+                        </div>
+                      
+                        <!-- <button id="clearButton" class="flex-1 py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl bg-white/20 text-white border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                             <i data-lucide="trash-2"></i>
-                        </button>
+                        </button> -->
                     
                     </div>
                     <div class="flex gap-2 mb-2">
@@ -199,7 +224,9 @@
         // =============================================
         // 🚀 ASSISTANT VOCAL ULTRA-RAPIDE COMPLET
         // =============================================
-        
+        // Variables pour le bouton toggle
+let isRecording = false;
+let toggleButton, toggleIcon, toggleText;
         // 🔧 VARIABLES GLOBALES
         let isSettingsExpanded = true;
         let myVad = null;
@@ -210,7 +237,22 @@
         let pipelineActive = false;
         let generationWorkers = [];
         let readyAudioBuffer = new Map();
-        
+
+
+        let lastPlayedReflection = ""; // NOUVELLE LIGNE À AJOUTER
+        // 🆕 NOUVEAU : Variables pour les modes d'enregistrement
+
+
+        // AJOUTER ICI après lastPlayedReflection
+let phrasePipeline = [];
+let currentPhraseIndex = 0;
+let phraseGenerationActive = false;
+let mainResponseReady = false;
+let reflectionAudio = null;
+let recordingMode = 'continu'; // 'continu' ou 'push-to-talk'
+let isPushToTalkRecording = false;
+let pushToTalkAudio = [];
+let modeContinu, modePushToTalk;
         const transcriptionCache = new Map();
         const ttsCache = new Map();
         const MAX_CACHE_SIZE = 50;
@@ -231,19 +273,9 @@ let isPlayingReflection = false;
 // Liste simple de réflexions sans analyse
 const SIMPLE_REFLECTIONS = [
 "Ah oui, je vois...",
-"D'accord, très bien...",
-"OK,ok  je comprends...",
-"Hmm, intéressant...",
-"Oui, ok ,  effectivement...",
-"Ah, parfait...",
+"D'accord, très bien rémi, laisse moi le temps de reflechir...",
+"OK,ok  je comprends, rémi je te comprends ...",
 
-"Très bien, ok ,ok ...",
-"OK, laissez-moi voir...",
-"D'accord, ok , ok ...",
-"Ah, bien sûr , Ok...",
-"Oui, d'accord,d'accord...",
-"Je comprends bien...",
-"Oui, tout à fait..."
 ];
 
         // AJOUTEZ CETTE LIGNE À LA FIN
@@ -360,7 +392,7 @@ function isLikelyBackgroundNoise(audioData) {
     return false;
 }
 
-        function compressAudio(audioData, targetSampleRate = 16000) { 
+        function compressAudio(audioData, targetSampleRate = 8000) { 
             const maxSamples = targetSampleRate * 15; 
             if (audioData.length > maxSamples) { 
                 const ratio = Math.ceil(audioData.length / maxSamples); 
@@ -458,33 +490,234 @@ for (const phrase of SIMPLE_REFLECTIONS) {
 log(`🎉 ${reflectionAudios.size} réflexions simples pré-générées !`, 'success');
 }
 
-function playRandomReflection() {
-if (isPlayingReflection || reflectionAudios.size === 0) return;
-
-// Choisir une réflexion au hasard
-const randomReflection = SIMPLE_REFLECTIONS[Math.floor(Math.random() * SIMPLE_REFLECTIONS.length)];
-const audioUrl = reflectionAudios.get(randomReflection);
-
-if (audioUrl) {
-    isPlayingReflection = true;
-    log(`💭 Réflexion: "${randomReflection}"`, 'success');
+// AJOUTER TOUTES CES FONCTIONS ICI
+async function playRandomReflectionAsync() {
+    if (isPlayingReflection || reflectionAudios.size === 0) return null;
     
-    const reflectionAudio = new Audio(audioUrl);
-    reflectionAudio.play();
+    const randomReflection = SIMPLE_REFLECTIONS[Math.floor(Math.random() * SIMPLE_REFLECTIONS.length)];
+    const audioUrl = reflectionAudios.get(randomReflection);
     
-    reflectionAudio.onended = () => {
-        isPlayingReflection = false;
-        log('💭 Réflexion terminée', 'info');
-    };
-}
+    if (audioUrl) {
+        isPlayingReflection = true;
+        lastPlayedReflection = randomReflection;
+        
+        reflectionAudio = new Audio(audioUrl);
+        
+        return new Promise((resolve) => {
+            reflectionAudio.onended = () => {
+                isPlayingReflection = false;
+                log('💭 Réflexion terminée - prêt pour enchaînement', 'info');
+                resolve();
+            };
+            
+            reflectionAudio.onerror = () => {
+                isPlayingReflection = false;
+                log('❌ Erreur réflexion', 'error');
+                resolve();
+            };
+            
+            reflectionAudio.play();
+            log(`💭 Réflexion: "${randomReflection}"`, 'success');
+        });
+    }
+    return null;
 }
 
-    // =============================================
-    // 🔧 SYSTÈME TTS PIPELINE
-    // =============================================
-        // =============================================
-        // 🔧 SYSTÈME TTS PIPELINE
-        // =============================================
+async function processUserMessageParallel(audio) {
+    try {
+        const userText = await transcribeAudioFromBuffer(audio);
+        if (!userText || userText.length < 3) return null;
+        
+        log(`Message reçu: "${userText}"`, 'info');
+        addToConversation('user', userText);
+        
+        const aiResponse = await getLLMResponseStreaming(userText);
+        if (aiResponse) {
+            addToConversation('assistant', aiResponse);
+            
+            // 🔥 DÉMARRER GÉNÉRATION TTS PHRASE PAR PHRASE IMMÉDIATEMENT
+            await startPhrasePipelineGeneration(aiResponse);
+        }
+        
+        return { userText, aiResponse };
+        
+    } catch (error) {
+        log(`Erreur traitement parallèle: ${error.message}`, 'error');
+        return null;
+    }
+}
+
+async function transcribeAudioFromBuffer(audioData) {
+    const startTime = performance.now();
+    const groqKey = groqApiKeyInput?.value?.trim();
+    
+    if (!groqKey) return null;
+    
+    try {
+        const qualityResult = analyzeAudioQuality(audioData);
+        updateQuality(qualityResult.quality);
+        if (!qualityResult.pass) return null;
+        
+        updateStatus("Transcription...", "⚡", "processing");
+        const compressedAudio = compressAudio(audioData);
+        const wavBuffer = encodeWAV(compressedAudio);
+        const formData = new FormData();
+        formData.append('file', new Blob([wavBuffer], { type: 'audio/wav' }), 'audio.wav');
+        formData.append('model', 'whisper-large-v3');
+        formData.append('response_format', 'json');
+        formData.append('language', 'fr');
+        
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 10000);
+        
+        const transResponse = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${groqKey}` },
+            body: formData,
+            signal: controller.signal
+        });
+        
+        if (!transResponse.ok) throw new Error(`Transcription échouée: ${transResponse.status}`);
+        const transResult = await transResponse.json();
+        let userText = transResult.text?.trim();
+        
+        // Filtres anti-parasite
+        const parasiteFilters = [
+            /sous[\-\s]*titrage/i,
+            /société[\-\s]*radio[\-\s]*canada/i,
+            /radio[\-\s]*canada/i,
+            /src[\-\s]*subtitle/i
+        ];
+
+        for (const filter of parasiteFilters) {
+            if (filter.test(userText)) {
+                log('Texte parasite détecté et ignoré: ' + userText, 'warning');
+                return null;
+            }
+        }
+        
+        updateLatency(Math.round(performance.now() - startTime));
+        return userText;
+        
+    } catch (error) {
+        log(`Erreur transcription: ${error.message}`, 'error');
+        return null;
+    }
+}
+
+async function startPhrasePipelineGeneration(aiResponse) {
+    phraseGenerationActive = true;
+    const sentences = splitIntoSentences(aiResponse);
+    phrasePipeline = new Array(sentences.length);
+    currentPhraseIndex = 0;
+    
+    log(`🔄 Génération pipeline: ${sentences.length} phrases`, 'info');
+    
+    // Générer toutes les phrases en parallèle
+    const generationPromises = sentences.map(async (sentence, i) => {
+        if (!phraseGenerationActive) return;
+        
+        try {
+            const audioUrl = await generateTTSForSentence(sentence, voiceSelect.value, i);
+            phrasePipeline[i] = {
+                audioUrl: audioUrl,
+                sentence: sentence,
+                ready: true
+            };
+            log(`✅ Phrase ${i} prête: "${sentence.substring(0, 30)}..."`, 'success');
+        } catch (error) {
+            log(`❌ Erreur phrase ${i}`, 'error');
+            phrasePipeline[i] = { ready: false };
+        }
+    });
+    
+    mainResponseReady = true;
+    
+    // Attendre que toutes les phrases soient traitées (en arrière-plan)
+    Promise.allSettled(generationPromises);
+}
+
+async function playMainResponseStreamingStyle() {
+    updateStatus("IA parle...", "🔊", "tts-playing");
+    currentPhraseIndex = 0;
+    
+    while (currentPhraseIndex < phrasePipeline.length && phraseGenerationActive) {
+        // Attendre que la phrase courante soit prête
+        while (!phrasePipeline[currentPhraseIndex]?.ready && phraseGenerationActive) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+        
+        const phraseData = phrasePipeline[currentPhraseIndex];
+        if (phraseData && phraseData.ready && phraseData.audioUrl) {
+            
+            log(`🔊 Phrase ${currentPhraseIndex}: "${phraseData.sentence.substring(0, 30)}..."`, 'info');
+            
+            if (currentAudioUrl) {
+                URL.revokeObjectURL(currentAudioUrl);
+            }
+            currentAudioUrl = phraseData.audioUrl;
+            ttsAudio.src = phraseData.audioUrl;
+            
+            await new Promise((resolve) => {
+                ttsAudio.onended = () => {
+                    log(`✅ Phrase ${currentPhraseIndex} terminée`, 'success');
+                    resolve();
+                };
+                ttsAudio.onerror = () => {
+                    log(`❌ Erreur lecture phrase ${currentPhraseIndex}`, 'error');
+                    resolve();
+                };
+                ttsAudio.play();
+            });
+        }
+        
+        currentPhraseIndex++;
+    }
+    
+    cleanupPhrasePipeline();
+    if (myVad) updateStatus("En écoute...", "👂", "listening");
+}
+
+
+async function handleParallelPipeline(reflectionPromise, processingPromise) {
+    // 🔥 DÉMARRER IMMÉDIATEMENT LA RÉFLEXION (0ms)
+    if (reflectionPromise) {
+        reflectionPromise; // Pas d'await - joue immédiatement !
+        log('🎯 Réflexion IMMÉDIATE lancée', 'success');
+    }
+    
+    // 🔥 DÉMARRER LE PROCESSING EN PARALLÈLE TOTAL
+    processingPromise;
+    
+    // 🔥 ATTENDRE MOINS LONGTEMPS (5ms au lieu de 20ms)
+    let attempts = 0;
+    while (!phrasePipeline[0]?.ready && attempts < 25) { // 25 x 5ms = 125ms max
+        await new Promise(resolve => setTimeout(resolve, 5)); // Plus rapide !
+        attempts++;
+    }
+    
+    // 🔥 DÉMARRER TTS MÊME SI PAS PRÊT (risqué mais ultra-rapide)
+    playMainResponseStreamingStyle();
+}
+
+
+function cleanupPhrasePipeline() {
+    phraseGenerationActive = false;
+    
+    // Nettoyer les URLs
+    phrasePipeline.forEach(phrase => {
+        if (phrase?.audioUrl) {
+            URL.revokeObjectURL(phrase.audioUrl);
+        }
+    });
+    
+    phrasePipeline = [];
+    currentPhraseIndex = 0;
+    mainResponseReady = false;
+    
+    log('🧹 Pipeline phrases nettoyé', 'info');
+}
+
 
         function splitIntoSentences(text) {
             const sentences = text
@@ -507,9 +740,11 @@ if (audioUrl) {
             }
             return hash.toString(36);
         }
+
+
         async function generateTTSForSentence(sentence, sentenceIndex) {
     // ⚠️ Remplacez par votre clé API Cartesia si ce n'est pas déjà fait
-    const CARTESIA_API_KEY = "sk_car_j18nkdGqMkXxdvYwPJVJiJ";
+    const CARTESIA_API_KEY = "votre_cle_api_cartesia";
     
     // ID de la voix "Antoine" unique et fixé
     const FIXED_VOICE_ID = "0b1380da-611b-4d00-83f4-8a969a53e4e0"; 
@@ -568,7 +803,7 @@ if (audioUrl) {
     }
 }
 
-        async function pipelineWorker(sentences, voice, startIndex = 0) {
+async function pipelineWorker(sentences, voice, startIndex = 0) {
             for (let i = startIndex; i < sentences.length && pipelineActive; i++) {
                 while (readyAudioBuffer.size >= MAX_BUFFER_SIZE && pipelineActive) {
                     await new Promise(resolve => setTimeout(resolve, 100));
@@ -716,24 +951,25 @@ if (audioUrl) {
             }
         }
     }
-
     async function cleanupPipeline() {
-        pipelineActive = false;
-        isProcessingTTS = false;
-        isPlaying = false;
+    pipelineActive = false;
+    isProcessingTTS = false;
+    isPlaying = false;
+    
+    // Nettoyer le nouveau pipeline
+    cleanupPhrasePipeline();
 
-        for (const [key, data] of readyAudioBuffer) {
-            URL.revokeObjectURL(data.audioUrl);
-        }
-        readyAudioBuffer.clear();
-
-        await Promise.allSettled(generationWorkers);
-        generationWorkers = [];
-
-        if (!myVad) updateStatus("Arrêté", "😴", "");
-        else updateStatus("En écoute...", "👂", "listening");
+    for (const [key, data] of readyAudioBuffer) {
+        URL.revokeObjectURL(data.audioUrl);
     }
+    readyAudioBuffer.clear();
 
+    await Promise.allSettled(generationWorkers);
+    generationWorkers = [];
+
+    if (!myVad) updateStatus("Arrêté", "😴", "");
+    else updateStatus("En écoute...", "👂", "listening");
+}
     async function speakText(text, buttonElement = null) {
         return speakTextWithPipeline(text, buttonElement);
     }
@@ -771,8 +1007,260 @@ if (audioUrl) {
     // =============================================
     // 🔧 TRANSCRIPTION
     // =============================================
+// 🎯 NOUVELLE FONCTION TOGGLE
+async function toggleRecording() {
+    if (recordingMode === 'continu') {
+        // Mode continu (comme avant)
+        if (isRecording) {
+            await stopRecording();
+        } else {
+            await startRecording();
+        }
+    } else {
+        // Mode Push-to-Talk
+        await handlePushToTalk();
+    }
+}
+// 🆕 NOUVEAU : Gestion du Push-to-Talk
+async function handlePushToTalk() {
+    if (isPlaying || isProcessingTTS) {
+        // Si l'IA parle, couper l'audio
+        log('🛑 Interruption TTS par Push-to-Talk', 'warning');
+        interruptTTS();
+        return;
+    }
+    
+    if (isPushToTalkRecording) {
+        // Arrêter l'enregistrement et envoyer
+        await stopPushToTalkRecording();
+    } else {
+        // Démarrer l'enregistrement
+        await startPushToTalkRecording();
+    }
+}
 
-    async function transcribeAudioUltraFast(audioData) {
+async function startPushToTalkRecording() {
+    const groqKey = groqApiKeyInput?.value?.trim();
+    const openaiKey = openaiApiKeyInput?.value?.trim();
+
+    if (!groqKey || !openaiKey) { 
+        alert('Veuillez entrer vos clés API !'); 
+        return; 
+    }
+
+    try {
+        updateStatus("🎤 Parlez maintenant...", "🔴", "recording");
+        
+        // Créer un VAD pour le Push-to-Talk
+        myVad = await vad.MicVAD.new({
+            positiveSpeechThreshold: 0.6,
+            minSpeechFrames: 3,
+            preSpeechPadFrames: 1,
+            redemptionFrames: 5,
+            onSpeechStart: () => { 
+                log("🎤 Parole détectée en Push-to-Talk", 'info'); 
+            },
+            onSpeechEnd: (audio) => { 
+                // Accumuler l'audio au lieu de le traiter immédiatement
+                pushToTalkAudio.push(...audio);
+                log(`Audio accumulé: ${pushToTalkAudio.length} échantillons`, 'info');
+            },
+        });
+        
+        myVad.start();
+        pushToTalkAudio = [];
+        isPushToTalkRecording = true;
+        updateButtonState();
+        
+        log("🎤 Push-to-Talk démarré - cliquez à nouveau pour envoyer", 'success');
+        
+    } catch (error) {
+        log(`Erreur Push-to-Talk: ${error.message}`, 'error');
+        isPushToTalkRecording = false;
+        updateButtonState();
+    }
+}
+
+async function stopPushToTalkRecording() {
+    if (myVad) {
+        myVad.pause();
+        myVad = null;
+    }
+    
+    isPushToTalkRecording = false;
+    updateButtonState();
+    
+    if (pushToTalkAudio.length > 1000) { // Au moins 1000 échantillons
+        updateStatus("🔄 Traitement de votre message...", "⚡", "processing");
+        
+        // Traiter tout l'audio accumulé
+        const fullAudio = new Float32Array(pushToTalkAudio);
+        await transcribeAudioUltraFast(fullAudio);
+        
+        log(`✅ Push-to-Talk envoyé: ${fullAudio.length} échantillons`, 'success');
+    } else {
+        updateStatus("❌ Message trop court", "⚠️", "");
+      // REMPLACE PAR ça (immédiat) :
+updateStatus("En écoute...", "👂", "listening");
+        log("Message Push-to-Talk trop court, ignoré", 'warning');
+    }
+    
+    pushToTalkAudio = [];
+}
+
+// 🆕 NOUVEAU : Gestion des modes
+function switchToMode(mode) {
+    recordingMode = mode;
+    
+    // Arrêter tout ce qui est en cours
+    if (isRecording || isPushToTalkRecording) {
+        if (recordingMode === 'continu') {
+            stopRecording();
+        } else {
+            stopPushToTalkRecording();
+        }
+    }
+    
+    // Mettre à jour l'interface
+    updateModeButtons();
+    updateButtonState();
+    
+    log(`Mode changé vers: ${mode}`, 'info');
+}
+
+function updateModeButtons() {
+    if (recordingMode === 'continu') {
+        modeContinu.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-green-500/80 text-white";
+        modePushToTalk.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-white/20 text-white/70 hover:bg-white/30";
+    } else {
+        modeContinu.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-white/20 text-white/70 hover:bg-white/30";
+        modePushToTalk.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-blue-500/80 text-white";
+    }
+}
+async function startRecording() {
+    const groqKey = groqApiKeyInput?.value?.trim();
+    const openaiKey = openaiApiKeyInput?.value?.trim();
+
+    if (!groqKey || !openaiKey) { 
+        alert('Veuillez entrer vos clés API Groq (STT) et OpenAI (GPT-4o Mini) !'); 
+        return; 
+    }
+
+    // Désactiver le bouton pendant l'initialisation
+    toggleButton.disabled = true;
+    updateStatus("Initialisation...", "⚡", "processing");
+    
+    try {
+        // Pré-générer les réflexions d'abord
+        await preGenerateSimpleReflections();
+        
+        myVad = await vad.MicVAD.new({
+            positiveSpeechThreshold: 0.8,
+            minSpeechFrames: 6,
+            preSpeechPadFrames: 1,
+            redemptionFrames: 10,
+            onSpeechStart: () => { 
+                log("Parole détectée", 'success'); 
+                if (!interruptTTS()) updateStatus("Vous parlez!", "🗣️", "speaking"); 
+            },
+            onSpeechEnd: async (audio) => { 
+    log(`Fin de parole`, 'info');
+    
+    if (!isProcessingTTS && audio.length > 600) {
+        // 🔥 RÉFLEXION IMMÉDIATE (0ms de délai)
+        const reflectionPromise = playRandomReflectionAsync(); // Pas d'await !
+        
+        // 🔥 PROCESSING IMMÉDIAT EN PARALLÈLE
+        const processingPromise = processUserMessageParallel(audio);
+        
+        // 🔥 LANCER TOUT SANS ATTENDRE
+        handleParallelPipeline(reflectionPromise, processingPromise);
+    } else if (myVad) {
+        updateStatus("En écoute...", "👂", "listening");
+    }
+}
+        });
+        
+        myVad.start();
+        
+        // Changer l'état du bouton
+        isRecording = true;
+        toggleButton.disabled = false;
+        updateButtonState();
+        
+        updateStatus("En écoute...", "👂", "listening");
+        log("🎤 Enregistrement démarré!", 'success');
+        
+    } catch (error) { 
+        console.error("Erreur VAD:", error); 
+        log(`Erreur VAD: ${error.message}`, 'error'); 
+        updateStatus("Erreur", "❌", ""); 
+        toggleButton.disabled = false;
+        isRecording = false;
+        updateButtonState();
+    }
+}
+
+async function stopRecording() {
+    if (myVad) { 
+        myVad.pause(); 
+        myVad = null; 
+        log("VAD arrêté", 'info'); 
+    }
+    
+    await cleanupPipeline();
+    
+    // Nettoyer les réflexions
+    for (const [key, url] of reflectionAudios) {
+        URL.revokeObjectURL(url);
+    }
+    reflectionAudios.clear();
+    isPlayingReflection = false;
+    
+    // Changer l'état du bouton
+    isRecording = false;
+    updateButtonState();
+    
+    updateStatus("Arrêté", "😴", "");
+    log("🛑 Enregistrement arrêté", 'info');
+}
+function updateButtonState() {
+    if (!toggleButton || !toggleIcon || !toggleText) return;
+    
+    if (recordingMode === 'push-to-talk') {
+        // Mode Push-to-Talk
+        if (isPushToTalkRecording) {
+            // En cours d'enregistrement
+            toggleButton.className = "flex-1 py-4 rounded-2xl font-semibold text-base transition-all duration-300 backdrop-blur-xl bg-red-500/80 hover:bg-red-600/80 text-white animate-pulse flex items-center justify-center gap-2";
+            toggleIcon.setAttribute('data-lucide', 'square');
+            toggleText.textContent = 'Envoyer';
+        } else {
+            // Prêt à enregistrer
+            toggleButton.className = "flex-1 py-4 rounded-2xl font-semibold text-base transition-all duration-300 backdrop-blur-xl bg-blue-500/80 hover:bg-blue-600/80 text-white flex items-center justify-center gap-2";
+            toggleIcon.setAttribute('data-lucide', 'mic');
+            toggleText.textContent = 'Maintenir & Parler';
+        }
+    } else {
+        // Mode continu (comme avant)
+        if (isRecording) {
+            // État "Arrêter" (bouton rouge)
+            toggleButton.className = "flex-1 py-4 rounded-2xl font-semibold text-base transition-all duration-300 backdrop-blur-xl bg-red-500/80 hover:bg-red-600/80 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2";
+            toggleIcon.setAttribute('data-lucide', 'mic-off');
+            toggleText.textContent = 'Arrêter';
+            log('🔴 Bouton en mode STOP', 'info');
+        } else {
+            // État "Démarrer" (bouton vert)
+            toggleButton.className = "flex-1 py-4 rounded-2xl font-semibold text-base transition-all duration-300 backdrop-blur-xl bg-green-500/80 hover:bg-green-600/80 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2";
+            toggleIcon.setAttribute('data-lucide', 'mic');
+            toggleText.textContent = 'Démarrer';
+            log('🟢 Bouton en mode START', 'info');
+        }
+    }
+    
+    // IMPORTANT : Mettre à jour les icônes Lucide
+    lucide.createIcons();
+}
+async function transcribeAudioUltraFast(audioData) {
         const startTime = performance.now();
         const groqKey = groqApiKeyInput?.value?.trim();
         
@@ -809,7 +1297,7 @@ if (audioUrl) {
             
             const controller = new AbortController();
             setTimeout(() => controller.abort(), 10000);
-            // playRandomReflection();
+            
             const transResponse = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${groqKey}` },
@@ -847,7 +1335,6 @@ if (audioUrl) {
                 updateStatus("En écoute...", "👂", "listening"); 
                 return; 
             }
-            // playRandomReflection();
             
             setCachedTranscription(audioHash, userText);
             updateLatency(Math.round(performance.now() - startTime));
@@ -865,23 +1352,25 @@ if (audioUrl) {
     // =============================================
 // 🔧 LLM GROQ ULTRA-RAPIDE AVEC STREAMING
 async function getLLMResponseStreaming(userMessage) {
-const openaiKey = openaiApiKeyInput?.value?.trim();
-
-if (!openaiKey) {
-alert('Veuillez entrer votre clé API OpenAI pour utiliser GPT-4o Mini');
-return null;
-}
-
-try {
-log('🚀 Génération streaming OpenAI GPT-4o Mini...', 'info');
-updateStatus("IA réfléchit...", "🤔", "processing");
-
-const messages = [
-    { 
-        role: "system", 
-        content: `Tu es un assistant vocal conversationnel naturel. Réponds en français parlé, comme dans une conversation normale entre humains.
+    const openaiKey = openaiApiKeyInput?.value?.trim();
+    
+    if (!openaiKey) {
+        alert('Veuillez entrer votre clé API OpenAI pour utiliser GPT-4o Mini');
+        return null;
+    }
+    
+    try {
+        log('🚀 Génération streaming OpenAI GPT-4o Mini...', 'info');
+        updateStatus("IA réfléchit...", "🤔", "processing");
+        
+        // NOUVELLE PARTIE - Construction des messages avec contexte de réflexion
+        const messages = [
+            { 
+                role: "system", 
+                content: `Tu es un assistant vocal conversationnel naturel. Réponds en français parlé, comme dans une conversation normale entre humains.
 
 RÈGLES IMPORTANTES :
+- COMMENCE TOUJOURS par une phrase très courte (3-5 mots maximum) etcontinue avec des phrases tres courtes.
 - N'utilise JAMAIS d'émoticônes, d'astérisques, ou de symboles (❤️, 🔥, *, etc.)
 - Parle comme si tu étais une personne réelle au téléphone
 - Utilise un langage oral naturel avec des expressions comme "alors", "bon", "eh bien"
@@ -889,84 +1378,117 @@ RÈGLES IMPORTANTES :
 - N'écris pas d'actions entre astérisques comme "*sourit*" ou "*réfléchit*"
 - Évite les listes à puces ou les formats structurés
 - Réponds simplement et naturellement comme dans une vraie conversation`
-    }, 
-    ...conversationHistory.slice(-30),
-    { role: 'user', content: userMessage }
-];
+            }, 
+            ...conversationHistory.slice(-30),
+            { role: 'user', content: userMessage }
+        ];
+        
+        // NOUVELLE PARTIE - Ajouter le contexte de la réflexion si elle existe
+        if (lastPlayedReflection && lastPlayedReflection.trim() !== "") {
+            messages.push({
+                role: "system", 
+                content: `INFO CONTEXTE VOCAL: Tu viens de dire cette phrase à l'utilisateur: "${lastPlayedReflection}"
 
-// 🔥 STREAMING REQUEST avec OpenAI GPT-4o Mini
-const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 
-        'Authorization': `Bearer ${openaiKey}`, 
-        'Content-Type': 'application/json' 
-    },
-    body: JSON.stringify({ 
-        model: 'gpt-4o-mini',
-        messages: messages, 
-        temperature: 0.3,
-        max_tokens: 150,
-        top_p: 0.9,
-        stream: true
-    })
-});
-
-if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(`HTTP ${response.status}: ${errorData.error?.message || response.statusText}`);
-}
-
-// 🔥 LECTURE STREAMING ET ACCUMULATION
-let fullResponse = '';
-const reader = response.body.getReader();
-const decoder = new TextDecoder();
-
-while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    
-    const chunk = decoder.decode(value);
-    const lines = chunk.split('\n');
-    
-    for (const line of lines) {
-        if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') break;
+RÈGLE ABSOLUE: Ne répète JAMAIS cette phrase dans ta réponse. Commence directement par le contenu de ta réponse sans répéter "${lastPlayedReflection}".`
+            });
+            log(`🎯 Contexte ajouté: réflexion "${lastPlayedReflection}" déjà jouée`, 'info');
+        }
+        
+        // 🔥 STREAMING REQUEST avec OpenAI GPT-4o Mini
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${openaiKey}`, 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ 
+                model: 'gpt-4o-mini',
+                messages: messages, 
+                temperature: 0.3,
+                max_tokens: 150,
+                top_p: 0.9,
+                stream: true
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`HTTP ${response.status}: ${errorData.error?.message || response.statusText}`);
+        }
+        
+        // 🔥 LECTURE STREAMING ET ACCUMULATION
+        let fullResponse = '';
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
             
-            try {
-                const parsed = JSON.parse(data);
-                const content = parsed.choices[0]?.delta?.content || '';
-                
-                if (content) {
-                    fullResponse += content;
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+            
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const data = line.slice(6);
+                    if (data === '[DONE]') break;
+                    
+                    try {
+                        const parsed = JSON.parse(data);
+                        const content = parsed.choices[0]?.delta?.content || '';
+                        
+                        if (content) {
+                            fullResponse += content;
+                        }
+                    } catch (parseError) {
+                        // Ignorer les erreurs de parsing JSON
+                    }
                 }
-            } catch (parseError) {
-                // Ignorer les erreurs de parsing JSON
             }
         }
+        
+        const finalResponse = fullResponse.trim() || 'Désolé, je n\'ai pas pu répondre.';
+        
+        // NOUVELLE PARTIE - Nettoyer la réponse si elle répète la réflexion
+        let cleanedResponse = finalResponse;
+        if (lastPlayedReflection && lastPlayedReflection.trim() !== "") {
+            // Vérifier si la réponse commence par la réflexion
+            const reflectionLower = lastPlayedReflection.toLowerCase().trim();
+            const responseLower = finalResponse.toLowerCase().trim();
+            
+            if (responseLower.startsWith(reflectionLower)) {
+                cleanedResponse = finalResponse.substring(lastPlayedReflection.length).trim();
+                // Enlever les virgules ou points qui pourraient rester
+                cleanedResponse = cleanedResponse.replace(/^[,.\s]+/, '');
+                log(`🧹 Réponse nettoyée: "${lastPlayedReflection}" retiré`, 'info');
+            }
+        }
+        
+        // Réinitialiser la réflexion pour la prochaine fois
+        lastPlayedReflection = "";
+        
+//         // 🎵 JOUER LE TTS COMPLET UNE SEULE FOIS
+//         if (autoSpeakCheckbox?.checked && cleanedResponse) {
+//             log(`🎵 Lancement TTS pour réponse nettoyée: "${cleanedResponse.substring(0, 50)}..."`, 'info');
+//             // Attendre un peu pour éviter les conflits
+//            // REMPLACE PAR ça (sans délai) :
+// speakTextWithPipeline(cleanedResponse);
+//         }
+        
+        log('✅ Streaming OpenAI GPT-4o Mini terminé', 'success');
+        return cleanedResponse; // Retourner la réponse nettoyée
+        
+    } catch (error) {
+        console.error('Erreur OpenAI GPT-4o Mini:', error);
+        log(`Erreur OpenAI: ${error.message}`, 'error');
+        // Réinitialiser la réflexion en cas d'erreur aussi
+        lastPlayedReflection = "";
+        return `Erreur OpenAI: ${error.message}`;
     }
 }
 
-const finalResponse = fullResponse.trim() || 'Désolé, je n\'ai pas pu répondre.';
 
-// 🎵 JOUER LE TTS COMPLET UNE SEULE FOIS
-if (autoSpeakCheckbox?.checked && finalResponse) {
-    log(`🎵 Lancement TTS pour réponse complète: "${finalResponse.substring(0, 50)}..."`, 'info');
-    // Attendre un peu pour éviter les conflits
-    setTimeout(() => {
-        speakTextWithPipeline(finalResponse);
-    }, 300);
-}
 
-log('✅ Streaming OpenAI GPT-4o Mini terminé', 'success');
-return finalResponse;
-
-} catch (error) {
-console.error('Erreur OpenAI GPT-4o Mini:', error);
-log(`Erreur OpenAI: ${error.message}`, 'error');
-return `Erreur OpenAI: ${error.message}`;
-}
-}
 async function processUserMessageOptimized(userText) {
     if (!userText) return;
 
@@ -1094,10 +1616,12 @@ console.log('🔑 Clés utilisées:', { groq: groqKey ? 'OK (STT)' : 'KO', opena
         await preGenerateSimpleReflections();
         
         myVad = await vad.MicVAD.new({
-            positiveSpeechThreshold: 0.8,
-            minSpeechFrames: 6,
-            preSpeechPadFrames: 1,
-            redemptionFrames:10 ,
+            positiveSpeechThreshold: 0.6, // Baissé de 0.8 à 0.6
+    minSpeechFrames: 4, // Baissé de 6 à 4
+    preSpeechPadFrames: 0, // Réduit de 1 à 0
+    redemptionFrames: 6, // Baissé de 10 à 6
+    // Ajouter ces nouveaux paramètres
+    frameSamples: 512, // Plus petit = plus réactif
             onSpeechStart: () => { 
                 log("Parole détectée", 'success'); 
                 if (!interruptTTS()) updateStatus("Vous parlez!", "🗣️", "speaking"); 
@@ -1106,10 +1630,9 @@ console.log('🔑 Clés utilisées:', { groq: groqKey ? 'OK (STT)' : 'KO', opena
                 log(`Fin de parole`, 'info');
                 
                 // 💭 JOUER RÉFLEXION IMMÉDIATEMENT !
-               
+                playRandomReflection();
                 
                 if (!isProcessingTTS && audio.length > 600) {
-                    // playRandomReflection();
                     transcribeAudioUltraFast(audio);
                 } else if (myVad) {
                     updateStatus("En écoute...", "👂", "listening");
@@ -1172,17 +1695,50 @@ function stop() {
     
     window.onload = () => {
 // Ajoute ça dans ton window.onload
+
+// 🔧 CORRECTION : Déclarer les variables AVANT de les utiliser
+const conversationToggle = document.getElementById('conversationToggle');
+const conversationDrawer = document.getElementById('conversationDrawer');
 const conversationDrawerClose = document.getElementById('conversationDrawerClose');
+
+function toggleConversationDrawer() {
+    if (conversationDrawer && conversationDrawer.classList.contains('-translate-x-full')) {
+        // Ouvrir
+        conversationDrawer.classList.remove('-translate-x-full');
+        log('Drawer conversations ouvert', 'info');
+    } else if (conversationDrawer) {
+        // Fermer
+        conversationDrawer.classList.add('-translate-x-full');
+        log('Drawer conversations fermé', 'info');
+    }
+}
+
+// Attacher les événements APRÈS avoir déclaré les variables
+if (conversationToggle) {
+    conversationToggle.onclick = toggleConversationDrawer;
+}
+
 if (conversationDrawerClose) {
     conversationDrawerClose.onclick = toggleConversationDrawer;
 }
-// Tu peux cacher/réduire la zone conversation principale
-document.getElementById('conversation-area').style.display = 'none';
-            // ✨ AJOUTE ÇA DANS TON window.onload, après les autres initialisations
-// Dans ton window.onload, après les autres initialisations, ajoute :
 
-const conversationToggle = document.getElementById('conversationToggle');
-const conversationDrawer = document.getElementById('conversationDrawer');
+// 🆕 NOUVEAU : Initialisation des modes
+modeContinu = document.getElementById('modeContinu');
+modePushToTalk = document.getElementById('modePushToTalk');
+
+// Événements des boutons de mode
+if (modeContinu) modeContinu.onclick = () => switchToMode('continu');
+if (modePushToTalk) modePushToTalk.onclick = () => switchToMode('push-to-talk');
+
+// Initialiser l'affichage des modes
+updateModeButtons();
+
+// Cacher la zone conversation principale
+if (document.getElementById('conversation-area')) {
+    document.getElementById('conversation-area').style.display = 'none';
+}
+
+
 
 function toggleConversationDrawer() {
     if (conversationDrawer.classList.contains('-translate-x-full')) {
@@ -1350,8 +1906,14 @@ console.log('✨ Drawer initialisé avec succès !');
         // ✅ RÉCUPÉRER TOUS LES ÉLÉMENTS
         groqApiKeyInput = document.getElementById('groqApiKey');
         openaiApiKeyInput = document.getElementById('openaiApiKey');
-        startButton = document.getElementById('startButton');
-        stopButton = document.getElementById('stopButton');
+       // REMPLACER CES LIGNES :
+// startButton = document.getElementById('startButton');
+// stopButton = document.getElementById('stopButton');
+
+// PAR CES NOUVELLES LIGNES :
+toggleButton = document.getElementById('toggleButton');
+toggleIcon = document.getElementById('toggleIcon');
+toggleText = document.getElementById('toggleText');
         clearButton = document.getElementById('clearButton');
         voiceCircle = document.getElementById('voice-circle');
         statusText = document.getElementById('status-text');
@@ -1412,8 +1974,12 @@ console.log('✨ Drawer initialisé avec succès !');
         }
         
         // ✅ ATTACHER LES ÉVÉNEMENTS DES BOUTONS
-        if (startButton) startButton.onclick = start;
-        if (stopButton) stopButton.onclick = stop;
+       // REMPLACER CES LIGNES :
+// if (startButton) startButton.onclick = start;
+// if (stopButton) stopButton.onclick = stop;
+
+// PAR CETTE NOUVELLE LIGNE :
+if (toggleButton) toggleButton.onclick = toggleRecording;
         if (clearButton) clearButton.onclick = clearConversation;
         if (sendButton) sendButton.onclick = handleTextInput;
         
