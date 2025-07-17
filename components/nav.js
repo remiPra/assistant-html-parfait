@@ -1,4 +1,3 @@
-// components/nav.js
 class Navigation {
     constructor() {
         this.currentPage = this.getCurrentPage();
