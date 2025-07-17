@@ -30,6 +30,10 @@
     {
       "src": "/(.*)",
       "dest": "/openai.html"
+    },
+    {
+      "src": "/testo",
+      "dest": "/speechr.html"
     }
   ]
 }
