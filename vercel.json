@@ -36,6 +36,10 @@
       "dest": "/safari.html"
     },
     {
+      "src": "/safari",
+      "dest": "/safari.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/openai.html"
     }
