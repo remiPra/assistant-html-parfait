@@ -28,16 +28,17 @@
       "dest": "/english.html"
     },
     {
-      "src": "/(.*)",
-      "dest": "/openai.html"
-    },
-    {
       "src": "/testo",
       "dest": "/speechr.html"
     },
     {
       "src": "/safari",
       "dest": "/safari.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/openai.html"
     }
+    
   ]
 }
