@@ -48,7 +48,7 @@
         <div class="fixed top-0 left-0 w-full z-20">
             <div class="flex justify-between items-center px-5 py-3 text-white text-sm font-semibold">
                 <button id="conversationToggle" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"> <i data-lucide="message-square-text" class="w-5 h-5"></i> </button>
-                <div id="time" class="font-bold">ios</div>
+                <div id="time" class="font-bold">9:41</div>
                 <button id="drawerToggle" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"> <i data-lucide="sliders-horizontal" class="w-5 h-5"></i> </button>
             </div>
         </div>
@@ -392,59 +392,32 @@
         }
     }
     
-  // REMPLACE CETTE FONCTION DANS TON CODE EXISTANT
-
-async function speakTextWithPipeline(text) {
-    if (isProcessingTTS) return;
-    isProcessingTTS = isPlaying = pipelineActive = true;
-    updateButtonState();
-
-    const drawerVoiceSelect = document.getElementById('drawerVoiceSelect');
-    const voice = drawerVoiceSelect ? drawerVoiceSelect.value : 'fr-FR-DeniseNeural';
-    
-    // Sépare le texte en phrases. Le filtre `s.length > 1` est plus tolérant.
-    const sentences = text.match(/[^.!?]+[.!?]*|[^.!?]+$/g)?.map(s => s.trim()).filter(s => s.length > 1) || [];
-
-    if (sentences.length === 0) {
-        log('Aucune phrase à lire après découpage.', 'warning');
-        await cleanupPipeline();
-        return;
+    async function speakTextWithPipeline(text) {
+        if (isProcessingTTS) return;
+        isProcessingTTS = isPlaying = pipelineActive = true;
+        updateButtonState();
+        const sentences = text.match(/[^.!?]+[.!?]*|[^.!?]+$/g)?.map(s => s.trim()).filter(s => s.length > 1) || [];
+        if (sentences.length === 0) { await cleanupPipeline(); return; }
+        
+        window.readyAudioBuffer = new Map();
+        try {
+            const generationPipeline = (async () => {
+                for (let i = 0; i < sentences.length && pipelineActive; i++) {
+                    if (window.readyAudioBuffer.size >= 3) { await new Promise(r => setTimeout(r, 100)); i--; continue; }
+                    try {
+                        const audioUrl = await generateTTSForSentence(sentences[i], document.getElementById('drawerVoiceSelect').value);
+                        if (pipelineActive) window.readyAudioBuffer.set(i, { audioUrl });
+                    } catch {}
+                }
+            })();
+            await Promise.all([generationPipeline, playAudioPipeline(sentences, document.getElementById('drawerVoiceSelect').value)]);
+        } catch (error) {
+            log(`Erreur pipeline: ${error.message}`, 'error');
+        } finally {
+            await cleanupPipeline();
+        }
     }
     
-    log(`🚀 Démarrage pipeline TTS pour ${sentences.length} phrases`, 'info');
-    window.readyAudioBuffer = new Map();
-
-    try {
-        // MODIFICATION CLÉ : On sépare le générateur du lecteur.
-        // 1. On lance le générateur de son en arrière-plan. Il va remplir le buffer.
-        const generationWorker = (async () => {
-            for (let i = 0; i < sentences.length && pipelineActive; i++) {
-                // On attend seulement si le buffer est plein pour ne pas surcharger la mémoire
-                while (window.readyAudioBuffer.size >= 3 && pipelineActive) {
-                    await new Promise(r => setTimeout(r, 100));
-                }
-                if (!pipelineActive) break; // Double vérification après la pause
-
-                try {
-                    const audioUrl = await generateTTSForSentence(sentences[i], voice);
-                    if (pipelineActive) window.readyAudioBuffer.set(i, { audioUrl });
-                } catch (err){
-                    log(`Erreur génération phrase ${i}`, 'error');
-                }
-            }
-        })();
-
-        // 2. On attend la fin de la LECTURE. Le lecteur fera des pauses lui-même
-        //    s'il attend des phrases du générateur.
-        await playAudioPipeline(sentences, voice);
-
-    } catch (error) {
-        log(`Erreur majeure dans le pipeline de lecture: ${error.message}`, 'error');
-    } finally {
-        // Le nettoyage n'est appelé qu'après la fin de la lecture complète.
-        await cleanupPipeline();
-    }
-}
     async function cleanupPipeline() {
         pipelineActive = false; isProcessingTTS = false; isPlaying = false;
         if (window.readyAudioBuffer) window.readyAudioBuffer.forEach(data => URL.revokeObjectURL(data.audioUrl));
