@@ -806,7 +806,6 @@ async function toggleRecording() {
         await handlePushToTalk();
     }
 }
-// 🆕 NOUVEAU : Gestion du Push-to-Talk
 async function handlePushToTalk() {
     if (isPlaying || isProcessingTTS) {
         // Si l'IA parle, couper l'audio
@@ -823,7 +822,6 @@ async function handlePushToTalk() {
         await startPushToTalkRecording();
     }
 }
-
 async function startPushToTalkRecording() {
     const groqKey = groqApiKeyInput?.value?.trim();
     const openaiKey = openaiApiKeyInput?.value?.trim();
@@ -838,10 +836,10 @@ async function startPushToTalkRecording() {
         
         // Créer un VAD pour le Push-to-Talk
         myVad = await vad.MicVAD.new({
-            positiveSpeechThreshold: 0.6,
-            minSpeechFrames: 3,
-            preSpeechPadFrames: 1,
-            redemptionFrames: 5,
+            positiveSpeechThreshold: 0.4,
+            minSpeechFrames: 2,
+            preSpeechPadFrames: 2,
+            redemptionFrames: 8,
             onSpeechStart: () => { 
                 log("🎤 Parole détectée en Push-to-Talk", 'info'); 
             },
@@ -865,34 +863,36 @@ async function startPushToTalkRecording() {
         updateButtonState();
     }
 }
-
 async function stopPushToTalkRecording() {
-    if (myVad) {
-        myVad.pause();
-        myVad = null;
-    }
-    
-    isPushToTalkRecording = false;
-    updateButtonState();
-    
-    if (pushToTalkAudio.length > 1000) { // Au moins 1000 échantillons
-        updateStatus("🔄 Traitement de votre message...", "⚡", "processing");
-        
-        // Traiter tout l'audio accumulé
-        const fullAudio = new Float32Array(pushToTalkAudio);
-        await transcribeAudioUltraFast(fullAudio);
-        
-        log(`✅ Push-to-Talk envoyé: ${fullAudio.length} échantillons`, 'success');
-    } else {
-        updateStatus("❌ Message trop court", "⚠️", "");
-        setTimeout(() => {
-            updateStatus("Prêt", "😴", "");
-        }, 2000);
-        log("Message Push-to-Talk trop court, ignoré", 'warning');
-    }
-    
-    pushToTalkAudio = [];
+    if (myVad) {
+        myVad.pause();
+        myVad = null;
+    }
+    
+    isPushToTalkRecording = false;
+    updateButtonState();
+    
+    // LA NOUVELLE CORRECTION EST ICI : on augmente le seuil
+    if (pushToTalkAudio.length > 3200) { 
+        updateStatus("🔄 Traitement de votre message...", "⚡", "processing");
+        
+        // Traiter tout l'audio accumulé
+        const fullAudio = new Float32Array(pushToTalkAudio);
+        await transcribeAudioUltraFast(fullAudio);
+        
+        log(`✅ Push-to-Talk envoyé: ${fullAudio.length} échantillons`, 'success');
+    } else {
+        updateStatus("❌ Message trop court", "⚠️", "");
+        setTimeout(() => {
+            updateStatus("Prêt", "😴", "");
+        }, 2000);
+        log("Message Push-to-Talk trop court, ignoré", 'warning');
+    }
+    
+    pushToTalkAudio = [];
 }
+
+
 
 // 🆕 NOUVEAU : Gestion des modes
 function switchToMode(mode) {
@@ -1008,19 +1008,19 @@ function updateButtonState() {
     if (!toggleButton || !toggleIcon || !toggleText) return;
     
     if (recordingMode === 'push-to-talk') {
-        // Mode Push-to-Talk
-        if (isPushToTalkRecording) {
-            // En cours d'enregistrement
-            toggleButton.className = "flex-1 py-4 rounded-2xl font-semibold text-base transition-all duration-300 backdrop-blur-xl bg-red-500/80 hover:bg-red-600/80 text-white animate-pulse flex items-center justify-center gap-2";
-            toggleIcon.setAttribute('data-lucide', 'square');
-            toggleText.textContent = 'Envoyer';
-        } else {
-            // Prêt à enregistrer
-            toggleButton.className = "flex-1 py-4 rounded-2xl font-semibold text-base transition-all duration-300 backdrop-blur-xl bg-blue-500/80 hover:bg-blue-600/80 text-white flex items-center justify-center gap-2";
-            toggleIcon.setAttribute('data-lucide', 'mic');
-            toggleText.textContent = 'Maintenir & Parler';
-        }
+    // Mode Push-to-Talk
+    if (isPushToTalkRecording) {
+        // En cours d'enregistrement - bouton rouge "Arrêter et envoyer"
+        toggleButton.className = "flex-1 py-4 rounded-2xl font-semibold text-base transition-all duration-300 backdrop-blur-xl bg-red-500/80 hover:bg-red-600/80 text-white animate-pulse flex items-center justify-center gap-2";
+        toggleIcon.setAttribute('data-lucide', 'square');
+        toggleText.textContent = '🔴 Arrêter & Envoyer';
     } else {
+        // Prêt à enregistrer - bouton bleu "Démarrer enregistrement"
+        toggleButton.className = "flex-1 py-4 rounded-2xl font-semibold text-base transition-all duration-300 backdrop-blur-xl bg-blue-500/80 hover:bg-blue-600/80 text-white flex items-center justify-center gap-2";
+        toggleIcon.setAttribute('data-lucide', 'mic');
+        toggleText.textContent = '🎤 Démarrer enregistrement';
+    }
+} else {
         // Mode continu (comme avant)
         if (isRecording) {
             // État "Arrêter" (bouton rouge)
