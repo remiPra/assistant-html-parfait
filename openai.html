@@ -11,8 +11,6 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style>
         /* Tailwind CSS Configuration */
-        /* Note: It's generally better to move this to a separate JS file for larger projects */
-        /* For this example, keeping it here as it was in your original code */
         tailwind.config = {
             theme: {
                 extend: {
@@ -51,7 +49,7 @@
                 },
             },
         };
-    </script>
+    </style>
     <style>
         /* Custom Scrollbar Styles */
         ::-webkit-scrollbar { width: 4px; }
@@ -69,9 +67,10 @@
         #toggleButton:disabled {
             transform: scale(1);
             opacity: 0.5;
+            cursor: not-allowed;
         }
         
-        /* Ultra-Fast Indicator (if needed, currently commented out in HTML) */
+        /* Ultra-Fast Indicator (if needed) */
         .ultra-fast-indicator {
             position: absolute;
             top: 10px;
@@ -83,7 +82,7 @@
             font-size: 10px;
             font-weight: bold;
             animation: pulse 2s infinite;
-            z-index: 10; /* Ensure it's above other elements if active */
+            z-index: 10;
         }
     </style>
 </head>
@@ -92,8 +91,7 @@
     <div class="w-full h-full relative flex flex-col items-center justify-start min-h-screen p-5">
         <div class="fixed top-0 left-0 w-full z-10 p-5">
             <div class="flex justify-between items-center text-white text-sm font-semibold">
-                <div>9:41</div>
-                <div id="nav-menu-toggle" class="cursor-pointer">
+                <div>1:16 PM</div> <div id="nav-menu-toggle" class="cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
@@ -143,7 +141,7 @@
                                 <input type="checkbox" id="allowInterrupt" class="opacity-0 w-0 h-0 peer" checked>
                                 <span class="absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-white/30 rounded-full transition-colors peer-checked:bg-green-400 before:absolute before:content-[''] before:h-[18px] before:w-[18px] before:left-[3px] before:bottom-[3px] before:bg-white before:rounded-full before:transition-transform peer-checked:before:translate-x-4"></span>
                             </label>
-                            <span class="text-white">Interrupt</span>
+                            <span class="text-white">Interruption</span>
                         </div>
                     </div>
                     
@@ -219,21 +217,16 @@
         // =============================================
         // Variables pour le bouton toggle
         let isRecording = false; // Tracks if continuous recording is active
-        let toggleButton, toggleButtonIcon, toggleText; // Renamed toggleIcon to toggleButtonIcon
+        let toggleButton, toggleButtonIcon, toggleText;
 
         // 🔧 VARIABLES GLOBALES
         let isSettingsExpanded = false; // Initial state: collapsed
         let myVad = null;
         let conversationHistory = [];
         let isPlaying = false; // Is TTS currently playing?
-        let isProcessingTTS = false; // Unused for now, but good to keep if needed
         let currentAudioUrl = null; // To manage object URLs for TTS
         let pipelineActive = false; // True if continuous VAD pipeline is running
-        let generationWorkers = []; // If you use web workers for generation
-        let readyAudioBuffer = new Map(); // For buffering audio chunks
 
-        let lastPlayedReflection = ""; 
-        // 🆕 NOUVEAU : Variables pour les modes d'enregistrement
         let recordingMode = 'continu'; // 'continu' ou 'push-to-talk'
         let isPushToTalkRecording = false; // Tracks if PTT recording is in progress
         let mediaRecorder = null; // MediaRecorder instance for PTT
@@ -246,49 +239,29 @@
         const transcriptionCache = new Map();
         const ttsCache = new Map();
         const MAX_CACHE_SIZE = 50;
-        const MAX_BUFFER_SIZE = 3;
         const baseCircleClasses = "w-[200px] h-[200px] rounded-full mx-auto mt-10 mb-2.5 flex items-center justify-center text-6xl transition-all duration-300 backdrop-blur-xl";
         
-        // 🔧 ÉLÉMENTS DOM
+        // 🔧 ÉLÉMENTS DOM (Assurez-vous que tous ces IDs correspondent à votre HTML)
         let groqApiKeyInput, openaiApiKeyInput, settingsToggle, settingsContent, settingsToggleIcon;
         let voiceCircle, statusText, debug, conversation, autoSpeakCheckbox;
         let allowInterruptCheckbox, voiceSelect, ttsAudio, interruptIndicator;
         let processingIndicator, cacheHitsElement, latencyElement, qualityElement;
-        let textInput, sendButton, conversationArea;
+        let textInput, sendButton;
 
-        // 💭 NOUVELLES VARIABLES RÉFLEXIONS SIMPLES
-        let reflectionAudios = new Map();
-        let isPlayingReflection = false;
-
+        // 💭 NOUVELLES VARIABLES RÉFLEXIONS SIMPLES (si tu comptes les utiliser)
         const SIMPLE_REFLECTIONS = [
-            "Ah oui, je vois...",
-            "D'accord, très bien...",
-            "OK, ok je comprends...",
-            "Hmm, intéressant...",
-            "Oui, ok , effectivement...",
-            "Ah, parfait...",
-            "Très bien, ok ,ok ...",
-            "OK, laissez-moi voir...",
-            "D'accord, ok , ok ...",
-            "Ah, bien sûr , Ok...",
-            "Oui, d'accord,d'accord...",
-            "Je comprends bien...",
-            "Oui, tout à fait..."
+            "Ah oui, je vois...", "D'accord, très bien...", "OK, ok je comprends...",
+            "Hmm, intéressant...", "Oui, ok , effectivement...", "Ah, parfait...",
+            "Très bien, ok ,ok ...", "OK, laissez-moi voir...", "D'accord, ok , ok ...",
+            "Ah, bien sûr , Ok...", "Oui, d'accord,d'accord...", "Je comprends bien...", "Oui, tout à fait..."
         ];
-
-        // AJOUTEZ CETTE LIGNE À LA FIN
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            log('🎨 Icônes Lucide initialisées.', 'success');
-        });
-
 
         // =============================================
         // 🔧 FONCTIONS UTILITAIRES
         // =============================================
         
         function log(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
+            const timestamp = new Date().toLocaleTimeString('fr-FR');
             const emoji = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '⚡';
             const logMessage = `${timestamp} ${emoji} ${message}`;
             
@@ -297,8 +270,10 @@
                 const newLine = document.createElement('div');
                 newLine.textContent = logMessage;
                 newLine.className = type === 'error' ? 'text-red-300' : type === 'success' ? 'text-green-300' : type === 'warning' ? 'text-yellow-300' : '';
+                // Add new line at the top
                 debug.insertBefore(newLine, debug.firstChild);
                 
+                // Keep only a reasonable number of log lines to prevent overflow
                 while (debug.children.length > 10) {
                     debug.removeChild(debug.lastChild);
                 }
@@ -306,21 +281,24 @@
         }
         
         function toggleSettings() {
-            const content = settingsContent;
-            const icon = settingsToggleIcon; // Use the specific settings icon
-            
+            if (!settingsContent || !settingsToggleIcon) {
+                log('Erreur: Éléments des paramètres non trouvés. Vérifiez les IDs HTML.', 'error');
+                return;
+            }
+
             isSettingsExpanded = !isSettingsExpanded;
             if (isSettingsExpanded) {
-                content.style.maxHeight = content.scrollHeight + "px"; // Adjust based on content height
-                content.style.paddingBottom = '20px';
-                content.style.opacity = '1';
-                icon.textContent = '⬆️'; // Changed arrow for expanded state
+                // Set a fixed large maxHeight for the transition to work
+                settingsContent.style.maxHeight = '500px'; 
+                settingsContent.style.paddingBottom = '20px';
+                settingsContent.style.opacity = '1';
+                settingsToggleIcon.textContent = '⬆️'; 
                 log('Paramètres déployés', 'info');
             } else {
-                content.style.maxHeight = '0px';
-                content.style.paddingBottom = '0px';
-                content.style.opacity = '0';
-                icon.textContent = '⬇️'; // Changed arrow for collapsed state
+                settingsContent.style.maxHeight = '0px';
+                settingsContent.style.paddingBottom = '0px';
+                settingsContent.style.opacity = '0';
+                settingsToggleIcon.textContent = '⬇️'; 
                 log('Paramètres rétractés', 'info');
             }
         }
@@ -337,15 +315,27 @@
                 case "tts-playing": iconName = 'volume-2'; break;
                 case "processing": iconName = 'loader-circle'; break;
                 case "interrupted": iconName = 'zap-off'; break;
-                case "recording-ptt": iconName = 'mic-vibrate'; break; // New icon for PTT recording
+                case "recording-ptt": iconName = 'mic-vibrate'; break; 
                 default: iconName = 'power-off';
             }
+            // Update the voice circle icon and ensure Lucide re-renders it
             voiceCircle.innerHTML = `<i data-lucide="${iconName}" class="w-16 h-16"></i>`;
-            lucide.createIcons(); // Re-render Lucide icons after updating innerHTML
+            lucide.createIcons(); 
 
+            // Manage visibility of processing and interrupt indicators
             processingIndicator?.classList.remove('opacity-100');
             interruptIndicator?.classList.remove('opacity-100');
             
+            // Apply appropriate styling classes to the voice circle
             let stateClasses = "";
             switch (stateClass) {
-                case "listening": stateClasses = "bg-green-400/20 border-2 border-green-400/40 animate-pulse"; br
+                case "listening": stateClasses = "bg-green-400/20 border-2 border-green-400/40 animate-pulse"; break;
+                case "speaking": stateClasses = "bg-green-600/30 border-2 border-green-600/50"; break;
+                case "processing":
+                    stateClasses = "bg-amber-400/20 border-2 border-amber-400/40";
+                    // For processing, we use loader-circle with an explicit spin animation
+                    voiceCircle.innerHTML = `<i data-lucide="loader-circle" class="w-16 h-16 animate-processing-spin"></i>`;
+                    lucide.createIcons(); 
+                    processingIndicator?.classList.add('opacity-100');
+                    break;
+                case "tts-playing": stateCla
