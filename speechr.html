@@ -190,6 +190,7 @@
     let isPushToTalkRecording = false;
     let isContinuRecording = false;
     let pushToTalkAudio = [];
+    let mediaRecorder, recordedChunks = []; // Nouvelles variables pour l'enregistrement direct
     const transcriptionCache = new Map();
     const ttsCache = new Map();
     const MAX_CACHE_SIZE = 50;
@@ -349,7 +350,7 @@
                 onSpeechEnd: (audio) => {
                     log(`Fin de parole`, 'info');
                     playRandomReflection();
-                    if (!isProcessingTTS && audio.length > 600) transcribeAudioUltraFast(audio);
+                    if (!isProcessingTTS && audio.length > 100) transcribeAudioUltraFast(audio);
                     else if (myVad) updateStatus("En écoute...", "mic", "listening");
                 },
             });
@@ -373,16 +374,25 @@
             alert('Veuillez configurer vos clés API dans le panneau de contrôle.');
             return;
         }
+
         updateStatus("Parlez maintenant...", "mic", "speaking");
+        isPushToTalkRecording = true;
+        updateButtonState();
+        log("🎤 Push-to-Talk (direct) démarré", 'info');
+
         try {
-            myVad = await vad.MicVAD.new({
-                 onSpeechEnd: (audio) => { pushToTalkAudio.push(...audio); }
-            });
-            myVad.start();
-            pushToTalkAudio = [];
-            isPushToTalkRecording = true;
-            updateButtonState();
-            log("🎤 Push-to-Talk démarré", 'info');
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recordedChunks = [];
+
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+            mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
+            mediaRecorder.onstop = async () => {
+                const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                const arrayBuffer = await blob.arrayBuffer();
+                const audioBuffer = await convertWebmToWavBuffer(arrayBuffer);
+                await transcribeAudioUltraFast(audioBuffer);
+            };
+            mediaRecorder.start();
         } catch (error) {
             log(`Erreur Push-to-Talk: ${error.message}`, 'error');
             isPushToTalkRecording = false;
@@ -391,18 +401,12 @@
     }
     
     async function stopPushToTalkRecording() {
-        if (myVad) { myVad.destroy(); myVad = null; }
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
         isPushToTalkRecording = false;
         updateButtonState();
-        
-        if (pushToTalkAudio.length > 1000) {
-            updateStatus("Traitement...", "loader-circle", "processing");
-            await transcribeAudioUltraFast(new Float32Array(pushToTalkAudio));
-        } else {
-            log("Message Push-to-Talk trop court", 'warning');
-            updateStatus("Prêt", "power-off", "");
-        }
-        pushToTalkAudio = [];
+        updateStatus("Traitement...", "loader-circle", "processing");
     }
 
     async function stopAllRecording() {
@@ -452,6 +456,14 @@
             view.setInt16(44 + i * 2, Math.max(-1, Math.min(1, samples[i])) * 0x7FFF, true);
         }
         return buffer;
+    }
+
+    async function convertWebmToWavBuffer(webmBuffer) {
+        const audioCtx = new OfflineAudioContext(1, 48000 * 10, 48000); // max 10 sec
+        const audioBuffer = await audioCtx.decodeAudioData(webmBuffer);
+        
+        const samples = audioBuffer.getChannelData(0);
+        return encodeWAV(samples, audioBuffer.sampleRate);
     }
     
     async function preGenerateSimpleReflections() {
@@ -601,13 +613,16 @@
     // 💬 TRANSCRIPTION & LLM
     // =============================================
     async function transcribeAudioUltraFast(audioData) {
-        if (!analyzeAudioQuality(audioData)) {
+        // Ignorer la validation de qualité audio en mode push-to-talk
+        if (recordingMode !== 'push-to-talk' && audioData instanceof Float32Array && !analyzeAudioQuality(audioData)) {
             updateStatus("En écoute...", "mic", "listening"); return;
         }
         updateStatus("Transcription...", "loader-circle", "processing");
 
         try {
-            const wavBuffer = encodeWAV(audioData);
+            // Si audioData est déjà un buffer WAV (ArrayBuffer), l'utiliser directement
+            // Sinon, c'est un Float32Array qu'il faut encoder
+            const wavBuffer = audioData instanceof ArrayBuffer ? audioData : encodeWAV(audioData);
             const formData = new FormData();
             formData.append('file', new Blob([wavBuffer], { type: 'audio/wav' }), 'audio.wav');
             formData.append('model', 'whisper-large-v3');
