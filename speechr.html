@@ -249,37 +249,43 @@
     }
     
     function updateButtonState() {
-        if (!toggleButton || !toggleIconEl || !toggleText) return;
-        
-        let isRecording = isContinuRecording || isPushToTalkRecording;
-        toggleButton.disabled = isPlaying || isProcessingTTS;
+    if (!toggleButton || !toggleIconEl || !toggleText) return;
+    
+    let isRecording = isContinuRecording || isPushToTalkRecording;
+    // ✅ En mode push-to-talk, ne jamais désactiver le bouton
+    // En mode continu, désactiver seulement quand on joue du TTS
+    toggleButton.disabled = recordingMode === 'continu' && (isPlaying || isProcessingTTS);
 
-        if (recordingMode === 'push-to-talk') {
-            const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white flex items-center justify-center gap-2";
-            if (isPushToTalkRecording) {
-                toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80 animate-pulse`;
-                toggleIconEl.setAttribute('data-lucide', 'square');
-                toggleText.textContent = 'Envoyer';
-            } else {
-                toggleButton.className = `${baseClass} bg-blue-500/80 hover:bg-blue-600/80`;
-                toggleIconEl.setAttribute('data-lucide', 'mic');
-                toggleText.textContent = 'Maintenir & Parler';
-            }
-        } else { // Continu
-            const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white disabled:opacity-50 flex items-center justify-center gap-2";
-            if (isContinuRecording) {
-                toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80`;
-                toggleIconEl.setAttribute('data-lucide', 'mic-off');
-                toggleText.textContent = 'Arrêter';
-            } else {
-                toggleButton.className = `${baseClass} bg-green-500/80 hover:bg-green-600/80`;
-                toggleIconEl.setAttribute('data-lucide', 'mic');
-                toggleText.textContent = 'Démarrer';
-            }
+    if (recordingMode === 'push-to-talk') {
+        const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white flex items-center justify-center gap-2";
+        if (isPushToTalkRecording) {
+            toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80 animate-pulse`;
+            toggleIconEl.setAttribute('data-lucide', 'square');
+            toggleText.textContent = 'Envoyer';
+        } else if (isPlaying || isProcessingTTS) {
+            // ✅ Pendant la lecture TTS en push-to-talk
+            toggleButton.className = `${baseClass} bg-orange-500/80 hover:bg-orange-600/80`;
+            toggleIconEl.setAttribute('data-lucide', 'square');
+            toggleText.textContent = 'Interrompre';
+        } else {
+            toggleButton.className = `${baseClass} bg-blue-500/80 hover:bg-blue-600/80`;
+            toggleIconEl.setAttribute('data-lucide', 'mic');
+            toggleText.textContent = 'Maintenir & Parler';
         }
-        lucide.createIcons();
+    } else { // Continu
+        const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2";
+        if (isContinuRecording) {
+            toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80`;
+            toggleIconEl.setAttribute('data-lucide', 'mic-off');
+            toggleText.textContent = 'Arrêter';
+        } else {
+            toggleButton.className = `${baseClass} bg-green-500/80 hover:bg-green-600/80`;
+            toggleIconEl.setAttribute('data-lucide', 'mic');
+            toggleText.textContent = 'Démarrer';
+        }
     }
-
+    lucide.createIcons();
+}
     function updateModeButtons() {
         if (recordingMode === 'continu') {
             modeContinu.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-green-500/80 text-white";
@@ -317,20 +323,21 @@
             else await startPushToTalkRecording();
         }
     }
-    
     async function togglePushToTalk() {
-        if (isPlaying || isProcessingTTS) {
-             interruptTTS();
-             return;
-        }
-        if (isPushToTalkRecording) {
-            await stopPushToTalkRecording();
-        } else {
-            const hasPermission = await requestMicrophonePermission();
-            if (hasPermission) await startPushToTalkRecording();
-        }
+    // ✅ Si on est en train de jouer du TTS, l'interrompre d'abord
+    if (isPlaying || isProcessingTTS) {
+        interruptTTS();
+        // Laisser un petit délai pour que l'interruption soit complète
+        await new Promise(resolve => setTimeout(resolve, 100));
     }
-
+    
+    if (isPushToTalkRecording) {
+        await stopPushToTalkRecording();
+    } else {
+        const hasPermission = await requestMicrophonePermission();
+        if (hasPermission) await startPushToTalkRecording();
+    }
+}
     async function startContinuRecording() {
         if (!drawerGroqKey.value.trim() || !drawerOpenaiKey.value.trim()) {
             alert('Veuillez configurer vos clés API dans le panneau de contrôle.');
