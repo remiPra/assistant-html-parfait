@@ -98,7 +98,7 @@
                         🔄 Continu
                     </button>
                     <button id="modePushToTalk" class="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-white/20 text-white/70 hover:bg-white/30">
-                        🎙️ Push-to-Talk
+                        🎤 Push-to-Talk
                     </button>
                 </div>
                 
@@ -112,7 +112,7 @@
         </div>
     </div>
 
-    <audio id="ttsAudio" style="display: none;" preload="auto"></audio>
+    <audio id="ttsAudio" style="display: none;" preload="auto" playsinline></audio>
 
     <div id="conversationDrawer" class="fixed inset-y-0 left-0 z-50 w-full sm:w-96 bg-gradient-to-b from-[#19356d] to-[#26488b] shadow-xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
         <div class="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0">
@@ -137,7 +137,7 @@
         </div>
         <div class="p-4 space-y-4 overflow-y-auto flex-1">
             <div class="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20">
-                <h3 class="text-white font-medium mb-3">🛠️ Paramètres</h3>
+                <h3 class="text-white font-medium mb-3">🔧 Paramètres</h3>
                 <input type="password" id="drawerGroqKey" placeholder="Clé API Groq (STT)" class="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/60 focus:outline-none focus:border-green-400/50 focus:bg-white/15 mb-3">
                 <input type="password" id="drawerOpenaiKey" placeholder="Clé API OpenAI (LLM)" class="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/60 focus:outline-none focus:border-green-400/50 focus:bg-white/15 mb-3">
                 <div class="grid grid-cols-2 gap-3 text-sm mt-3">
@@ -159,7 +159,7 @@
                 </div>
             </div>
             <div class="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20">
-                <h3 class="text-white font-medium mb-3">🔗 Log de débogage</h3>
+                <h3 class="text-white font-medium mb-3">🔍 Log de débogage</h3>
                 <div id="drawerDebug" class="bg-black/20 rounded-lg p-3 text-xs text-white/70 h-48 overflow-y-auto">
                     <div>⚡ Système prêt...</div>
                 </div>
@@ -177,7 +177,7 @@
     // 🚀 ASSISTANT VOCAL ULTRA-RAPIDE COMPLET
     // =============================================
     
-    // 🛠️ DOM & STATE VARIABLES
+    // 🔧 DOM & STATE VARIABLES
     let myVad = null;
     let conversationHistory = [];
     let isPlaying = false;
@@ -185,7 +185,6 @@
     let pipelineActive = false;
     let generationWorkers = [];
     let readyAudioBuffer = new Map();
-    let isAudioUnlocked = false; // NOUVEAU : Flag pour la compatibilité Apple/Safari
     let lastPlayedReflection = "";
     let recordingMode = 'continu';
     let isPushToTalkRecording = false;
@@ -203,30 +202,14 @@
     let conversationDrawer, conversationHistoryEl, settingsDrawer, drawerOverlay;
     let drawerGroqKey, drawerOpenaiKey, drawerAutoSpeak, drawerAllowInterrupt, drawerVoiceSelect, drawerDebug;
     
-    // 🗣️ SIMPLE REFLECTIONS
+    // 💭 SIMPLE REFLECTIONS
     const SIMPLE_REFLECTIONS = ["Ah oui, je vois...", "D'accord, très bien...", "OK, je comprends...", "Hmm, intéressant...", "Oui, effectivement...", "Ah, parfait...", "Très bien...", "Laissez-moi voir...", "Bien sûr...", "Oui, d'accord...", "Je comprends bien...", "Oui, tout à fait..."];
     let reflectionAudios = new Map();
     let isPlayingReflection = false;
 
     // =============================================
-    // 🛠️ UTILITY & UI FUNCTIONS
+    // 🔧 UTILITY & UI FUNCTIONS
     // =============================================
-    
-    // NOUVEAU : Fonction pour déverrouiller le contexte audio sur les appareils Apple
-    function unlockAudio() {
-        if (isAudioUnlocked) return;
-        
-        log('Tentative de déverrouillage du contexte audio...', 'info');
-        // On joue un son MP3 silencieux minuscule encodé en base64
-        const silentSound = new Audio("data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMHumKFsZW0gdG9jIGRlaW5Bbm indulging composITSUhTBAAAAAABVFNTRAAAAFeAFwAQAAAAAbAAAAkAAAAA==");
-        silentSound.play()
-            .then(() => {
-                isAudioUnlocked = true;
-                log('🔓 Contexte audio déverrouillé avec succès !', 'success');
-            })
-            .catch(e => log('Le déverrouillage audio nécessite une interaction de l\'utilisateur', 'warning'));
-    }
-
     function log(message, type = 'info') {
         const timestamp = new Date().toLocaleTimeString();
         const emoji = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '⚡';
@@ -266,41 +249,43 @@
     }
     
     function updateButtonState() {
-        if (!toggleButton || !toggleIconEl || !toggleText) return;
-        
-        let isRecording = isContinuRecording || isPushToTalkRecording;
-        toggleButton.disabled = recordingMode === 'continu' && (isPlaying || isProcessingTTS);
+    if (!toggleButton || !toggleIconEl || !toggleText) return;
+    
+    let isRecording = isContinuRecording || isPushToTalkRecording;
+    // ✅ En mode push-to-talk, ne jamais désactiver le bouton
+    // En mode continu, désactiver seulement quand on joue du TTS
+    toggleButton.disabled = recordingMode === 'continu' && (isPlaying || isProcessingTTS);
 
-        if (recordingMode === 'push-to-talk') {
-            const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white flex items-center justify-center gap-2";
-            if (isPushToTalkRecording) {
-                toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80 animate-pulse`;
-                toggleIconEl.setAttribute('data-lucide', 'square');
-                toggleText.textContent = 'Envoyer';
-            } else if (isPlaying || isProcessingTTS) {
-                toggleButton.className = `${baseClass} bg-orange-500/80 hover:bg-orange-600/80`;
-                toggleIconEl.setAttribute('data-lucide', 'square');
-                toggleText.textContent = 'Interrompre';
-            } else {
-                toggleButton.className = `${baseClass} bg-blue-500/80 hover:bg-blue-600/80`;
-                toggleIconEl.setAttribute('data-lucide', 'mic');
-                toggleText.textContent = 'Maintenir & Parler';
-            }
-        } else { // Continu
-            const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2";
-            if (isContinuRecording) {
-                toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80`;
-                toggleIconEl.setAttribute('data-lucide', 'mic-off');
-                toggleText.textContent = 'Arrêter';
-            } else {
-                toggleButton.className = `${baseClass} bg-green-500/80 hover:bg-green-600/80`;
-                toggleIconEl.setAttribute('data-lucide', 'mic');
-                toggleText.textContent = 'Démarrer';
-            }
+    if (recordingMode === 'push-to-talk') {
+        const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white flex items-center justify-center gap-2";
+        if (isPushToTalkRecording) {
+            toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80 animate-pulse`;
+            toggleIconEl.setAttribute('data-lucide', 'square');
+            toggleText.textContent = 'Envoyer';
+        } else if (isPlaying || isProcessingTTS) {
+            // ✅ Pendant la lecture TTS en push-to-talk
+            toggleButton.className = `${baseClass} bg-orange-500/80 hover:bg-orange-600/80`;
+            toggleIconEl.setAttribute('data-lucide', 'square');
+            toggleText.textContent = 'Interrompre';
+        } else {
+            toggleButton.className = `${baseClass} bg-blue-500/80 hover:bg-blue-600/80`;
+            toggleIconEl.setAttribute('data-lucide', 'mic');
+            toggleText.textContent = 'Maintenir & Parler';
         }
-        lucide.createIcons();
+    } else { // Continu
+        const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2";
+        if (isContinuRecording) {
+            toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80`;
+            toggleIconEl.setAttribute('data-lucide', 'mic-off');
+            toggleText.textContent = 'Arrêter';
+        } else {
+            toggleButton.className = `${baseClass} bg-green-500/80 hover:bg-green-600/80`;
+            toggleIconEl.setAttribute('data-lucide', 'mic');
+            toggleText.textContent = 'Démarrer';
+        }
     }
-
+    lucide.createIcons();
+}
     function updateModeButtons() {
         if (recordingMode === 'continu') {
             modeContinu.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-green-500/80 text-white";
@@ -312,7 +297,7 @@
     }
     
     // =============================================
-    // 🎙️ RECORDING & VAD
+    // 🎤 RECORDING & VAD
     // =============================================
     async function requestMicrophonePermission() {
         try {
@@ -328,28 +313,31 @@
     }
 
     async function toggleMasterRecording() {
-        if (isContinuRecording) {
+        if (isContinuRecording || isPushToTalkRecording) {
             await stopAllRecording();
         } else {
             const hasPermission = await requestMicrophonePermission();
-            if (hasPermission) await startContinuRecording();
+            if (!hasPermission) return;
+            
+            if (recordingMode === 'continu') await startContinuRecording();
+            else await startPushToTalkRecording();
         }
     }
-
     async function togglePushToTalk() {
-        if (isPlaying || isProcessingTTS) {
-            interruptTTS();
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        
-        if (isPushToTalkRecording) {
-            await stopPushToTalkRecording();
-        } else {
-            const hasPermission = await requestMicrophonePermission();
-            if (hasPermission) await startPushToTalkRecording();
-        }
+    // ✅ Si on est en train de jouer du TTS, l'interrompre d'abord
+    if (isPlaying || isProcessingTTS) {
+        interruptTTS();
+        // Laisser un petit délai pour que l'interruption soit complète
+        await new Promise(resolve => setTimeout(resolve, 100));
     }
-
+    
+    if (isPushToTalkRecording) {
+        await stopPushToTalkRecording();
+    } else {
+        const hasPermission = await requestMicrophonePermission();
+        if (hasPermission) await startPushToTalkRecording();
+    }
+}
     async function startContinuRecording() {
         if (!drawerGroqKey.value.trim() || !drawerOpenaiKey.value.trim()) {
             alert('Veuillez configurer vos clés API dans le panneau de contrôle.');
@@ -377,7 +365,7 @@
             isContinuRecording = true;
             updateButtonState();
             updateStatus("En écoute...", "mic", "listening");
-            log("🎙️ Mode Continu démarré !", 'success');
+            log("🎤 Mode Continu démarré !", 'success');
         } catch (error) {
             log(`Erreur VAD: ${error.message}`, 'error');
             updateStatus("Erreur VAD", "alert-circle", "error");
@@ -397,7 +385,7 @@
         updateStatus("Parlez maintenant...", "mic", "speaking");
         isPushToTalkRecording = true;
         updateButtonState();
-        log("🎙️ Push-to-Talk (direct) démarré", 'info');
+        log("🎤 Push-to-Talk (direct) démarré", 'info');
 
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -487,7 +475,7 @@
     
     async function preGenerateSimpleReflections() {
         if (reflectionAudios.size > 0) return;
-        log('🗣️ Pré-génération des réflexions...', 'info');
+        log('💭 Pré-génération des réflexions...', 'info');
         const promises = SIMPLE_REFLECTIONS.map(async (phrase) => {
             try {
                 const audioUrl = await generateTTSForSentence(phrase, drawerVoiceSelect.value, -1);
@@ -495,7 +483,7 @@
             } catch (error) { /* ignore */ }
         });
         await Promise.all(promises);
-        log(`👍 ${reflectionAudios.size} réflexions prêtes !`, 'success');
+        log(`🎉 ${reflectionAudios.size} réflexions prêtes !`, 'success');
     }
 
     function playRandomReflection() {
@@ -572,6 +560,7 @@
         generationWorkers = [];
 
         try {
+            // Start generating all sentences in parallel, throttled by the pipeline worker
             const worker = (async () => {
                 for (let i = 0; i < sentences.length && pipelineActive; i++) {
                     if (readyAudioBuffer.size >= MAX_BUFFER_SIZE) {
@@ -628,15 +617,18 @@
     }
 
     // =============================================
-    // ✍️ TRANSCRIPTION & LLM
+    // 💬 TRANSCRIPTION & LLM
     // =============================================
     async function transcribeAudioUltraFast(audioData) {
+        // Ignorer la validation de qualité audio en mode push-to-talk
         if (recordingMode !== 'push-to-talk' && audioData instanceof Float32Array && !analyzeAudioQuality(audioData)) {
             updateStatus("En écoute...", "mic", "listening"); return;
         }
         updateStatus("Transcription...", "loader-circle", "processing");
 
         try {
+            // Si audioData est déjà un buffer WAV (ArrayBuffer), l'utiliser directement
+            // Sinon, c'est un Float32Array qu'il faut encoder
             const wavBuffer = audioData instanceof ArrayBuffer ? audioData : encodeWAV(audioData);
             const formData = new FormData();
             formData.append('file', new Blob([wavBuffer], { type: 'audio/wav' }), 'audio.wav');
@@ -816,32 +808,11 @@
         drawerAllowInterrupt.checked = localStorage.getItem('allow_interrupt') !== 'false';
         drawerVoiceSelect.value = localStorage.getItem('selected_voice') || 'fr-FR-DeniseNeural';
 
-        // MODIFIÉ : Gestion des événements du bouton principal
-        const handleStart = (e) => {
-            e.preventDefault();
-            unlockAudio(); // On déverrouille l'audio à la première action
-            if (recordingMode === 'continu') {
-                toggleMasterRecording(); // Pour le mode continu, un clic suffit
-            } else { // Push-to-Talk
-                if (!isPushToTalkRecording) {
-                    togglePushToTalk();
-                }
-            }
+        // Attach event listeners
+        toggleButton.onclick = () => {
+             if (recordingMode === 'continu') toggleMasterRecording();
+             else togglePushToTalk();
         };
-
-        const handleEnd = (e) => {
-            e.preventDefault();
-            if (recordingMode === 'push-to-talk' && isPushToTalkRecording) {
-                togglePushToTalk();
-            }
-        };
-        
-        toggleButton.addEventListener('mousedown', handleStart);
-        toggleButton.addEventListener('touchstart', handleStart);
-        toggleButton.addEventListener('mouseup', handleEnd);
-        toggleButton.addEventListener('touchend', handleEnd);
-        toggleButton.addEventListener('mouseleave', handleEnd); // Gère le cas où l'utilisateur glisse son doigt en dehors du bouton
-        
         modeContinu.onclick = () => switchToMode('continu');
         modePushToTalk.onclick = () => switchToMode('push-to-talk');
         sendButton.onclick = () => processUserMessage(textInput.value.trim());
