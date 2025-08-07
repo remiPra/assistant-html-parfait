@@ -137,7 +137,7 @@
         </div>
         <div class="p-4 space-y-4 overflow-y-auto flex-1">
             <div class="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20">
-                <h3 class="text-white font-medium mb-3">🔧 Paramètres</h3>
+                <h3 class="text-white font-medium mb-3">🛠️ Paramètres</h3>
                 <input type="password" id="drawerGroqKey" placeholder="Clé API Groq (STT)" class="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/60 focus:outline-none focus:border-green-400/50 focus:bg-white/15 mb-3">
                 <input type="password" id="drawerOpenaiKey" placeholder="Clé API OpenAI (LLM)" class="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/60 focus:outline-none focus:border-green-400/50 focus:bg-white/15 mb-3">
                 <div class="grid grid-cols-2 gap-3 text-sm mt-3">
@@ -159,7 +159,7 @@
                 </div>
             </div>
             <div class="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20">
-                <h3 class="text-white font-medium mb-3">🔍 Log de débogage</h3>
+                <h3 class="text-white font-medium mb-3">📝 Log de débogage</h3>
                 <div id="drawerDebug" class="bg-black/20 rounded-lg p-3 text-xs text-white/70 h-48 overflow-y-auto">
                     <div>⚡ Système prêt...</div>
                 </div>
@@ -177,7 +177,7 @@
     // 🚀 ASSISTANT VOCAL ULTRA-RAPIDE COMPLET
     // =============================================
     
-    // 🔧 DOM & STATE VARIABLES
+    // 🛠️ DOM & STATE VARIABLES
     let myVad = null;
     let conversationHistory = [];
     let isPlaying = false;
@@ -190,25 +190,26 @@
     let isPushToTalkRecording = false;
     let isContinuRecording = false;
     let pushToTalkAudio = [];
-    let mediaRecorder, recordedChunks = []; // Nouvelles variables pour l'enregistrement direct
+    let mediaRecorder, recordedChunks = [];
     const transcriptionCache = new Map();
     const ttsCache = new Map();
     const MAX_CACHE_SIZE = 50;
     const MAX_BUFFER_SIZE = 3;
     const baseCircleClasses = "w-[200px] h-[200px] rounded-full mx-auto mb-2.5 flex items-center justify-center text-6xl transition-all duration-300 backdrop-blur-xl";
+    window.audioInitialized = false; // ✅ Flag pour l'initialisation audio sur iOS
 
     let toggleButton, toggleIconEl, toggleText, voiceCircle, statusText, ttsAudio, interruptIndicator, processingIndicator, textInput, sendButton;
     let modeContinu, modePushToTalk;
     let conversationDrawer, conversationHistoryEl, settingsDrawer, drawerOverlay;
     let drawerGroqKey, drawerOpenaiKey, drawerAutoSpeak, drawerAllowInterrupt, drawerVoiceSelect, drawerDebug;
     
-    // 💭 SIMPLE REFLECTIONS
+    // 🗣️ SIMPLE REFLECTIONS
     const SIMPLE_REFLECTIONS = ["Ah oui, je vois...", "D'accord, très bien...", "OK, je comprends...", "Hmm, intéressant...", "Oui, effectivement...", "Ah, parfait...", "Très bien...", "Laissez-moi voir...", "Bien sûr...", "Oui, d'accord...", "Je comprends bien...", "Oui, tout à fait..."];
     let reflectionAudios = new Map();
     let isPlayingReflection = false;
 
     // =============================================
-    // 🔧 UTILITY & UI FUNCTIONS
+    // 🛠️ UTILITY & UI FUNCTIONS
     // =============================================
     function log(message, type = 'info') {
         const timestamp = new Date().toLocaleTimeString();
@@ -225,6 +226,24 @@
             while (drawerDebug.children.length > 50) {
                 drawerDebug.removeChild(drawerDebug.lastChild);
             }
+        }
+    }
+    
+    // ✅ NOUVELLE FONCTION : Initialisation audio pour iOS
+    async function initializeAudioContextForIOS() {
+        if (window.audioInitialized) return true;
+        try {
+            // Créer un audio silencieux pour "débloquer" l'audio sur iOS
+            const silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
+            silentAudio.playsinline = true;
+            await silentAudio.play();
+            silentAudio.pause();
+            log('✅ Audio iOS initialisé', 'success');
+            window.audioInitialized = true;
+            return true;
+        } catch (error) {
+            log('⚠️ Initialisation audio iOS échouée. Une interaction utilisateur est requise.', 'warning');
+            return false;
         }
     }
 
@@ -249,43 +268,41 @@
     }
     
     function updateButtonState() {
-    if (!toggleButton || !toggleIconEl || !toggleText) return;
-    
-    let isRecording = isContinuRecording || isPushToTalkRecording;
-    // ✅ En mode push-to-talk, ne jamais désactiver le bouton
-    // En mode continu, désactiver seulement quand on joue du TTS
-    toggleButton.disabled = recordingMode === 'continu' && (isPlaying || isProcessingTTS);
+        if (!toggleButton || !toggleIconEl || !toggleText) return;
+        
+        let isRecording = isContinuRecording || isPushToTalkRecording;
+        toggleButton.disabled = recordingMode === 'continu' && (isPlaying || isProcessingTTS);
 
-    if (recordingMode === 'push-to-talk') {
-        const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white flex items-center justify-center gap-2";
-        if (isPushToTalkRecording) {
-            toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80 animate-pulse`;
-            toggleIconEl.setAttribute('data-lucide', 'square');
-            toggleText.textContent = 'Envoyer';
-        } else if (isPlaying || isProcessingTTS) {
-            // ✅ Pendant la lecture TTS en push-to-talk
-            toggleButton.className = `${baseClass} bg-orange-500/80 hover:bg-orange-600/80`;
-            toggleIconEl.setAttribute('data-lucide', 'square');
-            toggleText.textContent = 'Interrompre';
-        } else {
-            toggleButton.className = `${baseClass} bg-blue-500/80 hover:bg-blue-600/80`;
-            toggleIconEl.setAttribute('data-lucide', 'mic');
-            toggleText.textContent = 'Maintenir & Parler';
+        if (recordingMode === 'push-to-talk') {
+            const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white flex items-center justify-center gap-2";
+            if (isPushToTalkRecording) {
+                toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80 animate-pulse`;
+                toggleIconEl.setAttribute('data-lucide', 'square');
+                toggleText.textContent = 'Envoyer';
+            } else if (isPlaying || isProcessingTTS) {
+                toggleButton.className = `${baseClass} bg-orange-500/80 hover:bg-orange-600/80`;
+                toggleIconEl.setAttribute('data-lucide', 'square');
+                toggleText.textContent = 'Interrompre';
+            } else {
+                toggleButton.className = `${baseClass} bg-blue-500/80 hover:bg-blue-600/80`;
+                toggleIconEl.setAttribute('data-lucide', 'mic');
+                toggleText.textContent = 'Maintenir & Parler';
+            }
+        } else { // Continu
+            const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2";
+            if (isContinuRecording) {
+                toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80`;
+                toggleIconEl.setAttribute('data-lucide', 'mic-off');
+                toggleText.textContent = 'Arrêter';
+            } else {
+                toggleButton.className = `${baseClass} bg-green-500/80 hover:bg-green-600/80`;
+                toggleIconEl.setAttribute('data-lucide', 'mic');
+                toggleText.textContent = 'Démarrer';
+            }
         }
-    } else { // Continu
-        const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2";
-        if (isContinuRecording) {
-            toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80`;
-            toggleIconEl.setAttribute('data-lucide', 'mic-off');
-            toggleText.textContent = 'Arrêter';
-        } else {
-            toggleButton.className = `${baseClass} bg-green-500/80 hover:bg-green-600/80`;
-            toggleIconEl.setAttribute('data-lucide', 'mic');
-            toggleText.textContent = 'Démarrer';
-        }
+        lucide.createIcons();
     }
-    lucide.createIcons();
-}
+
     function updateModeButtons() {
         if (recordingMode === 'continu') {
             modeContinu.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-green-500/80 text-white";
@@ -323,26 +340,33 @@
             else await startPushToTalkRecording();
         }
     }
-    async function togglePushToTalk() {
-    // ✅ Si on est en train de jouer du TTS, l'interrompre d'abord
-    if (isPlaying || isProcessingTTS) {
-        interruptTTS();
-        // Laisser un petit délai pour que l'interruption soit complète
-        await new Promise(resolve => setTimeout(resolve, 100));
-    }
     
-    if (isPushToTalkRecording) {
-        await stopPushToTalkRecording();
-    } else {
-        const hasPermission = await requestMicrophonePermission();
-        if (hasPermission) await startPushToTalkRecording();
+    async function togglePushToTalk() {
+        if (isPlaying || isProcessingTTS) {
+            interruptTTS();
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    
+        if (isPushToTalkRecording) {
+            await stopPushToTalkRecording();
+        } else {
+            const hasPermission = await requestMicrophonePermission();
+            if (hasPermission) await startPushToTalkRecording();
+        }
     }
-}
+
+    // ✅ MODIFIÉ : `startContinuRecording` avec initialisation iOS
     async function startContinuRecording() {
         if (!drawerGroqKey.value.trim() || !drawerOpenaiKey.value.trim()) {
             alert('Veuillez configurer vos clés API dans le panneau de contrôle.');
             return;
         }
+        
+        // ✅ iOS : Initialiser l'audio d'abord
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            await initializeAudioContextForIOS();
+        }
+        
         toggleButton.disabled = true;
         updateStatus("Initialisation...", "loader-circle", "processing");
 
@@ -443,7 +467,7 @@
     }
 
     // =============================================
-    // 🔊 TTS & AUDIO PROCESSING
+    // 🔉 TTS & AUDIO PROCESSING
     // =============================================
     function analyzeAudioQuality(audioData) {
         const energy = audioData.reduce((s, x) => s + x * x, 0) / audioData.length;
@@ -468,14 +492,13 @@
     async function convertWebmToWavBuffer(webmBuffer) {
         const audioCtx = new OfflineAudioContext(1, 48000 * 10, 48000); // max 10 sec
         const audioBuffer = await audioCtx.decodeAudioData(webmBuffer);
-        
         const samples = audioBuffer.getChannelData(0);
         return encodeWAV(samples, audioBuffer.sampleRate);
     }
     
     async function preGenerateSimpleReflections() {
         if (reflectionAudios.size > 0) return;
-        log('💭 Pré-génération des réflexions...', 'info');
+        log('🗣️ Pré-génération des réflexions...', 'info');
         const promises = SIMPLE_REFLECTIONS.map(async (phrase) => {
             try {
                 const audioUrl = await generateTTSForSentence(phrase, drawerVoiceSelect.value, -1);
@@ -528,6 +551,7 @@
         }
     }
 
+    // ✅ ENTIÈREMENT REMPLACÉE : `playAudioPipeline` pour iOS
     async function playAudioPipeline(sentences, voice) {
         for (let i = 0; i < sentences.length && pipelineActive; i++) {
             while (!readyAudioBuffer.has(i) && pipelineActive) await new Promise(r => setTimeout(r, 50));
@@ -536,19 +560,57 @@
             const audioData = readyAudioBuffer.get(i);
             readyAudioBuffer.delete(i);
             updateStatus(`IA parle... (${i + 1}/${sentences.length})`, "volume-2", "tts-playing");
-            ttsAudio.src = audioData.audioUrl;
+            
+            // ✅ Fix iOS : Créer un nouvel élément audio pour chaque phrase
+            const audioElement = new Audio();
+            audioElement.preload = 'auto';
+            audioElement.playsinline = true; // Important pour iOS
+            audioElement.src = audioData.audioUrl;
 
             await new Promise((resolve, reject) => {
-                ttsAudio.onloadeddata = () => ttsAudio.play().catch(reject);
-                ttsAudio.onended = resolve;
-                ttsAudio.onerror = reject;
+                // ✅ iOS nécessite un gestionnaire d'événements plus robuste
+                audioElement.oncanplaythrough = async () => {
+                    try {
+                        // ✅ iOS : Forcer le focus avant de jouer
+                        await audioElement.play();
+                    } catch (error) {
+                        console.warn('Erreur lecture audio iOS:', error);
+                        reject(error);
+                    }
+                };
+                
+                audioElement.onended = () => {
+                    audioElement.src = ''; // Libérer la mémoire
+                    resolve();
+                };
+                
+                audioElement.onerror = (error) => {
+                    console.error('Erreur audio:', error);
+                    reject(error);
+                };
+                
+                // ✅ Timeout de sécurité pour iOS
+                setTimeout(() => {
+                    if (!audioElement.ended) {
+                        audioElement.pause();
+                        resolve();
+                    }
+                }, 30000); // 30s max par phrase
+                
                 if (!pipelineActive) resolve();
             });
         }
     }
     
+    // ✅ MODIFIÉ : `speakTextWithPipeline` avec initialisation iOS
     async function speakTextWithPipeline(text) {
         if (isProcessingTTS) return;
+        
+        // ✅ iOS : S'assurer que l'audio est initialisé
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            await initializeAudioContextForIOS();
+        }
+        
         isProcessingTTS = isPlaying = pipelineActive = true;
         updateButtonState();
 
@@ -560,7 +622,6 @@
         generationWorkers = [];
 
         try {
-            // Start generating all sentences in parallel, throttled by the pipeline worker
             const worker = (async () => {
                 for (let i = 0; i < sentences.length && pipelineActive; i++) {
                     if (readyAudioBuffer.size >= MAX_BUFFER_SIZE) {
@@ -590,6 +651,7 @@
         readyAudioBuffer.clear();
         await Promise.allSettled(generationWorkers);
         generationWorkers = [];
+        if (ttsAudio) { ttsAudio.pause(); ttsAudio.src = ""; } // Sécurité
         updateButtonState();
         if (isContinuRecording) updateStatus("En écoute...", "mic", "listening");
         else if (!isPushToTalkRecording) updateStatus("Prêt", "power-off", "");
@@ -598,8 +660,7 @@
     function interruptTTS() {
         if ((isPlaying || isProcessingTTS) && drawerAllowInterrupt.checked) {
             log('🛑 TTS Interrompu !', 'warning');
-            if (ttsAudio) { ttsAudio.pause(); ttsAudio.src = ""; }
-            cleanupPipeline();
+            cleanupPipeline(); // cleanupPipeline gère déjà la pause/reset de ttsAudio
             updateStatus("Interruption !", "zap-off", "interrupted");
             showInterruptIndicator();
             addToConversation('system', 'Réponse interrompue');
@@ -617,18 +678,15 @@
     }
 
     // =============================================
-    // 💬 TRANSCRIPTION & LLM
+    // 🧠 TRANSCRIPTION & LLM
     // =============================================
     async function transcribeAudioUltraFast(audioData) {
-        // Ignorer la validation de qualité audio en mode push-to-talk
         if (recordingMode !== 'push-to-talk' && audioData instanceof Float32Array && !analyzeAudioQuality(audioData)) {
             updateStatus("En écoute...", "mic", "listening"); return;
         }
         updateStatus("Transcription...", "loader-circle", "processing");
 
         try {
-            // Si audioData est déjà un buffer WAV (ArrayBuffer), l'utiliser directement
-            // Sinon, c'est un Float32Array qu'il faut encoder
             const wavBuffer = audioData instanceof ArrayBuffer ? audioData : encodeWAV(audioData);
             const formData = new FormData();
             formData.append('file', new Blob([wavBuffer], { type: 'audio/wav' }), 'audio.wav');
@@ -860,6 +918,17 @@
 
         lucide.createIcons();
         log('🎯 Système initialisé avec succès!', 'success');
+        
+        // ✅ Détection iOS et ajustements
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (isIOS) {
+            log('📱 iOS détecté - Optimisations audio activées', 'info');
+            // Ajouter un gestionnaire pour initialiser l'audio au premier touch
+            document.addEventListener('touchstart', async function initAudioOnFirstTouch() {
+                await initializeAudioContextForIOS();
+                document.removeEventListener('touchstart', initAudioOnFirstTouch);
+            }, { once: true });
+        }
         
         window.onbeforeunload = stopAllRecording;
     };
