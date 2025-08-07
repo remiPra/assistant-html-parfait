@@ -168,7 +168,14 @@
     </div>
 
     <div id="drawerOverlay" class="fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
-
+    <!-- Ajouter après la div drawerOverlay -->
+<div id="mobileConsole" class="fixed top-20 right-4 w-80 h-64 bg-black/90 text-green-400 text-xs p-2 rounded-lg z-50 overflow-y-auto font-mono hidden">
+    <div class="flex justify-between items-center mb-2">
+        <span>📱 Debug Console</span>
+        <button onclick="document.getElementById('mobileConsole').classList.add('hidden')" class="text-red-400">✕</button>
+    </div>
+    <div id="mobileConsoleContent"></div>
+</div>
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.22/dist/bundle.min.js"></script>
     
