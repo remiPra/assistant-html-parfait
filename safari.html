@@ -50,7 +50,7 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
-        
+
         #toggleButton {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             transform-origin: center;
@@ -74,7 +74,7 @@
                 </button>
             </div>
         </div>
-        
+
         <div class="flex-1 flex flex-col justify-center items-center px-5 pt-16 pb-48">
             <div class="relative flex-shrink-0 text-center">
                 <div id="voice-circle" class="w-[200px] h-[200px] rounded-full mx-auto mb-2.5 flex items-center justify-center text-6xl transition-all duration-300 bg-white/10 backdrop-blur-xl border-2 border-white/20">
@@ -92,18 +92,18 @@
                     <i data-lucide="mic" id="toggleIconEl"></i>
                     <span id="toggleText">Démarrer</span>
                 </button>
-                
+
                 <div class="flex justify-center items-center gap-2">
                     <button id="modeContinu" class="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-green-500/80 text-white">
                         🔄 Continu
                     </button>
                     <button id="modePushToTalk" class="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-white/20 text-white/70 hover:bg-white/30">
-                        🎙️ Push-to-Talk
+                        🎤 Push-to-Talk
                     </button>
                 </div>
-                
+
                 <div class="flex gap-2">
-                    <input type="text" id="text-input" placeholder="Envoyer un mes.." class="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder-white/60 focus:outline-none focus:border-green-400/50 focus:bg-white/15">
+                    <input type="text" id="text-input" placeholder="Envoyer un message..." class="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder-white/60 focus:outline-none focus:border-green-400/50 focus:bg-white/15">
                     <button id="send-button" class="p-3 bg-green-500/80 rounded-xl text-white hover:bg-green-500/100 transition-colors">
                          <i data-lucide="send-horizontal" class="w-6 h-6"></i>
                     </button>
@@ -112,7 +112,7 @@
         </div>
     </div>
 
-    <audio id="ttsAudio" style="display: none;" preload="auto"></audio>
+    <audio id="ttsAudio" style="display: none;" preload="auto" playsinline></audio>
 
     <div id="conversationDrawer" class="fixed inset-y-0 left-0 z-50 w-full sm:w-96 bg-gradient-to-b from-[#19356d] to-[#26488b] shadow-xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
         <div class="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0">
@@ -127,7 +127,7 @@
             </div>
         </div>
     </div>
-    
+
     <div id="settingsDrawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-gradient-to-b from-[#19356d] to-[#26488b] shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
         <div class="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0">
             <h2 class="text-white text-lg font-semibold">⚙️ Panneau de contrôle</h2>
@@ -159,7 +159,7 @@
                 </div>
             </div>
             <div class="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20">
-                <h3 class="text-white font-medium mb-3">🔗 Log de débogage</h3>
+                <h3 class="text-white font-medium mb-3">📝 Log de débogage</h3>
                 <div id="drawerDebug" class="bg-black/20 rounded-lg p-3 text-xs text-white/70 h-48 overflow-y-auto">
                     <div>⚡ Système prêt...</div>
                 </div>
@@ -168,734 +168,832 @@
     </div>
 
     <div id="drawerOverlay" class="fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+    <div id="mobileConsole" class="fixed top-20 right-4 w-80 h-64 bg-black/90 text-green-400 text-xs p-2 rounded-lg z-50 overflow-y-auto font-mono hidden">
+        <div class="flex justify-between items-center mb-2">
+            <span>📱 Debug Console</span>
+            <button onclick="document.getElementById('mobileConsole').classList.add('hidden')" class="text-red-400">✕</button>
+        </div>
+        <div id="mobileConsoleContent"></div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.22/dist/bundle.min.js"></script>
-    
+
     <script>
-        // =============================================
-        // 🚀 ASSISTANT VOCAL ULTRA-RAPIDE COMPLET
-        // =============================================
-        
-        // 🛠️ DOM & STATE VARIABLES
-        let myVad = null;
-        let conversationHistory = [];
-        let isPlaying = false;
-        let isProcessingTTS = false;
-        let pipelineActive = false;
-        let generationWorkers = [];
-        let readyAudioBuffer = new Map();
-        let lastPlayedReflection = "";
-        let recordingMode = 'continu';
-        let isPushToTalkRecording = false;
-        let isContinuRecording = false;
-        let pushToTalkAudio = [];
-        let isAudioUnlocked = false; 
-        const transcriptionCache = new Map();
-        const ttsCache = new Map();
-        const MAX_CACHE_SIZE = 50;
-        const MAX_BUFFER_SIZE = 3;
-        const baseCircleClasses = "w-[200px] h-[200px] rounded-full mx-auto mb-2.5 flex items-center justify-center text-6xl transition-all duration-300 backdrop-blur-xl";
-    
-        let toggleButton, toggleIconEl, toggleText, voiceCircle, statusText, ttsAudio, interruptIndicator, processingIndicator, textInput, sendButton;
-        let modeContinu, modePushToTalk;
-        let conversationDrawer, conversationHistoryEl, settingsDrawer, drawerOverlay;
-        let drawerGroqKey, drawerOpenaiKey, drawerAutoSpeak, drawerAllowInterrupt, drawerVoiceSelect, drawerDebug;
-        
-        const SIMPLE_REFLECTIONS = ["Ah oui, je vois...", "D'accord, très bien...", "OK, je comprends...", "Hmm, intéressant...", "Oui, effectivement...", "Ah, parfait...", "Très bien...", "Laissez-moi voir...", "Bien sûr...", "Oui, d'accord...", "Je comprends bien...", "Oui, tout à fait..."];
-        let reflectionAudios = new Map();
-        let isPlayingReflection = false;
-    
-        // =============================================
-        // 🛠️ UTILITY & UI FUNCTIONS
-        // =============================================
-        function log(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
-            const emoji = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '⚡';
-            const logMessage = `${timestamp} ${emoji} ${message}`;
-            console.log(logMessage);
-    
-            if (drawerDebug) {
-                const newLine = document.createElement('div');
-                newLine.textContent = logMessage;
-                const typeClass = { error: 'text-red-300', success: 'text-green-300', warning: 'text-yellow-300' };
-                newLine.className = typeClass[type] || '';
-                drawerDebug.insertBefore(newLine, drawerDebug.firstChild);
-                while (drawerDebug.children.length > 50) {
-                    drawerDebug.removeChild(drawerDebug.lastChild);
-                }
+    // =============================================
+    // 🚀 ASSISTANT VOCAL ULTRA-RAPIDE COMPLET
+    // =============================================
+
+    // 🛠️ DOM & STATE VARIABLES
+    let myVad = null;
+    let conversationHistory = [];
+    let isPlaying = false;
+    let isProcessingTTS = false;
+    let pipelineActive = false;
+    let generationWorkers = [];
+    let readyAudioBuffer = new Map();
+    let lastPlayedReflection = "";
+    let recordingMode = 'continu';
+    let isPushToTalkRecording = false;
+    let isContinuRecording = false;
+    let pushToTalkAudio = [];
+    let mediaRecorder, recordedChunks = [];
+    const transcriptionCache = new Map();
+    const ttsCache = new Map();
+    const MAX_CACHE_SIZE = 50;
+    const MAX_BUFFER_SIZE = 3;
+    const baseCircleClasses = "w-[200px] h-[200px] rounded-full mx-auto mb-2.5 flex items-center justify-center text-6xl transition-all duration-300 backdrop-blur-xl";
+    window.audioInitialized = false; // ✅ Flag pour l'initialisation audio sur iOS
+
+    let toggleButton, toggleIconEl, toggleText, voiceCircle, statusText, ttsAudio, interruptIndicator, processingIndicator, textInput, sendButton;
+    let modeContinu, modePushToTalk;
+    let conversationDrawer, conversationHistoryEl, settingsDrawer, drawerOverlay;
+    let drawerGroqKey, drawerOpenaiKey, drawerAutoSpeak, drawerAllowInterrupt, drawerVoiceSelect, drawerDebug;
+
+    // 🗣️ SIMPLE REFLECTIONS
+    const SIMPLE_REFLECTIONS = ["Ah oui, je vois...", "D'accord, très bien...", "OK, je comprends...", "Hmm, intéressant...", "Oui, effectivement...", "Ah, parfait...", "Très bien...", "Laissez-moi voir...", "Bien sûr...", "Oui, d'accord...", "Je comprends bien...", "Oui, tout à fait..."];
+    let reflectionAudios = new Map();
+    let isPlayingReflection = false;
+
+    // =============================================
+    // 🛠️ UTILITY & UI FUNCTIONS
+    // =============================================
+    function log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const emoji = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '⚡';
+        const logMessage = `${timestamp} ${emoji} ${message}`;
+        console.log(logMessage);
+
+        if (drawerDebug) {
+            const newLine = document.createElement('div');
+            newLine.textContent = logMessage;
+            const typeClass = { error: 'text-red-300', success: 'text-green-300', warning: 'text-yellow-300' };
+            newLine.className = typeClass[type] || '';
+            drawerDebug.insertBefore(newLine, drawerDebug.firstChild);
+            while (drawerDebug.children.length > 50) {
+                drawerDebug.removeChild(drawerDebug.lastChild);
             }
         }
-        
-        // MODIFICATION POUR iOS/iPadOS : Fonction de déverrouillage audio renforcée
-        function unlockAudio() {
-            if (isAudioUnlocked) return;
-            
-            log('Tentative de déverrouillage audio pour iOS/iPadOS...');
-            
-            // Méthode 1: Contexte Web Audio API
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const buffer = audioCtx.createBuffer(1, 1, 22050);
-                const source = audioCtx.createBufferSource();
-                source.buffer = buffer;
-                source.connect(audioCtx.destination);
-                source.start(0);
-                if (audioCtx.state === 'running') {
-                    log('✅ Contexte Web Audio API déverrouillé.', 'success');
-                }
-            } catch(e) {
-                log('Erreur déverrouillage Contexte Web Audio.', 'warning');
-            }
-    
-            // Méthode 2: Élément <audio> HTML
-            if (ttsAudio) {
-                const promise = ttsAudio.play();
-                if (promise !== undefined) {
-                    promise.then(_ => {
-                        ttsAudio.pause();
-                        ttsAudio.currentTime = 0;
-                        log('✅ Élément <audio> déverrouillé.', 'success');
-                    }).catch(error => {
-                        log(`Erreur déverrouillage <audio>: ${error}`, 'warning');
-                    });
-                }
-            }
-            
-            isAudioUnlocked = true;
-        }
-    
-    
-        function updateStatus(text, iconName, stateClass) {
-            if (!statusText || !voiceCircle) return;
-            statusText.textContent = text;
-            voiceCircle.innerHTML = `<i data-lucide="${iconName}" class="w-16 h-16 ${stateClass === 'processing' ? 'animate-spin' : ''}"></i>`;
-            
-            processingIndicator?.classList.toggle('opacity-100', stateClass === 'processing');
-            
-            let stateClasses = "";
-            switch (stateClass) {
-                case "listening": stateClasses = "bg-green-400/20 border-2 border-green-400/40 animate-pulse"; break;
-                case "speaking": stateClasses = "bg-green-600/30 border-2 border-green-600/50"; break;
-                case "processing": stateClasses = "bg-amber-400/20 border-2 border-amber-400/40"; break;
-                case "tts-playing": stateClasses = "bg-purple-500/20 border-2 border-purple-500/40 animate-tts-pulse"; break;
-                case "interrupted": stateClasses = "bg-red-500/20 border-2 border-red-500/40 animate-interrupt-flash"; break;
-                default: stateClasses = "bg-white/10 border-2 border-white/20";
-            }
-            voiceCircle.className = `${baseCircleClasses} ${stateClasses}`;
-            lucide.createIcons();
-        }
-        
-        function updateButtonState() {
-            if (!toggleButton || !toggleIconEl || !toggleText) return;
-            
-            let isRecording = isContinuRecording || isPushToTalkRecording;
-            toggleButton.disabled = isPlaying || isProcessingTTS;
-    
-            if (recordingMode === 'push-to-talk') {
-                const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white flex items-center justify-center gap-2";
-                if (isPushToTalkRecording) {
-                    toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80 animate-pulse`;
-                    toggleIconEl.setAttribute('data-lucide', 'square');
-                    toggleText.textContent = 'Envoyer';
-                } else {
-                    toggleButton.className = `${baseClass} bg-blue-500/80 hover:bg-blue-600/80`;
-                    toggleIconEl.setAttribute('data-lucide', 'mic');
-                    toggleText.textContent = 'Maintenir & Parler';
-                }
-            } else { // Continu
-                const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white disabled:opacity-50 flex items-center justify-center gap-2";
-                if (isContinuRecording) {
-                    toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80`;
-                    toggleIconEl.setAttribute('data-lucide', 'mic-off');
-                    toggleText.textContent = 'Arrêter';
-                } else {
-                    toggleButton.className = `${baseClass} bg-green-500/80 hover:bg-green-600/80`;
-                    toggleIconEl.setAttribute('data-lucide', 'mic');
-                    toggleText.textContent = 'Démarrer';
-                }
-            }
-            lucide.createIcons();
-        }
-    
-        function updateModeButtons() {
-            if (recordingMode === 'continu') {
-                modeContinu.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-green-500/80 text-white";
-                modePushToTalk.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-white/20 text-white/70 hover:bg-white/30";
-            } else {
-                modeContinu.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-white/20 text-white/70 hover:bg-white/30";
-                modePushToTalk.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-blue-500/80 text-white";
-            }
-        }
-        
-        // =============================================
-        // 🎙️ RECORDING & VAD
-        // =============================================
-        async function requestMicrophonePermission() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                stream.getTracks().forEach(track => track.stop());
-                log('Permission microphone accordée', 'success');
-                return true;
-            } catch (error) {
-                log('Permission microphone refusée ou non disponible.', 'error');
-                alert("Veuillez autoriser l'accès au microphone pour utiliser l'assistant vocal.");
-                return false;
-            }
-        }
-    
-        async function toggleMasterRecording() {
-            if (isContinuRecording || isPushToTalkRecording) {
-                await stopAllRecording();
-            } else {
-                const hasPermission = await requestMicrophonePermission();
-                if (!hasPermission) return;
-                
-                if (recordingMode === 'continu') await startContinuRecording();
-                else await startPushToTalkRecording();
-            }
-        }
-        
-        async function togglePushToTalk() {
-            if (isPlaying || isProcessingTTS) {
-                 interruptTTS();
-                 return;
-            }
-            if (isPushToTalkRecording) {
-                await stopPushToTalkRecording();
-            } else {
-                const hasPermission = await requestMicrophonePermission();
-                if (hasPermission) await startPushToTalkRecording();
-            }
-        }
-    
-        async function startContinuRecording() {
-            if (!drawerGroqKey.value.trim() || !drawerOpenaiKey.value.trim()) {
-                alert('Veuillez configurer vos clés API dans le panneau de contrôle.');
-                return;
-            }
-            toggleButton.disabled = true;
-            updateStatus("Initialisation...", "loader-circle", "processing");
-    
-            try {
-                await preGenerateSimpleReflections();
-                myVad = await vad.MicVAD.new({
-                    positiveSpeechThreshold: 0.8, minSpeechFrames: 6, preSpeechPadFrames: 1, redemptionFrames: 10,
-                    onSpeechStart: () => {
-                        log("Parole détectée", 'success');
-                        if (!interruptTTS()) updateStatus("Vous parlez...", "mic", "speaking");
-                    },
-                    onSpeechEnd: (audio) => {
-                        log(`Fin de parole`, 'info');
-                        playRandomReflection();
-                        if (!isProcessingTTS && audio.length > 600) transcribeAudioUltraFast(audio);
-                        else if (myVad) updateStatus("En écoute...", "mic", "listening");
-                    },
-                });
-                myVad.start();
-                isContinuRecording = true;
-                updateButtonState();
-                updateStatus("En écoute...", "mic", "listening");
-                log("🎙️ Mode Continu démarré !", 'success');
-            } catch (error) {
-                log(`Erreur VAD: ${error.message}`, 'error');
-                updateStatus("Erreur VAD", "alert-circle", "error");
-                isContinuRecording = false;
-            } finally {
-                toggleButton.disabled = false;
-                updateButtonState();
-            }
-        }
-    
-        async function startPushToTalkRecording() {
-            if (!drawerGroqKey.value.trim() || !drawerOpenaiKey.value.trim()) {
-                alert('Veuillez configurer vos clés API dans le panneau de contrôle.');
-                return;
-            }
-            updateStatus("Parlez maintenant...", "mic", "speaking");
-            try {
-                myVad = await vad.MicVAD.new({
-                     onSpeechEnd: (audio) => { pushToTalkAudio.push(...audio); }
-                });
-                myVad.start();
-                pushToTalkAudio = [];
-                isPushToTalkRecording = true;
-                updateButtonState();
-                log("🎙️ Push-to-Talk démarré", 'info');
-            } catch (error) {
-                log(`Erreur Push-to-Talk: ${error.message}`, 'error');
-                isPushToTalkRecording = false;
-                updateButtonState();
-            }
-        }
-        
-        async function stopPushToTalkRecording() {
-            if (myVad) { myVad.destroy(); myVad = null; }
-            isPushToTalkRecording = false;
-            updateButtonState();
-            
-            if (pushToTalkAudio.length > 1000) {
-                updateStatus("Traitement...", "loader-circle", "processing");
-                await transcribeAudioUltraFast(new Float32Array(pushToTalkAudio));
-            } else {
-                log("Message Push-to-Talk trop court", 'warning');
-                updateStatus("Prêt", "power-off", "");
-            }
-            pushToTalkAudio = [];
-        }
-    
-        async function stopAllRecording() {
-            if (myVad) { myVad.destroy(); myVad = null; }
-            await cleanupPipeline();
-            
-            reflectionAudios.forEach(URL.revokeObjectURL);
-            reflectionAudios.clear();
-            isPlayingReflection = false;
-            
-            isContinuRecording = false;
-            isPushToTalkRecording = false;
-            
-            updateButtonState();
-            updateStatus("Prêt", "power-off", "");
-            log("🛑 Enregistrement arrêté", 'info');
-        }
-    
-        function switchToMode(mode) {
-            if (isContinuRecording || isPushToTalkRecording) {
-                stopAllRecording();
-            }
-            recordingMode = mode;
-            updateModeButtons();
-            updateButtonState();
-            log(`Mode changé vers : ${mode}`, 'info');
-        }
-    
-        // =============================================
-        // 🔉 TTS & AUDIO PROCESSING
-        // =============================================
-        function analyzeAudioQuality(audioData) {
-            const energy = audioData.reduce((s, x) => s + x * x, 0) / audioData.length;
-            if (energy < 0.0008) { log('Audio trop silencieux', 'warning'); return false; }
+    }
+
+    // ✅ Initialisation audio pour iOS (unlock)
+    async function initializeAudioContextForIOS() {
+        if (window.audioInitialized) return true;
+        try {
+            const silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
+            silentAudio.playsinline = true;
+            await silentAudio.play();
+            silentAudio.pause();
+            // Optionnel: réveiller un AudioContext
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioCtx();
+            await ctx.resume();
+
+            log('✅ Audio iOS initialisé', 'success');
+            window.audioInitialized = true;
             return true;
+        } catch (error) {
+            log('⚠️ Initialisation audio iOS échouée. Une interaction utilisateur est requise.', 'warning');
+            return false;
         }
-    
-        function encodeWAV(samples, sampleRate = 16000) {
-            const buffer = new ArrayBuffer(44 + samples.length * 2);
-            const view = new DataView(buffer);
-            const writeString = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
-            writeString(0, 'RIFF'); view.setUint32(4, 36 + samples.length * 2, true); writeString(8, 'WAVE'); writeString(12, 'fmt ');
-            view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true); view.setUint32(24, sampleRate, true);
-            view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true); writeString(36, 'data');
-            view.setUint32(40, samples.length * 2, true);
-            for (let i = 0; i < samples.length; i++) {
-                view.setInt16(44 + i * 2, Math.max(-1, Math.min(1, samples[i])) * 0x7FFF, true);
+    }
+
+    function updateStatus(text, iconName, stateClass) {
+        if (!statusText || !voiceCircle) return;
+        statusText.textContent = text;
+        voiceCircle.innerHTML = `<i data-lucide="${iconName}" class="w-16 h-16 ${stateClass === 'processing' ? 'animate-spin' : ''}"></i>`;
+
+        processingIndicator?.classList.toggle('opacity-100', stateClass === 'processing');
+
+        let stateClasses = "";
+        switch (stateClass) {
+            case "listening": stateClasses = "bg-green-400/20 border-2 border-green-400/40 animate-pulse"; break;
+            case "speaking": stateClasses = "bg-green-600/30 border-2 border-green-600/50"; break;
+            case "processing": stateClasses = "bg-amber-400/20 border-2 border-amber-400/40"; break;
+            case "tts-playing": stateClasses = "bg-purple-500/20 border-2 border-purple-500/40 animate-tts-pulse"; break;
+            case "interrupted": stateClasses = "bg-red-500/20 border-2 border-red-500/40 animate-interrupt-flash"; break;
+            default: stateClasses = "bg-white/10 border-2 border-white/20";
+        }
+        voiceCircle.className = `${baseCircleClasses} ${stateClasses}`;
+        lucide.createIcons();
+    }
+
+    function updateButtonState() {
+        if (!toggleButton || !toggleIconEl || !toggleText) return;
+
+        let isRecording = isContinuRecording || isPushToTalkRecording;
+        toggleButton.disabled = recordingMode === 'continu' && (isPlaying || isProcessingTTS);
+
+        if (recordingMode === 'push-to-talk') {
+            const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white flex items-center justify-center gap-2";
+            if (isPushToTalkRecording) {
+                toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80 animate-pulse`;
+                toggleIconEl.setAttribute('data-lucide', 'square');
+                toggleText.textContent = 'Envoyer';
+            } else if (isPlaying || isProcessingTTS) {
+                toggleButton.className = `${baseClass} bg-orange-500/80 hover:bg-orange-600/80`;
+                toggleIconEl.setAttribute('data-lucide', 'square');
+                toggleText.textContent = 'Interrompre';
+            } else {
+                toggleButton.className = `${baseClass} bg-blue-500/80 hover:bg-blue-600/80`;
+                toggleIconEl.setAttribute('data-lucide', 'mic');
+                toggleText.textContent = 'Maintenir & Parler';
             }
-            return buffer;
+        } else { // Continu
+            const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2";
+            if (isContinuRecording) {
+                toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80`;
+                toggleIconEl.setAttribute('data-lucide', 'mic-off');
+                toggleText.textContent = 'Arrêter';
+            } else {
+                toggleButton.className = `${baseClass} bg-green-500/80 hover:bg-green-600/80`;
+                toggleIconEl.setAttribute('data-lucide', 'mic');
+                toggleText.textContent = 'Démarrer';
+            }
         }
-        
-        async function preGenerateSimpleReflections() {
-            if (reflectionAudios.size > 0) return;
-            log('🗣️ Pré-génération des réflexions...', 'info');
-            const promises = SIMPLE_REFLECTIONS.map(async (phrase) => {
-                try {
-                    const audioUrl = await generateTTSForSentence(phrase, drawerVoiceSelect.value, -1);
-                    reflectionAudios.set(phrase, audioUrl);
-                } catch (error) { /* ignore */ }
+        lucide.createIcons();
+    }
+
+    function updateModeButtons() {
+        if (recordingMode === 'continu') {
+            modeContinu.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-green-500/80 text-white";
+            modePushToTalk.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-white/20 text-white/70 hover:bg-white/30";
+        } else {
+            modeContinu.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-white/20 text-white/70 hover:bg-white/30";
+            modePushToTalk.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-blue-500/80 text-white";
+        }
+    }
+
+    // =============================================
+    // 🎤 RECORDING & VAD
+    // =============================================
+    async function requestMicrophonePermission() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach(track => track.stop());
+            log('Permission microphone accordée', 'success');
+            return true;
+        } catch (error) {
+            log('Permission microphone refusée ou non disponible.', 'error');
+            alert('Veuillez autoriser l\'accès au microphone pour utiliser l\'assistant vocal.');
+            return false;
+        }
+    }
+
+    async function toggleMasterRecording() {
+        if (isContinuRecording || isPushToTalkRecording) {
+            await stopAllRecording();
+        } else {
+            const hasPermission = await requestMicrophonePermission();
+            if (!hasPermission) return;
+
+            if (recordingMode === 'continu') await startContinuRecording();
+            else await startPushToTalkRecording();
+        }
+    }
+
+    async function togglePushToTalk() {
+        if (isPlaying || isProcessingTTS) {
+            interruptTTS();
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        if (isPushToTalkRecording) {
+            await stopPushToTalkRecording();
+        } else {
+            const hasPermission = await requestMicrophonePermission();
+            if (hasPermission) await startPushToTalkRecording();
+        }
+    }
+
+    // ✅ Continu avec initialisation iOS
+    async function startContinuRecording() {
+        if (!drawerGroqKey.value.trim() || !drawerOpenaiKey.value.trim()) {
+            alert('Veuillez configurer vos clés API dans le panneau de contrôle.');
+            return;
+        }
+
+        // ✅ iOS : Initialiser l'audio d'abord
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            await initializeAudioContextForIOS();
+        }
+
+        toggleButton.disabled = true;
+        updateStatus("Initialisation...", "loader-circle", "processing");
+
+        try {
+            await preGenerateSimpleReflections();
+            myVad = await vad.MicVAD.new({
+                positiveSpeechThreshold: 0.8, minSpeechFrames: 6, preSpeechPadFrames: 1, redemptionFrames: 10,
+                onSpeechStart: () => {
+                    log("Parole détectée", 'success');
+                    if (!interruptTTS()) updateStatus("Vous parlez...", "mic", "speaking");
+                },
+                onSpeechEnd: (audio) => {
+                    log(`Fin de parole`, 'info');
+                    playRandomReflection();
+                    if (!isProcessingTTS && audio.length > 100) transcribeAudioUltraFast(audio);
+                    else if (myVad) updateStatus("En écoute...", "mic", "listening");
+                },
             });
-            await Promise.all(promises);
-            log(`🎉 ${reflectionAudios.size} réflexions prêtes !`, 'success');
+            myVad.start();
+            isContinuRecording = true;
+            updateButtonState();
+            updateStatus("En écoute...", "mic", "listening");
+            log("🎤 Mode Continu démarré !", 'success');
+        } catch (error) {
+            log(`Erreur VAD: ${error.message}`, 'error');
+            updateStatus("Erreur VAD", "alert-circle", "error");
+            isContinuRecording = false;
+        } finally {
+            toggleButton.disabled = false;
+            updateButtonState();
         }
-    
-        function playRandomReflection() {
-            if (isPlayingReflection || reflectionAudios.size === 0) return;
-            const randomReflection = SIMPLE_REFLECTIONS[Math.floor(Math.random() * SIMPLE_REFLECTIONS.length)];
-            const audioUrl = reflectionAudios.get(randomReflection);
-            if (audioUrl) {
-                isPlayingReflection = true;
-                lastPlayedReflection = randomReflection;
-                const reflectionAudio = new Audio(audioUrl);
-                reflectionAudio.play().catch(e => log('Erreur lecture réflexion', 'error'));
-                reflectionAudio.onended = () => { isPlayingReflection = false; };
-            }
+    }
+
+    // ✅ Push-to-Talk avec garde-fou MediaRecorder
+    async function startPushToTalkRecording() {
+        if (!drawerGroqKey.value.trim() || !drawerOpenaiKey.value.trim()) {
+            alert('Veuillez configurer vos clés API dans le panneau de contrôle.');
+            return;
         }
-        
-        function splitIntoSentences(text) {
-            return text.match(/[^.!?]+[.!?]*|[^.!?]+$/g)?.map(s => s.trim()).filter(s => s.length > 3) || [];
+
+        // Vérification support MediaRecorder
+        if (!('MediaRecorder' in window) || (MediaRecorder.isTypeSupported && !MediaRecorder.isTypeSupported('audio/webm'))) {
+            log("MediaRecorder non supporté: basculez en mode Continu ou utilisez un autre navigateur.", 'warning');
+            alert("Push-to-Talk n'est pas supporté par ce navigateur. Utilisez le mode Continu.");
+            return;
         }
-    
-        async function generateTTSForSentence(sentence, voice) {
-            const cacheKey = `${voice}_${sentence}`;
-            if (ttsCache.has(cacheKey)) return ttsCache.get(cacheKey);
-            
+
+        updateStatus("Parlez maintenant...", "mic", "speaking");
+        isPushToTalkRecording = true;
+        updateButtonState();
+        log("🎤 Push-to-Talk (direct) démarré", 'info');
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recordedChunks = [];
+
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+            mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
+            mediaRecorder.onstop = async () => {
+                const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                const arrayBuffer = await blob.arrayBuffer();
+                const wavBuffer = await convertWebmToWavBuffer(arrayBuffer);
+                await transcribeAudioUltraFast(wavBuffer);
+            };
+            mediaRecorder.start();
+        } catch (error) {
+            log(`Erreur Push-to-Talk: ${error.message}`, 'error');
+            isPushToTalkRecording = false;
+            updateButtonState();
+        }
+    }
+
+    async function stopPushToTalkRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+        isPushToTalkRecording = false;
+        updateButtonState();
+        updateStatus("Traitement...", "loader-circle", "processing");
+    }
+
+    async function stopAllRecording() {
+        if (myVad) { myVad.destroy(); myVad = null; }
+        await cleanupPipeline();
+
+        reflectionAudios.forEach(URL.revokeObjectURL);
+        reflectionAudios.clear();
+        isPlayingReflection = false;
+
+        isContinuRecording = false;
+        isPushToTalkRecording = false;
+
+        updateButtonState();
+        updateStatus("Prêt", "power-off", "");
+        log("🛑 Enregistrement arrêté", 'info');
+    }
+
+    function switchToMode(mode) {
+        if (isContinuRecording || isPushToTalkRecording) {
+            stopAllRecording();
+        }
+        recordingMode = mode;
+        updateModeButtons();
+        updateButtonState();
+        log(`Mode changé vers : ${mode}`, 'info');
+    }
+
+    // =============================================
+    // 🔉 TTS & AUDIO PROCESSING
+    // =============================================
+    function analyzeAudioQuality(audioData) {
+        const energy = audioData.reduce((s, x) => s + x * x, 0) / audioData.length;
+        if (energy < 0.0008) { log('Audio trop silencieux', 'warning'); return false; }
+        return true;
+    }
+
+    function encodeWAV(samples, sampleRate = 16000) {
+        const buffer = new ArrayBuffer(44 + samples.length * 2);
+        const view = new DataView(buffer);
+        const writeString = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+        writeString(0, 'RIFF'); view.setUint32(4, 36 + samples.length * 2, true); writeString(8, 'WAVE'); writeString(12, 'fmt ');
+        view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true); view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true); writeString(36, 'data');
+        view.setUint32(40, samples.length * 2, true);
+        for (let i = 0; i < samples.length; i++) {
+            view.setInt16(44 + i * 2, Math.max(-1, Math.min(1, samples[i])) * 0x7FFF, true);
+        }
+        return buffer;
+    }
+
+    // ✅ Conversion WebM → WAV compatible Safari/iOS
+    async function convertWebmToWavBuffer(webmBuffer) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioCtx();
+        const audioBuffer = await audioCtx.decodeAudioData(webmBuffer.slice(0));
+        const samples = audioBuffer.getChannelData(0);
+        return encodeWAV(samples, audioBuffer.sampleRate);
+    }
+
+    async function preGenerateSimpleReflections() {
+        if (reflectionAudios.size > 0) return;
+        log('🗣️ Pré-génération des réflexions...', 'info');
+        const promises = SIMPLE_REFLECTIONS.map(async (phrase) => {
             try {
-                const response = await fetch("https://chatbot-20102024-8c94bbb4eddf.herokuapp.com/synthesize", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text: sentence, voice: voice }),
-                });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const audioBlob = await response.blob();
-                const audioUrl = URL.createObjectURL(audioBlob);
+                const audioUrl = await generateTTSForSentence(phrase, drawerVoiceSelect.value, { cache: false });
+                reflectionAudios.set(phrase, audioUrl);
+            } catch (error) { /* ignore */ }
+        });
+        await Promise.all(promises);
+        log(`🎉 ${reflectionAudios.size} réflexions prêtes !`, 'success');
+    }
+
+    function playRandomReflection() {
+        if (isPlayingReflection || reflectionAudios.size === 0) return;
+        const randomReflection = SIMPLE_REFLECTIONS[Math.floor(Math.random() * SIMPLE_REFLECTIONS.length)];
+        const audioUrl = reflectionAudios.get(randomReflection);
+        if (audioUrl) {
+            isPlayingReflection = true;
+            lastPlayedReflection = randomReflection;
+            const reflectionAudio = new Audio(audioUrl);
+            reflectionAudio.playsinline = true;
+            reflectionAudio.play().catch(e => log('Erreur lecture réflexion', 'error'));
+            reflectionAudio.onended = () => { isPlayingReflection = false; };
+        }
+    }
+
+    function splitIntoSentences(text) {
+        return text.match(/[^.!?]+[.!?]*|[^.!?]+$/g)?.map(s => s.trim()).filter(s => s.length > 3) || [];
+    }
+
+    // ✅ Cache contrôlé pour éviter d'invalider des URLs encore utilisées
+    async function generateTTSForSentence(sentence, voice, { cache = true } = {}) {
+        const cacheKey = `${voice}_${sentence}`;
+        if (cache && ttsCache.has(cacheKey)) return ttsCache.get(cacheKey);
+
+        try {
+            const response = await fetch("https://chatbot-20102024-8c94bbb4eddf.herokuapp.com/synthesize", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: sentence, voice: voice }),
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const audioBlob = await response.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+
+            if (cache) {
                 if (ttsCache.size >= MAX_CACHE_SIZE) {
                     const [firstKey, firstUrl] = ttsCache.entries().next().value;
                     URL.revokeObjectURL(firstUrl);
                     ttsCache.delete(firstKey);
                 }
                 ttsCache.set(cacheKey, audioUrl);
-                return audioUrl;
-            } catch (error) {
-                log(`❌ Erreur TTS: ${error.message}`, 'error'); throw error;
             }
+            return audioUrl;
+        } catch (error) {
+            log(`❌ Erreur TTS: ${error.message}`, 'error'); throw error;
         }
-    
-        async function playAudioPipeline(sentences, voice) {
-            for (let i = 0; i < sentences.length && pipelineActive; i++) {
-                while (!readyAudioBuffer.has(i) && pipelineActive) await new Promise(r => setTimeout(r, 50));
-                if (!pipelineActive) break;
-    
-                const audioData = readyAudioBuffer.get(i);
-                readyAudioBuffer.delete(i);
-                updateStatus(`IA parle... (${i + 1}/${sentences.length})`, "volume-2", "tts-playing");
-                ttsAudio.src = audioData.audioUrl;
-    
-                await new Promise((resolve, reject) => {
-                    ttsAudio.onloadeddata = () => {
-                        const playPromise = ttsAudio.play();
-                        if (playPromise !== undefined) {
-                            playPromise.then(_ => resolve()).catch(error => reject(error));
-                        } else {
-                            resolve();
-                        }
-                    };
-                    ttsAudio.onended = resolve;
-                    ttsAudio.onerror = reject;
-                    if (!pipelineActive) resolve();
-                });
-            }
-        }
-        
-        async function speakTextWithPipeline(text) {
-            if (isProcessingTTS) return;
-            isProcessingTTS = isPlaying = pipelineActive = true;
-            updateButtonState();
-    
-            const sentences = splitIntoSentences(text);
-            if (sentences.length === 0) { await cleanupPipeline(); return; }
-            
-            log(`🚀 Démarrage pipeline TTS pour ${sentences.length} phrases`, 'info');
-            readyAudioBuffer.clear();
-            generationWorkers = [];
-    
-            try {
-                const worker = (async () => {
-                    for (let i = 0; i < sentences.length && pipelineActive; i++) {
-                        if (readyAudioBuffer.size >= MAX_BUFFER_SIZE) {
-                            await new Promise(r => setTimeout(r, 100)); i--; continue;
-                        }
-                        try {
-                            const audioUrl = await generateTTSForSentence(sentences[i], drawerVoiceSelect.value);
-                            if (pipelineActive) readyAudioBuffer.set(i, { audioUrl, sentence: sentences[i] });
-                        } catch { /* ignore */ }
+    }
+
+    // ✅ Lecture TTS robuste iOS (nouvel Audio par phrase)
+    async function playAudioPipeline(sentences, voice) {
+        for (let i = 0; i < sentences.length && pipelineActive; i++) {
+            while (!readyAudioBuffer.has(i) && pipelineActive) await new Promise(r => setTimeout(r, 50));
+            if (!pipelineActive) break;
+
+            const audioData = readyAudioBuffer.get(i);
+            readyAudioBuffer.delete(i);
+            updateStatus(`IA parle... (${i + 1}/${sentences.length})`, "volume-2", "tts-playing");
+
+            const audioElement = new Audio();
+            audioElement.preload = 'auto';
+            audioElement.playsinline = true;
+            audioElement.src = audioData.audioUrl;
+
+            await new Promise((resolve, reject) => {
+                audioElement.oncanplaythrough = async () => {
+                    try {
+                        await audioElement.play();
+                    } catch (error) {
+                        console.warn('Erreur lecture audio iOS:', error);
+                        reject(error);
                     }
-                })();
-                generationWorkers.push(worker);
-                
-                await playAudioPipeline(sentences, drawerVoiceSelect.value);
-            } catch (error) {
-                log(`Erreur pipeline: ${error.message}`, 'error');
-            } finally {
-                await cleanupPipeline();
-            }
-        }
-        
-        async function cleanupPipeline() {
-            pipelineActive = false;
-            isProcessingTTS = false;
-            isPlaying = false;
-            readyAudioBuffer.forEach(data => URL.revokeObjectURL(data.audioUrl));
-            readyAudioBuffer.clear();
-            await Promise.allSettled(generationWorkers);
-            generationWorkers = [];
-            updateButtonState();
-            if (isContinuRecording) updateStatus("En écoute...", "mic", "listening");
-            else if (!isPushToTalkRecording) updateStatus("Prêt", "power-off", "");
-        }
-    
-        function interruptTTS() {
-            if ((isPlaying || isProcessingTTS) && drawerAllowInterrupt.checked) {
-                log('🛑 TTS Interrompu !', 'warning');
-                if (ttsAudio) { ttsAudio.pause(); ttsAudio.src = ""; }
-                cleanupPipeline();
-                updateStatus("Interruption !", "zap-off", "interrupted");
-                showInterruptIndicator();
-                addToConversation('system', 'Réponse interrompue');
+                };
+
+                audioElement.onended = () => {
+                    audioElement.src = '';
+                    resolve();
+                };
+
+                audioElement.onerror = (error) => {
+                    console.error('Erreur audio:', error);
+                    resolve(); // ne bloque pas la suite, continue la pipeline
+                };
+
                 setTimeout(() => {
-                    if(isContinuRecording) updateStatus("En écoute...", "mic", "listening");
-                }, 800);
-                return true;
-            }
-            return false;
+                    if (!audioElement.ended) {
+                        audioElement.pause();
+                        resolve();
+                    }
+                }, 30000);
+
+                if (!pipelineActive) resolve();
+            });
         }
-    
-        function showInterruptIndicator() {
-            interruptIndicator?.classList.add('opacity-100');
-            setTimeout(() => interruptIndicator?.classList.remove('opacity-100'), 1500);
+    }
+
+    async function speakTextWithPipeline(text) {
+        if (isProcessingTTS) return;
+
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            await initializeAudioContextForIOS();
         }
-    
-        // =============================================
-        // 🧠 TRANSCRIPTION & LLM
-        // =============================================
-        async function transcribeAudioUltraFast(audioData) {
-            if (!analyzeAudioQuality(audioData)) {
-                updateStatus("En écoute...", "mic", "listening"); return;
-            }
-            updateStatus("Transcription...", "loader-circle", "processing");
-    
-            try {
-                const wavBuffer = encodeWAV(audioData);
-                const formData = new FormData();
-                formData.append('file', new Blob([wavBuffer], { type: 'audio/wav' }), 'audio.wav');
-                formData.append('model', 'whisper-large-v3');
-                formData.append('language', 'fr');
-    
-                const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${drawerGroqKey.value}` },
-                    body: formData
-                });
-                if (!response.ok) throw new Error(`Transcription échouée: ${response.statusText}`);
-                const result = await response.json();
-                const userText = result.text?.trim();
-                
-                const parasiteFilters = [/sous-titrage/i, /radio-canada/i, /src subtitle/i];
-                if (!userText || parasiteFilters.some(f => f.test(userText))) {
-                    log('Transcription vide ou parasite ignorée.', 'warning');
-                    if (isContinuRecording) updateStatus("En écoute...", "mic", "listening");
-                    else updateStatus("Prêt", "power-off", "");
-                    return;
+
+        isProcessingTTS = isPlaying = pipelineActive = true;
+        updateButtonState();
+
+        const sentences = splitIntoSentences(text);
+        if (sentences.length === 0) { await cleanupPipeline(); return; }
+
+        log(`🚀 Démarrage pipeline TTS pour ${sentences.length} phrases`, 'info');
+        readyAudioBuffer.clear();
+        generationWorkers = [];
+
+        try {
+            const worker = (async () => {
+                for (let i = 0; i < sentences.length && pipelineActive; i++) {
+                    if (readyAudioBuffer.size >= MAX_BUFFER_SIZE) {
+                        await new Promise(r => setTimeout(r, 100)); i--; continue;
+                    }
+                    try {
+                        const audioUrl = await generateTTSForSentence(sentences[i], drawerVoiceSelect.value);
+                        if (pipelineActive) readyAudioBuffer.set(i, { audioUrl, sentence: sentences[i] });
+                    } catch { /* ignore */ }
                 }
-                await processUserMessage(userText);
-            } catch (error) {
-                log(`Erreur transcription: ${error.message}`, 'error');
+            })();
+            generationWorkers.push(worker);
+
+            await playAudioPipeline(sentences, drawerVoiceSelect.value);
+        } catch (error) {
+            log(`Erreur pipeline: ${error.message}`, 'error');
+        } finally {
+            await cleanupPipeline();
+        }
+    }
+
+    async function cleanupPipeline() {
+        pipelineActive = false;
+        isProcessingTTS = false;
+        isPlaying = false;
+        // Ne pas révoquer ici : certaines URLs viennent du cache TTS
+        readyAudioBuffer.clear();
+        await Promise.allSettled(generationWorkers);
+        generationWorkers = [];
+        if (ttsAudio) { ttsAudio.pause(); ttsAudio.src = ""; }
+        updateButtonState();
+        if (isContinuRecording) updateStatus("En écoute...", "mic", "listening");
+        else if (!isPushToTalkRecording) updateStatus("Prêt", "power-off", "");
+    }
+
+    function interruptTTS() {
+        if ((isPlaying || isProcessingTTS) && drawerAllowInterrupt.checked) {
+            log('🛑 TTS Interrompu !', 'warning');
+            cleanupPipeline();
+            updateStatus("Interruption !", "zap-off", "interrupted");
+            showInterruptIndicator();
+            addToConversation('system', 'Réponse interrompue');
+            setTimeout(() => {
+                if(isContinuRecording) updateStatus("En écoute...", "mic", "listening");
+            }, 800);
+            return true;
+        }
+        return false;
+    }
+
+    function showInterruptIndicator() {
+        interruptIndicator?.classList.add('opacity-100');
+        setTimeout(() => interruptIndicator?.classList.remove('opacity-100'), 1500);
+    }
+
+    // =============================================
+    // 🧠 TRANSCRIPTION & LLM
+    // =============================================
+    async function transcribeAudioUltraFast(audioData) {
+        if (recordingMode !== 'push-to-talk' && audioData instanceof Float32Array && !analyzeAudioQuality(audioData)) {
+            updateStatus("En écoute...", "mic", "listening"); return;
+        }
+        updateStatus("Transcription...", "loader-circle", "processing");
+
+        try {
+            const wavBuffer = audioData instanceof ArrayBuffer ? audioData : encodeWAV(audioData);
+            const formData = new FormData();
+            formData.append('file', new Blob([wavBuffer], { type: 'audio/wav' }), 'audio.wav');
+            formData.append('model', 'whisper-large-v3');
+            formData.append('language', 'fr');
+
+            const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${drawerGroqKey.value}` },
+                body: formData
+            });
+            if (!response.ok) throw new Error(`Transcription échouée: ${response.statusText}`);
+            const result = await response.json();
+            const userText = result.text?.trim();
+
+            const parasiteFilters = [/sous-titrage/i, /radio-canada/i, /src subtitle/i];
+            if (!userText || parasiteFilters.some(f => f.test(userText))) {
+                log('Transcription vide ou parasite ignorée.', 'warning');
                 if (isContinuRecording) updateStatus("En écoute...", "mic", "listening");
                 else updateStatus("Prêt", "power-off", "");
+                return;
+            }
+            await processUserMessage(userText);
+        } catch (error) {
+            log(`Erreur transcription: ${error.message}`, 'error');
+            if (isContinuRecording) updateStatus("En écoute...", "mic", "listening");
+            else updateStatus("Prêt", "power-off", "");
+        }
+    }
+
+    async function processUserMessage(userText) {
+        if (!userText) return;
+        addToConversation('user', userText);
+
+        const aiResponse = await getLLMResponseStreaming(userText);
+        if (aiResponse) {
+            addToConversation('assistant', aiResponse);
+            if (drawerAutoSpeak.checked) {
+                speakTextWithPipeline(aiResponse);
             }
         }
-    
-        async function processUserMessage(userText) {
-            if (!userText) return;
-            addToConversation('user', userText);
-            
-            const aiResponse = await getLLMResponseStreaming(userText);
-            if (aiResponse) {
-                addToConversation('assistant', aiResponse);
-                if (drawerAutoSpeak.checked) {
-                    speakTextWithPipeline(aiResponse);
-                }
-            }
-            if (isContinuRecording && !isProcessingTTS) {
-                 updateStatus("En écoute...", "mic", "listening");
-            } else if (!isContinuRecording && !isPushToTalkRecording) {
-                updateStatus("Prêt", "power-off", "");
-            }
+        if (isContinuRecording && !isProcessingTTS) {
+             updateStatus("En écoute...", "mic", "listening");
+        } else if (!isContinuRecording && !isPushToTalkRecording) {
+            updateStatus("Prêt", "power-off", "");
         }
-    
-        async function getLLMResponseStreaming(userMessage) {
-            log('🚀 Requête OpenAI GPT-4o Mini...', 'info');
-            updateStatus("IA réfléchit...", "brain-circuit", "processing");
-    
-            try {
-                const messages = [
-                    { role: "system", content: "Tu es un assistant vocal conversationnel naturel. Réponds en français parlé, sans émoticônes, astérisques ou formatage. Sois concis (2-3 phrases max)." },
-                    ...conversationHistory.slice(-10),
-                    { role: 'user', content: userMessage }
-                ];
-                
-                if (lastPlayedReflection) {
-                    messages.push({ role: "system", content: `INFO CONTEXTE: Tu viens de dire "${lastPlayedReflection}". Ne le répète pas. Enchaîne directement.` });
-                }
-    
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${drawerOpenaiKey.value}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: 'gpt-4o-mini', messages, temperature: 0.5, max_tokens: 150, stream: true })
-                });
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error.message);
-                }
-    
-                let fullResponse = '';
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n');
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            const data = line.slice(6);
-                            if (data === '[DONE]') break;
-                            try {
-                                const parsed = JSON.parse(data);
-                                fullResponse += parsed.choices[0]?.delta?.content || '';
-                            } catch {}
-                        }
+    }
+
+    async function getLLMResponseStreaming(userMessage) {
+        log('🚀 Requête OpenAI GPT-4o Mini...', 'info');
+        updateStatus("IA réfléchit...", "brain-circuit", "processing");
+
+        try {
+            const messages = [
+                { role: "system", content: "Tu es un assistant vocal conversationnel naturel. Réponds en français parlé, sans émoticônes, astérisques ou formatage. Sois concis (2-3 phrases max)." },
+                ...conversationHistory.slice(-10),
+                { role: 'user', content: userMessage }
+            ];
+
+            if (lastPlayedReflection) {
+                messages.push({ role: "system", content: `INFO CONTEXTE: Tu viens de dire "${lastPlayedReflection}". Ne le répète pas. Enchaîne directement.` });
+            }
+
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${drawerOpenaiKey.value}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ model: 'gpt-4o-mini', messages, temperature: 0.5, max_tokens: 150, stream: true })
+            });
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error?.message || 'Erreur API OpenAI');
+            }
+
+            let fullResponse = '';
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6);
+                        if (data === '[DONE]') { try { reader.cancel(); } catch {} break; }
+                        try {
+                            const parsed = JSON.parse(data);
+                            fullResponse += parsed.choices[0]?.delta?.content || '';
+                        } catch {}
                     }
                 }
-                
-                let cleanedResponse = fullResponse.trim();
-                if (lastPlayedReflection && cleanedResponse.toLowerCase().startsWith(lastPlayedReflection.toLowerCase())) {
-                    cleanedResponse = cleanedResponse.substring(lastPlayedReflection.length).replace(/^[,.\s]+/, '');
-                }
-                lastPlayedReflection = "";
-                log('✅ Réponse OpenAI reçue', 'success');
-                return cleanedResponse;
-            } catch (error) {
-                log(`Erreur OpenAI: ${error.message}`, 'error');
-                lastPlayedReflection = "";
-                return `Désolé, une erreur est survenue avec l'IA: ${error.message}`;
             }
-        }
-    
-        // =============================================
-        // 💬 CONVERSATION UI
-        // =============================================
-        function addToConversation(type, content) {
-            if (!conversationHistoryEl || !content) return;
-            if (conversationHistoryEl.querySelector('.italic')) conversationHistoryEl.innerHTML = '';
-            
-            conversationHistory.push({ role: type, content });
-            if(conversationHistory.length > 30) conversationHistory.shift();
-    
-            const div = document.createElement('div');
-            const baseClasses = 'mb-3 px-4 py-3 rounded-2xl max-w-[85%] break-words shadow-md';
-            let specificClasses = '';
-            let header = '';
-    
-            if (type === 'user') {
-                specificClasses = 'bg-blue-500 text-white ml-auto rounded-br-md';
-                header = `<div class="text-xs opacity-80 mb-1">Vous</div>`;
-            } else if (type === 'assistant') {
-                specificClasses = 'bg-white/90 text-gray-800 mr-auto rounded-bl-md';
-                const speakFn = `speakTextWithPipeline('${content.replace(/'/g, "\\'")}')`;
-                header = `<div class="text-xs text-gray-600 opacity-70 mb-1 flex justify-between items-center"><span>Assistant</span><button onclick="${speakFn}" class="text-gray-600 hover:text-black transition-transform">🔊</button></div>`;
-            } else { // System
-                 specificClasses = 'text-center text-xs text-white/50 italic w-full';
+
+            let cleanedResponse = fullResponse.trim();
+            if (lastPlayedReflection && cleanedResponse.toLowerCase().startsWith(lastPlayedReflection.toLowerCase())) {
+                cleanedResponse = cleanedResponse.substring(lastPlayedReflection.length).replace(/^[,.\s]+/, '');
             }
-            
-            div.className = `${baseClasses} ${specificClasses}`;
-            div.innerHTML = type === 'system' ? `--- ${content} ---` : `${header}<div>${content}</div>`;
-            conversationHistoryEl.appendChild(div);
-            conversationHistoryEl.scrollTop = conversationHistoryEl.scrollHeight;
+            lastPlayedReflection = "";
+            log('✅ Réponse OpenAI reçue', 'success');
+            return cleanedResponse;
+        } catch (error) {
+            log(`Erreur OpenAI: ${error.message}`, 'error');
+            lastPlayedReflection = "";
+            return `Désolé, une erreur est survenue avec l'IA: ${error.message}`;
         }
-        
-        // =============================================
-        // 🚀 INITIALIZATION
-        // =============================================
-        window.onload = () => {
-            // Assign DOM elements
-            voiceCircle = document.getElementById('voice-circle');
-            statusText = document.getElementById('status-text');
-            toggleButton = document.getElementById('toggleButton');
-            toggleIconEl = document.getElementById('toggleIconEl');
-            toggleText = document.getElementById('toggleText');
-            ttsAudio = document.getElementById('ttsAudio');
-            interruptIndicator = document.getElementById('interrupt-indicator');
-            processingIndicator = document.getElementById('processing-indicator');
-            textInput = document.getElementById('text-input');
-            sendButton = document.getElementById('send-button');
-            modeContinu = document.getElementById('modeContinu');
-            modePushToTalk = document.getElementById('modePushToTalk');
-            conversationDrawer = document.getElementById('conversationDrawer');
-            conversationHistoryEl = document.getElementById('conversationHistory');
-            settingsDrawer = document.getElementById('settingsDrawer');
-            drawerOverlay = document.getElementById('drawerOverlay');
-            drawerGroqKey = document.getElementById('drawerGroqKey');
-            drawerOpenaiKey = document.getElementById('drawerOpenaiKey');
-            drawerAutoSpeak = document.getElementById('drawerAutoSpeak');
-            drawerAllowInterrupt = document.getElementById('drawerAllowInterrupt');
-            drawerVoiceSelect = document.getElementById('drawerVoiceSelect');
-            drawerDebug = document.getElementById('drawerDebug');
-    
-            // Initial state
-            updateStatus("Prêt", "power-off", "");
-            updateButtonState();
-            updateModeButtons();
-            
-            // Load saved settings
-            drawerGroqKey.value = localStorage.getItem('groq_api_key') || '';
-            drawerOpenaiKey.value = localStorage.getItem('openai_api_key') || '';
-            drawerAutoSpeak.checked = localStorage.getItem('auto_speak') !== 'false';
-            drawerAllowInterrupt.checked = localStorage.getItem('allow_interrupt') !== 'false';
-            drawerVoiceSelect.value = localStorage.getItem('selected_voice') || 'fr-FR-DeniseNeural';
-    
-            // MODIFICATION POUR iOS/iPadOS : Utilisation de 'touchend' pour le déverrouillage
-            const handleInteraction = (event) => {
-                event.preventDefault();
-                unlockAudio(); // Déverrouille l'audio à la PREMIÈRE interaction.
-                if (recordingMode === 'continu') {
-                    toggleMasterRecording();
-                } else {
-                    togglePushToTalk();
-                }
-            };
-    
-            toggleButton.addEventListener('click', handleInteraction);
-            toggleButton.addEventListener('touchend', handleInteraction);
-    
-    
-            modeContinu.onclick = () => switchToMode('continu');
-            modePushToTalk.onclick = () => switchToMode('push-to-talk');
-            sendButton.onclick = () => processUserMessage(textInput.value.trim());
-            textInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); processUserMessage(textInput.value.trim()); textInput.value = ''; } };
-    
-            // Drawer functionality
-            document.getElementById('conversationToggle').onclick = () => { conversationDrawer.classList.remove('-translate-x-full'); drawerOverlay.classList.remove('opacity-0', 'pointer-events-none'); };
-            document.getElementById('drawerToggle').onclick = () => { settingsDrawer.classList.remove('translate-x-full'); drawerOverlay.classList.remove('opacity-0', 'pointer-events-none'); };
-            const closeDrawers = () => {
-                conversationDrawer.classList.add('-translate-x-full');
-                settingsDrawer.classList.add('translate-x-full');
-                drawerOverlay.classList.add('opacity-0', 'pointer-events-none');
-            };
-            document.getElementById('conversationDrawerClose').onclick = closeDrawers;
-            document.getElementById('settingsDrawerClose').onclick = closeDrawers;
-            drawerOverlay.onclick = closeDrawers;
-            document.onkeydown = (e) => { if (e.key === 'Escape') closeDrawers(); };
-            
-            // Settings saving
-            drawerGroqKey.oninput = () => localStorage.setItem('groq_api_key', drawerGroqKey.value);
-            drawerOpenaiKey.oninput = () => localStorage.setItem('openai_api_key', drawerOpenaiKey.value);
-            drawerAutoSpeak.onchange = () => localStorage.setItem('auto_speak', drawerAutoSpeak.checked);
-            drawerAllowInterrupt.onchange = () => localStorage.setItem('allow_interrupt', drawerAllowInterrupt.checked);
-            drawerVoiceSelect.onchange = () => localStorage.setItem('selected_voice', drawerVoiceSelect.value);
-            
-            // Drawer actions
-            document.getElementById('drawerClearCache').onclick = () => {
-                transcriptionCache.clear(); ttsCache.clear();
-                log('Cache vidé', 'success');
-            };
-            document.getElementById('drawerExportConversation').onclick = () => {
-                const data = JSON.stringify(conversationHistory, null, 2);
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
-                a.download = `conversation_${new Date().toISOString().slice(0,10)}.json`;
-                a.click();
-                URL.revokeObjectURL(a.href);
-                log('Conversation exportée', 'success');
-            };
-            
-            // Update time
-            const updateTime = () => { document.getElementById('time').textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); };
-            updateTime();
-            setInterval(updateTime, 10000);
-    
-            lucide.createIcons();
-            log('🎯 Système initialisé avec succès!', 'success');
-            
-            window.onbeforeunload = stopAllRecording;
+    }
+
+    // =============================================
+    // 💬 CONVERSATION UI (sécurisée)
+    // =============================================
+    function addToConversation(type, content) {
+        if (!conversationHistoryEl || !content) return;
+        if (conversationHistoryEl.querySelector('.italic')) conversationHistoryEl.innerHTML = '';
+
+        conversationHistory.push({ role: type, content });
+        if(conversationHistory.length > 30) conversationHistory.shift();
+
+        const wrapper = document.createElement('div');
+        const baseClasses = 'mb-3 px-4 py-3 rounded-2xl max-w-[85%] break-words shadow-md';
+
+        if (type === 'system') {
+            wrapper.className = `${baseClasses} text-center text-xs text-white/50 italic w-full`;
+            wrapper.textContent = `--- ${content} ---`;
+        } else {
+            const isUser = type === 'user';
+            wrapper.className = `${baseClasses} ${isUser ? 'bg-blue-500 text-white ml-auto rounded-br-md' : 'bg-white/90 text-gray-800 mr-auto rounded-bl-md'}`;
+
+            const header = document.createElement('div');
+            header.className = isUser
+                ? 'text-xs opacity-80 mb-1'
+                : 'text-xs text-gray-600 opacity-70 mb-1 flex justify-between items-center';
+
+            if (isUser) {
+                header.textContent = 'Vous';
+            } else {
+                const left = document.createElement('span');
+                left.textContent = 'Assistant';
+                const btn = document.createElement('button');
+                btn.textContent = '🔊';
+                btn.className = 'text-gray-600 hover:text-black transition-transform';
+                btn.onclick = () => speakTextWithPipeline(content);
+
+                header.appendChild(left);
+                header.appendChild(btn);
+            }
+
+            const body = document.createElement('div');
+            body.textContent = content;
+
+            wrapper.appendChild(header);
+            wrapper.appendChild(body);
+        }
+        conversationHistoryEl.appendChild(wrapper);
+        conversationHistoryEl.scrollTop = conversationHistoryEl.scrollHeight;
+    }
+
+    // =============================================
+    // 🚀 INITIALIZATION
+    // =============================================
+    window.onload = () => {
+        // Assign DOM elements
+        voiceCircle = document.getElementById('voice-circle');
+        statusText = document.getElementById('status-text');
+        toggleButton = document.getElementById('toggleButton');
+        toggleIconEl = document.getElementById('toggleIconEl');
+        toggleText = document.getElementById('toggleText');
+        ttsAudio = document.getElementById('ttsAudio');
+        interruptIndicator = document.getElementById('interrupt-indicator');
+        processingIndicator = document.getElementById('processing-indicator');
+        textInput = document.getElementById('text-input');
+        sendButton = document.getElementById('send-button');
+        modeContinu = document.getElementById('modeContinu');
+        modePushToTalk = document.getElementById('modePushToTalk');
+        conversationDrawer = document.getElementById('conversationDrawer');
+        conversationHistoryEl = document.getElementById('conversationHistory');
+        settingsDrawer = document.getElementById('settingsDrawer');
+        drawerOverlay = document.getElementById('drawerOverlay');
+        drawerGroqKey = document.getElementById('drawerGroqKey');
+        drawerOpenaiKey = document.getElementById('drawerOpenaiKey');
+        drawerAutoSpeak = document.getElementById('drawerAutoSpeak');
+        drawerAllowInterrupt = document.getElementById('drawerAllowInterrupt');
+        drawerVoiceSelect = document.getElementById('drawerVoiceSelect');
+        drawerDebug = document.getElementById('drawerDebug');
+
+        // Initial state
+        updateStatus("Prêt", "power-off", "");
+        updateButtonState();
+        updateModeButtons();
+
+        // Load saved settings
+        drawerGroqKey.value = localStorage.getItem('groq_api_key') || '';
+        drawerOpenaiKey.value = localStorage.getItem('openai_api_key') || '';
+        drawerAutoSpeak.checked = localStorage.getItem('auto_speak') !== 'false';
+        drawerAllowInterrupt.checked = localStorage.getItem('allow_interrupt') !== 'false';
+        drawerVoiceSelect.value = localStorage.getItem('selected_voice') || 'fr-FR-DeniseNeural';
+
+        // Attach event listeners
+        toggleButton.onclick = () => {
+             if (recordingMode === 'continu') toggleMasterRecording();
+             else togglePushToTalk();
         };
+        modeContinu.onclick = () => switchToMode('continu');
+        modePushToTalk.onclick = () => switchToMode('push-to-talk');
+
+        // ✅ Vider le champ après envoi
+        sendButton.onclick = () => {
+            const msg = textInput.value.trim();
+            if (!msg) return;
+            processUserMessage(msg);
+            textInput.value = '';
+        };
+        textInput.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const msg = textInput.value.trim();
+                if (!msg) return;
+                processUserMessage(msg);
+                textInput.value = '';
+            }
+        };
+
+        // Drawer functionality
+        document.getElementById('conversationToggle').onclick = () => { conversationDrawer.classList.remove('-translate-x-full'); drawerOverlay.classList.remove('opacity-0', 'pointer-events-none'); };
+        document.getElementById('drawerToggle').onclick = () => { settingsDrawer.classList.remove('translate-x-full'); drawerOverlay.classList.remove('opacity-0', 'pointer-events-none'); };
+        const closeDrawers = () => {
+            conversationDrawer.classList.add('-translate-x-full');
+            settingsDrawer.classList.add('translate-x-full');
+            drawerOverlay.classList.add('opacity-0', 'pointer-events-none');
+        };
+        document.getElementById('conversationDrawerClose').onclick = closeDrawers;
+        document.getElementById('settingsDrawerClose').onclick = closeDrawers;
+        drawerOverlay.onclick = closeDrawers;
+        document.onkeydown = (e) => { if (e.key === 'Escape') closeDrawers(); };
+
+        // Settings saving
+        drawerGroqKey.oninput = () => localStorage.setItem('groq_api_key', drawerGroqKey.value);
+        drawerOpenaiKey.oninput = () => localStorage.setItem('openai_api_key', drawerOpenaiKey.value);
+        drawerAutoSpeak.onchange = () => localStorage.setItem('auto_speak', drawerAutoSpeak.checked);
+        drawerAllowInterrupt.onchange = () => localStorage.setItem('allow_interrupt', drawerAllowInterrupt.checked);
+        drawerVoiceSelect.onchange = () => localStorage.setItem('selected_voice', drawerVoiceSelect.value);
+
+        // Drawer actions
+        document.getElementById('drawerClearCache').onclick = () => {
+            transcriptionCache.clear(); ttsCache.clear();
+            log('Cache vidé', 'success');
+        };
+        document.getElementById('drawerExportConversation').onclick = () => {
+            const data = JSON.stringify(conversationHistory, null, 2);
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+            a.download = `conversation_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            log('Conversation exportée', 'success');
+        };
+
+        // Update time
+        const updateTime = () => { document.getElementById('time').textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); };
+        updateTime();
+        setInterval(updateTime, 10000);
+
+        lucide.createIcons();
+        log('🎯 Système initialisé avec succès!', 'success');
+
+        // ✅ iOS Safe Mode
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (isIOS) {
+            log('📱 iOS détecté - Mode Continu forcé, Push-to-Talk masqué', 'info');
+
+            // Unlock audio au premier touch
+            document.addEventListener('touchstart', async function initAudioOnFirstTouch() {
+                await initializeAudioContextForIOS();
+                document.removeEventListener('touchstart', initAudioOnFirstTouch);
+            }, { once: true });
+
+            // Forcer Continu et masquer PTT
+            switchToMode('continu');
+            if (modePushToTalk) {
+                modePushToTalk.style.display = 'none';
+                // Ajuste le bouton Continu pour occuper l'espace
+                modeContinu.classList.remove('flex-1');
+                modeContinu.classList.add('w-full');
+            }
+        }
+
+        window.onbeforeunload = stopAllRecording;
+    };
     </script>
 </body>
 </html>
