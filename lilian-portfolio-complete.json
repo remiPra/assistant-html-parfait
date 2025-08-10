@@ -1,0 +1,636 @@
+{
+  "photographer": "Lilian Ginet",
+  "gallery": "LIVE MUSIC 2025",
+  "year": 2025,
+  "website": "https://www.lilianginet.com",
+  "gallery_url": "https://www.lilianginet.com/photo-2/live-music/live-music-2025/",
+  "total_photos": 65,
+  "total_artists": 7,
+  "contact_info": {
+    "prints_available": true,
+    "contact_page": "https://www.lilianginet.com/contact/",
+    "artist_list_page": "https://www.lilianginet.com/liste-des-artistes-photographies/"
+  },
+  "artists": [
+    {
+      "name": "JACK WHITE",
+      "photo_count": 16,
+      "photo_ids": [1225, 1226, 1227, 1228, 1229, 1230, 1231, 1232, 1233, 1234, 1235, 1236, 1237, 1238, 1239, 1240],
+      "genre": "Rock/Blues",
+      "photos": [
+        {
+          "id": 1225,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1225.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1225.jpg",
+          "dimension": "landscape",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1226,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1226.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1226.jpg",
+          "dimension": "portrait",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1227,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1227.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1227.jpg",
+          "dimension": "landscape",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1228,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1228.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1228.jpg",
+          "dimension": "portrait",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1229,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1229.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1229.jpg",
+          "dimension": "landscape",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1230,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1230.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1230.jpg",
+          "dimension": "portrait",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1231,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1231.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1231.jpg",
+          "dimension": "portrait",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1232,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1232.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1232.jpg",
+          "dimension": "portrait",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1233,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1233.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1233.jpg",
+          "dimension": "portrait",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1234,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1234.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1234.jpg",
+          "dimension": "landscape",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1235,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1235.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1235.jpg",
+          "dimension": "portrait",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1236,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1236.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1236.jpg",
+          "dimension": "landscape",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1237,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1237.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1237.jpg",
+          "dimension": "portrait_narrow",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1238,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1238.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1238.jpg",
+          "dimension": "landscape",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1239,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1239.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1239.jpg",
+          "dimension": "landscape",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        },
+        {
+          "id": 1240,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1240.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1240.jpg",
+          "dimension": "landscape",
+          "title": "JACK WHITE",
+          "alt": "JACK WHITE"
+        }
+      ]
+    },
+    {
+      "name": "BLANDINE LEHOUT",
+      "photo_count": 3,
+      "photo_ids": [1292, 1293, 1294],
+      "genre": "Singer/Songwriter",
+      "photos": [
+        {
+          "id": 1292,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1292.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1292.jpg",
+          "dimension": "portrait",
+          "title": "BLANDINE LEHOUT",
+          "alt": "BLANDINE LEHOUT"
+        },
+        {
+          "id": 1293,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1293.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1293.jpg",
+          "dimension": "landscape",
+          "title": "BLANDINE LEHOUT",
+          "alt": "BLANDINE LEHOUT"
+        },
+        {
+          "id": 1294,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1294.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1294.jpg",
+          "dimension": "portrait",
+          "title": "BLANDINE LEHOUT",
+          "alt": "BLANDINE LEHOUT"
+        }
+      ]
+    },
+    {
+      "name": "DR FEELGOOD",
+      "photo_count": 4,
+      "photo_ids": [1295, 1296, 1297, 1298],
+      "genre": "Pub Rock/R&B",
+      "photos": [
+        {
+          "id": 1295,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1295.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1295.jpg",
+          "dimension": "portrait",
+          "title": "DR FEELGOOD",
+          "alt": "DR FEELGOOD"
+        },
+        {
+          "id": 1296,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1296.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1296.jpg",
+          "dimension": "landscape",
+          "title": "DR FEELGOOD",
+          "alt": "DR FEELGOOD"
+        },
+        {
+          "id": 1297,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1297.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1297.jpg",
+          "dimension": "portrait",
+          "title": "DR FEELGOOD",
+          "alt": "DR FEELGOOD"
+        },
+        {
+          "id": 1298,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1298.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1298.jpg",
+          "dimension": "landscape",
+          "title": "DR FEELGOOD",
+          "alt": "DR FEELGOOD"
+        }
+      ]
+    },
+    {
+      "name": "PERIPHERY",
+      "photo_count": 5,
+      "photo_ids": [1279, 1280, 1281, 1282, 1283],
+      "genre": "Progressive Metal",
+      "photos": [
+        {
+          "id": 1279,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1279.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1279.jpg",
+          "dimension": "landscape",
+          "title": "PERIPHERY",
+          "alt": "PERIPHERY"
+        },
+        {
+          "id": 1280,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1280.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1280.jpg",
+          "dimension": "landscape",
+          "title": "PERIPHERY",
+          "alt": "PERIPHERY"
+        },
+        {
+          "id": 1281,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1281.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1281.jpg",
+          "dimension": "portrait",
+          "title": "PERIPHERY",
+          "alt": "PERIPHERY"
+        },
+        {
+          "id": 1282,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1282.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1282.jpg",
+          "dimension": "portrait",
+          "title": "PERIPHERY",
+          "alt": "PERIPHERY"
+        },
+        {
+          "id": 1283,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1283.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1283.jpg",
+          "dimension": "portrait",
+          "title": "PERIPHERY",
+          "alt": "PERIPHERY"
+        }
+      ]
+    },
+    {
+      "name": "SPIRITBOX",
+      "photo_count": 6,
+      "photo_ids": [1273, 1274, 1275, 1276, 1277, 1278],
+      "genre": "Metalcore/Electronic",
+      "photos": [
+        {
+          "id": 1273,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1273.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1273.jpg",
+          "dimension": "landscape",
+          "title": "SPIRITBOX",
+          "alt": "SPIRITBOX"
+        },
+        {
+          "id": 1274,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1274.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1274.jpg",
+          "dimension": "landscape",
+          "title": "SPIRITBOX",
+          "alt": "SPIRITBOX"
+        },
+        {
+          "id": 1275,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1275.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1275.jpg",
+          "dimension": "landscape",
+          "title": "SPIRITBOX",
+          "alt": "SPIRITBOX"
+        },
+        {
+          "id": 1276,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1276.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1276.jpg",
+          "dimension": "landscape",
+          "title": "SPIRITBOX",
+          "alt": "SPIRITBOX"
+        },
+        {
+          "id": 1277,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1277.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1277.jpg",
+          "dimension": "portrait",
+          "title": "SPIRITBOX",
+          "alt": "SPIRITBOX"
+        },
+        {
+          "id": 1278,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1278.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1278.jpg",
+          "dimension": "landscape",
+          "title": "SPIRITBOX",
+          "alt": "SPIRITBOX"
+        }
+      ]
+    },
+    {
+      "name": "STRAY FROM THE PATH",
+      "photo_count": 7,
+      "photo_ids": [1285, 1286, 1287, 1288, 1289, 1290, 1291],
+      "genre": "Hardcore/Metalcore",
+      "photos": [
+        {
+          "id": 1285,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1285.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1285.jpg",
+          "dimension": "portrait",
+          "title": "STRAY FROM THE PATH",
+          "alt": "STRAY FROM THE PATH"
+        },
+        {
+          "id": 1286,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1286.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1286.jpg",
+          "dimension": "portrait",
+          "title": "STRAY FROM THE PATH",
+          "alt": "STRAY FROM THE PATH"
+        },
+        {
+          "id": 1287,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1287.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1287.jpg",
+          "dimension": "landscape",
+          "title": "STRAY FROM THE PATH",
+          "alt": "STRAY FROM THE PATH"
+        },
+        {
+          "id": 1288,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1288.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1288.jpg",
+          "dimension": "portrait",
+          "title": "STRAY FROM THE PATH",
+          "alt": "STRAY FROM THE PATH"
+        },
+        {
+          "id": 1289,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1289.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1289.jpg",
+          "dimension": "portrait",
+          "title": "STRAY FROM THE PATH",
+          "alt": "STRAY FROM THE PATH"
+        },
+        {
+          "id": 1290,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1290.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1290.jpg",
+          "dimension": "landscape",
+          "title": "STRAY FROM THE PATH",
+          "alt": "STRAY FROM THE PATH"
+        },
+        {
+          "id": 1291,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1291.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1291.jpg",
+          "dimension": "portrait",
+          "title": "STRAY FROM THE PATH",
+          "alt": "STRAY FROM THE PATH"
+        }
+      ]
+    },
+    {
+      "name": "WISHBONE ASH",
+      "photo_count": 3,
+      "photo_ids": [1299, 1300, 1301],
+      "genre": "Progressive Rock",
+      "photos": [
+        {
+          "id": 1299,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1299.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1299.jpg",
+          "dimension": "landscape",
+          "title": "WISHBONE ASH",
+          "alt": "WISHBONE ASH"
+        },
+        {
+          "id": 1300,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1300.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1300.jpg",
+          "dimension": "portrait",
+          "title": "WISHBONE ASH",
+          "alt": "WISHBONE ASH"
+        },
+        {
+          "id": 1301,
+          "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1301.jpg?ver=8",
+          "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1301.jpg",
+          "dimension": "landscape",
+          "title": "WISHBONE ASH",
+          "alt": "WISHBONE ASH"
+        }
+      ]
+    }
+  ],
+  "archive_photos": {
+    "name": "ARCHIVE",
+    "photo_count": 21,
+    "photo_ids": [1241, 1242, 1243, 1244, 1245, 1246, 1247, 1248, 1249, 1250, 1251, 1252, 1253, 1254, 1255, 1256, 1257, 1258, 1259, 1260, 1261, 1262, 1263, 1264, 1265, 1266, 1267, 1268, 1269, 1270, 1271, 1272],
+    "genre": "Electronic/Trip-Hop",
+    "photos": [
+      {
+        "id": 1241,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1241.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1241.jpg",
+        "dimension": "landscape",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1242,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1242.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1242.jpg",
+        "dimension": "portrait",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1243,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1243.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1243.jpg",
+        "dimension": "landscape",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1244,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1244.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1244.jpg",
+        "dimension": "portrait",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1245,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1245.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1245.jpg",
+        "dimension": "landscape",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1246,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1246.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1246.jpg",
+        "dimension": "portrait",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1247,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1247.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1247.jpg",
+        "dimension": "landscape",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1248,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1248.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1248.jpg",
+        "dimension": "portrait",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1249,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1249.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1249.jpg",
+        "dimension": "landscape",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1250,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1250.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1250.jpg",
+        "dimension": "portrait",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1251,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1251.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1251.jpg",
+        "dimension": "landscape",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1252,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1252.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1252.jpg",
+        "dimension": "portrait",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1253,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1253.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1253.jpg",
+        "dimension": "landscape",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1254,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1254.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1254.jpg",
+        "dimension": "portrait",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1255,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1255.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1255.jpg",
+        "dimension": "landscape",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1256,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1256.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1256.jpg",
+        "dimension": "portrait",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1257,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1257.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1257.jpg",
+        "dimension": "landscape",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1258,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1258.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1258.jpg",
+        "dimension": "portrait",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1259,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1259.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1259.jpg",
+        "dimension": "landscape",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1260,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1260.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1260.jpg",
+        "dimension": "landscape",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      },
+      {
+        "id": 1272,
+        "thumbnail_url": "https://www.lilianginet.com/wp-content/uploads/wppa/thumbs/1272.jpg?ver=8",
+        "full_url": "https://www.lilianginet.com/wp-content/uploads/wppa/1272.jpg",
+        "dimension": "landscape",
+        "title": "ARCHIVE",
+        "alt": "ARCHIVE"
+      }
+    ]
+  },
+  "metadata": {
+    "copyright": "© 2008 - 2025 Lilian Ginet",
+    "rights_reserved": "Pour des tirages ou utiliser certaines images, merci de me contacter.",
+    "extract_date": "2025-01-16",
+    "webpage_language": "fr-FR",
+    "photo_plugin": "WPPA+ (WP Photo Album Plus)",
+    "image_quality": "High resolution available",
+    "licensing": "Contact photographer for usage rights and limited prints"
+  },
+  "statistics": {
+    "total_images": 65,
+    "artists_count": 7,
+    "archive_count": 21,
+    "portrait_photos": 32,
+    "landscape_photos": 32,
+    "portrait_narrow": 1,
+    "genres_represented": [
+      "Rock/Blues",
+      "Singer/Songwriter", 
+      "Pub Rock/R&B",
+      "Progressive Metal",
+      "Metalcore/Electronic",
+      "Hardcore/Metalcore",
+      "Progressive Rock",
+      "Electronic/Trip-Hop"
+    ]
+  },
+  "technical_info": {
+    "thumbnail_dimensions": "250x320px (max)",
+    "thumbnail_format": "JPG",
+    "version_parameter": "?ver=8",
+    "lazy_loading": true,
+    "responsive_design": true,
+    "image_optimization": "WPPA+ plugin optimized"
+  }
+}
+
