@@ -48,6 +48,10 @@
       "src": "/remi",
       "dest": "/remi.html"
     },
+        {
+      "src": "/lilian",
+      "dest": "/lilianportoflio.html"
+    },
      {
       "src": "/(.*)",
       "dest": "/openai.html"
