@@ -9,6 +9,8 @@ class NavigationDrawer {
         const path = window.location.pathname;
         if (path.includes('/nav') || path.includes('testp.html')) return 'nav';
         if (path.includes('/nora') || path.includes('test.html')) return 'nora';
+        if (path.includes('/remi') || path.includes('remi.html')) return 'remi';
+
         if (path.includes('/testo') || path.includes('speechr.html')) return 'testo';
         if (path.includes('/english')) return 'english';
         return 'home';
@@ -46,6 +48,8 @@ class NavigationDrawer {
 
                     ${this.createDrawerLink('/nav', 'nav', '🧭', 'Navigation', 'Interface de test navigation')}
                     ${this.createDrawerLink('/nora', 'nora', '🤖', 'Nora Assistant', 'Assistant vocal principal')}
+                    ${this.createDrawerLink('/remi', 'remi', '🤖', 'remi Clone', 'Assistant vocal principal')}
+
                     ${this.createDrawerLink('/english', 'english', '🇬🇧', 'English Version', 'Version anglaise')}
                 </div>
 

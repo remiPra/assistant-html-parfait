@@ -39,10 +39,20 @@
       "src": "/safari",
       "dest": "/safari.html"
     },
+   
     {
+      "src": "/emilie",
+      "dest": "/emilie.html"
+    },
+      {
+      "src": "/remi",
+      "dest": "/remi.html"
+    },
+     {
       "src": "/(.*)",
       "dest": "/openai.html"
     }
+
     
   ]
 }
