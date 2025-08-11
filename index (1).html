@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sylvaine Fontaine | Transmission, Racines, Écoute, Fluidité</title>
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuration Tailwind avec les couleurs personnalisées -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ocre': '#C86E3F',       /* Ocre chaud - ancrage, terre, cacao */
+                        'foret': '#2F4F3A',      /* Vert forêt profond - nature, plantes médecine */
+                        'ocean': '#2A4F6E',      /* Bleu océan profond - chant des baleines, fluidité */
+                        'turquoise': '#75C4C0',  /* Turquoise clair - pureté, souffle, ouverture */
+                        'dore': '#D9B77C',       /* Doré doux - lumière intérieure, sacré */
+                        'sable': '#F4E5D3',      /* Beige sable - douceur, neutralité, respiration visuelle */
+                    },
+                    fontFamily: {
+                        'serif': ['Playfair Display', 'Cormorant Garamond', 'serif'],
+                        'sans': ['Inter', 'Raleway', 'Nunito', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=Nunito:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- React Icons via CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/react-icons@4.10.1/lib/esm/index.js" type="module"></script>
+    
+    <!-- Styles personnalisés -->
+    <style>
+        body {
+            background-color: #F4E5D3;
+            font-family: 'Inter', 'Raleway', 'Nunito', sans-serif;
+            color: #2F4F3A;
+        }
+        
+        h1, h2, h3, h4, .calligraphie {
+            font-family: 'Playfair Display', 'Cormorant Garamond', serif;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(to bottom, rgba(47, 79, 58, 0.7), rgba(42, 79, 110, 0.7));
+        }
+        
+        .transition-all {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .hover-lift {
+            transition: transform 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header avec Navigation -->
+    <header class="bg-sable shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <h1 class="text-2xl md:text-3xl font-serif font-semibold text-foret">Sylvaine Fontaine</h1>
+            </div>
+            
+            <!-- Navigation Desktop -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="#accueil" class="text-foret hover:text-ocre transition-all">Accueil</a>
+                <a href="#heritage" class="text-foret hover:text-ocre transition-all">Héritage & Racines</a>
+                <a href="#elements" class="text-foret hover:text-ocre transition-all">Connexion aux éléments</a>
+                <a href="#rituels" class="text-foret hover:text-ocre transition-all">Outils & Rituels</a>
+                <a href="#contact" class="text-foret hover:text-ocre transition-all">Contact</a>
+            </nav>
+            
+            <!-- Menu Hamburger Mobile -->
+            <div class="md:hidden">
+                <button id="menu-toggle" class="text-foret focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Menu Mobile -->
+        <div id="mobile-menu" class="hidden md:hidden bg-sable">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="#accueil" class="text-foret hover:text-ocre transition-all py-2">Accueil</a>
+                <a href="#heritage" class="text-foret hover:text-ocre transition-all py-2">Héritage & Racines</a>
+                <a href="#elements" class="text-foret hover:text-ocre transition-all py-2">Connexion aux éléments</a>
+                <a href="#rituels" class="text-foret hover:text-ocre transition-all py-2">Outils & Rituels</a>
+                <a href="#contact" class="text-foret hover:text-ocre transition-all py-2">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Section Hero -->
+    <section id="accueil" class="relative h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 bg-cover bg-center z-0" style="background-image: url('images/jFoWsaViSi0o.jpg');"></div>
+        <div class="absolute inset-0 hero-gradient z-10"></div>
+        
+        <div class="container mx-auto px-4 z-20 text-center">
+            <h1 class="text-4xl md:text-6xl font-serif font-bold text-sable mb-6">Au service du vivant</h1>
+            <p class="text-xl md:text-2xl text-sable mb-8 max-w-3xl mx-auto">Transmission, racines, écoute, fluidité, plantes médecine, voix guérisseuse, cacao sacré, baleines, pureté, harmonisation des lieux, respect du vivant, joie contagieuse.</p>
+            <a href="#heritage" class="inline-block bg-ocre hover:bg-opacity-90 text-sable py-3 px-8 rounded-full text-lg transition-all hover-lift">Découvrir mon univers</a>
+        </div>
+    </section>
+
+    <!-- Section Héritage & Racines -->
+    <section id="heritage" class="py-20 bg-sable">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-serif font-semibold text-foret mb-4">Héritage & Racines</h2>
+                <div class="w-24 h-1 bg-ocre mx-auto"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="order-2 md:order-1">
+                    <h3 class="text-2xl font-serif text-ocean mb-6">La sagesse de la terre</h3>
+                    <p class="text-lg mb-6">Ancrée dans les traditions de La Réunion, je porte en moi la richesse d'un héritage multiculturel où les savoirs ancestraux se transmettent de génération en génération. Chaque plante, chaque rituel raconte une histoire de guérison et de connexion profonde avec la nature.</p>
+                    <p class="text-lg mb-6">Mon chemin m'a amenée à explorer les plantes médecine, à écouter leur langage subtil et à comprendre comment elles peuvent nous accompagner dans notre quête d'équilibre et d'harmonie.</p>
+                    <p class="text-lg italic font-serif text-ocre">"Je t'invite à redécouvrir cette sagesse ancienne, à renouer avec tes propres racines et à honorer la terre qui nous nourrit."</p>
+                </div>
+                <div class="order-1 md:order-2">
+                    <img src="images/VjPZeziuZDz7.jpeg" alt="Forêt tropicale de La Réunion" class="rounded-lg shadow-xl w-full h-auto">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Connexion aux éléments -->
+    <section id="elements" class="py-20 bg-ocean bg-opacity-10">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-serif font-semibold text-ocean mb-4">Connexion aux éléments</h2>
+                <div class="w-24 h-1 bg-turquoise mx-auto"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Eau -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover-lift">
+                    <img src="images/xx0qk1u4nFlu.jpg" alt="Baleine dans l'océan" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-serif text-ocean mb-4">Le chant des baleines</h3>
+                        <p class="text-gray-700">L'eau nous enseigne la fluidité, l'adaptation et la profondeur émotionnelle. À travers le chant des baleines et la sagesse de l'océan, j'accompagne vers une reconnexion à notre nature fluide et intuitive.</p>
+                    </div>
+                </div>
+                
+                <!-- Terre -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover-lift">
+                    <img src="images/68JuA1MbBpJY.jpg" alt="Mains préparant une infusion de plantes" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-serif text-foret mb-4">La sagesse des plantes</h3>
+                        <p class="text-gray-700">La terre nous ancre et nous nourrit. Les plantes médecine sont des guides précieux qui nous reconnectent à notre corps et à notre essence. Elles nous enseignent la patience et la résilience.</p>
+                    </div>
+                </div>
+                
+                <!-- Feu -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover-lift">
+                    <img src="images/uEP10SrPbgkF.jpeg" alt="Cérémonie du cacao" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-serif text-ocre mb-4">Le feu sacré du cacao</h3>
+                        <p class="text-gray-700">Le feu transforme et purifie. À travers les cérémonies de cacao sacré, j'invite à réveiller le feu intérieur, cette flamme créatrice qui nous permet de transmuter nos expériences en sagesse.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Outils & Rituels -->
+    <section id="rituels" class="py-20 bg-sable">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-serif font-semibold text-foret mb-4">Outils & Rituels</h2>
+                <div class="w-24 h-1 bg-dore mx-auto"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <img src="images/eWvZmKgSeqMz.jpg" alt="Bols chantants en cristal" class="rounded-lg shadow-xl w-full h-auto">
+                </div>
+                <div>
+                    <h3 class="text-2xl font-serif text-ocean mb-6">Harmonisation par le son</h3>
+                    <p class="text-lg mb-6">Les bols chantants en cristal émettent des fréquences qui résonnent profondément avec nos cellules. Ces vibrations sonores permettent de libérer les blocages énergétiques et d'harmoniser nos différents corps subtils.</p>
+                    <p class="text-lg mb-6">Lors des séances d'harmonisation, je combine le pouvoir du son avec celui de la voix et des plantes pour créer un espace sacré de guérison et de transformation.</p>
+                    <p class="text-lg italic font-serif text-ocre">"Je t'accompagne dans ce voyage sonore vers ton essence, vers cette mélodie unique qui est la tienne."</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mt-20">
+                <div class="order-2 md:order-1">
+                    <h3 class="text-2xl font-serif text-ocean mb-6">Cérémonie du cacao sacré</h3>
+                    <p class="text-lg mb-6">Le cacao est une plante médecine douce mais puissante, qui ouvre le cœur et facilite la connexion à soi. Dans un cadre cérémoniel, cette boisson sacrée devient un portail vers notre sagesse intérieure.</p>
+                    <p class="text-lg mb-6">Chaque cérémonie est unique et adaptée à l'intention du moment, combinant chants, méditations guidées et partages authentiques dans un cercle bienveillant.</p>
+                    <p class="text-lg italic font-serif text-ocre">"Je t'invite à goûter à cette médecine du cœur, à te laisser porter par sa chaleur et sa douceur pour révéler ta véritable nature."</p>
+                </div>
+                <div class="order-1 md:order-2">
+                    <img src="images/BgRuJQ7r2jhl.png" alt="Cérémonie du cacao sacré" class="rounded-lg shadow-xl w-full h-auto">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Citation Calligraphie -->
+    <section class="py-16 bg-foret text-sable text-center">
+        <div class="container mx-auto px-4">
+            <div class="max-w-3xl mx-auto">
+                <img src="images/gEswRpQjdOq0.jpg" alt="Calligraphie Just Breathe" class="mx-auto mb-8 max-w-md">
+                <p class="text-2xl md:text-3xl font-serif italic">"Respire profondément et laisse la nature te guider vers ta propre sagesse."</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Contact -->
+    <section id="contact" class="py-20 bg-sable">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-serif font-semibold text-foret mb-4">Me Contacter</h2>
+                <div class="w-24 h-1 bg-turquoise mx-auto"></div>
+                <p class="text-lg mt-6 max-w-2xl mx-auto">Pour toute information sur les cérémonies, les soins énergétiques ou les ateliers, n'hésitez pas à me contacter.</p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2">
+                    <div class="p-8 bg-ocean text-white">
+                        <h3 class="text-2xl font-serif mb-6">Informations de contact</h3>
+                        
+                        <div class="flex items-start mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <div>
+                                <p class="font-semibold">Adresse</p>
+                                <p>La Réunion, France</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <div>
+                                <p class="font-semibold">Email</p>
+                                <p>contact@sylvainefontaine.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            <div>
+                                <p class="font-semibold">Téléphone</p>
+                                <p>+33 6 XX XX XX XX</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-10">
+                            <h4 class="text-xl font-serif mb-4">Suivez-moi</h4>
+                            <div class="flex space-x-4">
+                                <a href="#" class="text-white hover:text-dore transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                    </svg>
+                                </a>
+                                <a href="#" class="text-white hover:text-dore transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/>
+                                    </svg>
+                                </a>
+                                <a href="#" class="text-white hover:text-dore transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-8">
+                        <form>
+                            <div class="mb-4">
+                                <label for="name" class="block text-gray-700 font-medium mb-2">Nom</label>
+                                <input type="text" id="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-turquoise">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
+                                <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-turquoise">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="subject" class="block text-gray-700 font-medium mb-2">Sujet</label>
+                                <input type="text" id="subject" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-turquoise">
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label for="message" class="block text-gray-700 font-medium mb-2">Message</label>
+                                <textarea id="message" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-turquoise"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="bg-ocean hover:bg-opacity-90 text-white py-3 px-6 rounded-lg transition-all hover-lift">Envoyer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-foret text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-serif mb-4">Sylvaine Fontaine</h3>
+                    <p class="mb-4">Transmission, racines, écoute, fluidité, plantes médecine, voix guérisseuse, cacao sacré, baleines, pureté, harmonisation des lieux, respect du vivant, joie contagieuse.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-serif mb-4">Liens rapides</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#accueil" class="hover:text-dore transition-all">Accueil</a></li>
+                        <li><a href="#heritage" class="hover:text-dore transition-all">Héritage & Racines</a></li>
+                        <li><a href="#elements" class="hover:text-dore transition-all">Connexion aux éléments</a></li>
+                        <li><a href="#rituels" class="hover:text-dore transition-all">Outils & Rituels</a></li>
+                        <li><a href="#contact" class="hover:text-dore transition-all">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-serif mb-4">Newsletter</h3>
+                    <p class="mb-4">Inscrivez-vous pour recevoir des informations sur les prochaines cérémonies et ateliers.</p>
+                    <form class="flex">
+                        <input type="email" placeholder="Votre email" class="px-4 py-2 rounded-l-lg w-full focus:outline-none text-gray-700">
+                        <button type="submit" class="bg-ocre hover:bg-opacity-90 text-white px-4 py-2 rounded-r-lg transition-all">OK</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-10 pt-6 text-center text-sm">
+                <p>&copy; 2025 Sylvaine Fontaine. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script pour le menu mobile -->
+    <script>
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Fermer le menu mobile quand on clique sur un lien
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', function() {
+                document.getElementById('mobile-menu').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>

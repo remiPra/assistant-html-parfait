@@ -52,6 +52,10 @@
       "src": "/lilian",
       "dest": "/lilianportoflio.html"
     },
+    {
+      "src": "/sylvaine-site",
+      "dest": "/sylvaine.html"
+    },
      {
       "src": "/(.*)",
       "dest": "/openai.html"

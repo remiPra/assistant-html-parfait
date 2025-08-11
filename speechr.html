@@ -50,7 +50,7 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
-
+        
         #toggleButton {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             transform-origin: center;
@@ -74,7 +74,7 @@
                 </button>
             </div>
         </div>
-
+        
         <div class="flex-1 flex flex-col justify-center items-center px-5 pt-16 pb-48">
             <div class="relative flex-shrink-0 text-center">
                 <div id="voice-circle" class="w-[200px] h-[200px] rounded-full mx-auto mb-2.5 flex items-center justify-center text-6xl transition-all duration-300 bg-white/10 backdrop-blur-xl border-2 border-white/20">
@@ -92,8 +92,8 @@
                     <i data-lucide="mic" id="toggleIconEl"></i>
                     <span id="toggleText">Démarrer</span>
                 </button>
-
-                <div id="modeButtons" class="flex justify-center items-center gap-2">
+                
+                <div class="flex justify-center items-center gap-2">
                     <button id="modeContinu" class="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-green-500/80 text-white">
                         🔄 Continu
                     </button>
@@ -101,23 +101,12 @@
                         🎤 Push-to-Talk
                     </button>
                 </div>
-
+                
                 <div class="flex gap-2">
                     <input type="text" id="text-input" placeholder="Envoyer un message..." class="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder-white/60 focus:outline-none focus:border-green-400/50 focus:bg-white/15">
                     <button id="send-button" class="p-3 bg-green-500/80 rounded-xl text-white hover:bg-green-500/100 transition-colors">
                          <i data-lucide="send-horizontal" class="w-6 h-6"></i>
                     </button>
-                </div>
-
-                <!-- Legacy iOS controls -->
-                <div id="legacyControls" class="hidden space-y-2">
-                    <input type="file" id="legacyAudioInput" accept="audio/*;capture=microphone" class="hidden">
-                    <button id="legacyRecordBtn" class="w-full py-3 rounded-xl font-semibold bg-blue-500/80 text-white">
-                        🎙️ Enregistrer (iOS ancien)
-                    </button>
-                    <div class="text-xs text-white/70">
-                        Sur les anciens iPhone/iPad, utilisez ce bouton pour enregistrer, puis je transcris et je réponds.
-                    </div>
                 </div>
             </div>
         </div>
@@ -138,7 +127,7 @@
             </div>
         </div>
     </div>
-
+    
     <div id="settingsDrawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-gradient-to-b from-[#19356d] to-[#26488b] shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
         <div class="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0">
             <h2 class="text-white text-lg font-semibold">⚙️ Panneau de contrôle</h2>
@@ -179,41 +168,23 @@
     </div>
 
     <div id="drawerOverlay" class="fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
-    <div id="mobileConsole" class="fixed top-20 right-4 w-80 h-64 bg-black/90 text-green-400 text-xs p-2 rounded-lg z-50 overflow-y-auto font-mono hidden">
-        <div class="flex justify-between items-center mb-2">
-            <span>📱 Debug Console</span>
-            <button onclick="document.getElementById('mobileConsole').classList.add('hidden')" class="text-red-400">✕</button>
-        </div>
-        <div id="mobileConsoleContent"></div>
+    <!-- Ajouter après la div drawerOverlay -->
+<div id="mobileConsole" class="fixed top-20 right-4 w-80 h-64 bg-black/90 text-green-400 text-xs p-2 rounded-lg z-50 overflow-y-auto font-mono hidden">
+    <div class="flex justify-between items-center mb-2">
+        <span>📱 Debug Console</span>
+        <button onclick="document.getElementById('mobileConsole').classList.add('hidden')" class="text-red-400">✕</button>
     </div>
-
-    <!-- IMPORTANT: on ne charge pas ort/vad en <script> global.
-         Le script moderne les chargera dynamiquement si supporté. -->
-
-    <!-- Script MODERNE (modules) pour navigateurs récents -->
-    <script type="module">
+    <div id="mobileConsoleContent"></div>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.22/dist/bundle.min.js"></script>
+    
+    <script>
     // =============================================
-    // 🚀 MODERN PIPELINE (navigateur récent)
+    // 🚀 ASSISTANT VOCAL ULTRA-RAPIDE COMPLET
     // =============================================
-
-    // Dynamically load VAD only if needed
-    async function loadScript(src) {
-        return new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = src;
-            s.onload = resolve;
-            s.onerror = () => reject(new Error('Failed to load ' + src));
-            document.head.appendChild(s);
-        });
-    }
-    async function ensureVadLoaded() {
-        if (window.vad) return;
-        await loadScript('https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.22/dist/bundle.min.js');
-    }
-
-    // =============================================
-    // DOM & STATE
-    // =============================================
+    
+    // 🛠️ DOM & STATE VARIABLES
     let myVad = null;
     let conversationHistory = [];
     let isPlaying = false;
@@ -225,54 +196,60 @@
     let recordingMode = 'continu';
     let isPushToTalkRecording = false;
     let isContinuRecording = false;
+    let pushToTalkAudio = [];
     let mediaRecorder, recordedChunks = [];
     const transcriptionCache = new Map();
     const ttsCache = new Map();
     const MAX_CACHE_SIZE = 50;
     const MAX_BUFFER_SIZE = 3;
     const baseCircleClasses = "w-[200px] h-[200px] rounded-full mx-auto mb-2.5 flex items-center justify-center text-6xl transition-all duration-300 backdrop-blur-xl";
-    window.audioInitialized = false;
+    window.audioInitialized = false; // ✅ Flag pour l'initialisation audio sur iOS
 
     let toggleButton, toggleIconEl, toggleText, voiceCircle, statusText, ttsAudio, interruptIndicator, processingIndicator, textInput, sendButton;
-    let modeContinu, modePushToTalk, modeButtons;
+    let modeContinu, modePushToTalk;
     let conversationDrawer, conversationHistoryEl, settingsDrawer, drawerOverlay;
     let drawerGroqKey, drawerOpenaiKey, drawerAutoSpeak, drawerAllowInterrupt, drawerVoiceSelect, drawerDebug;
-    let legacyControls, legacyAudioInput, legacyRecordBtn;
-
+    
+    // 🗣️ SIMPLE REFLECTIONS
     const SIMPLE_REFLECTIONS = ["Ah oui, je vois...", "D'accord, très bien...", "OK, je comprends...", "Hmm, intéressant...", "Oui, effectivement...", "Ah, parfait...", "Très bien...", "Laissez-moi voir...", "Bien sûr...", "Oui, d'accord...", "Je comprends bien...", "Oui, tout à fait..."];
     let reflectionAudios = new Map();
     let isPlayingReflection = false;
 
+    // =============================================
+    // 🛠️ UTILITY & UI FUNCTIONS
+    // =============================================
     function log(message, type = 'info') {
         const timestamp = new Date().toLocaleTimeString();
         const emoji = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '⚡';
         const logMessage = `${timestamp} ${emoji} ${message}`;
         console.log(logMessage);
+
         if (drawerDebug) {
             const newLine = document.createElement('div');
             newLine.textContent = logMessage;
             const typeClass = { error: 'text-red-300', success: 'text-green-300', warning: 'text-yellow-300' };
             newLine.className = typeClass[type] || '';
             drawerDebug.insertBefore(newLine, drawerDebug.firstChild);
-            while (drawerDebug.children.length > 50) drawerDebug.removeChild(drawerDebug.lastChild);
+            while (drawerDebug.children.length > 50) {
+                drawerDebug.removeChild(drawerDebug.lastChild);
+            }
         }
     }
-
+    
+    // ✅ NOUVELLE FONCTION : Initialisation audio pour iOS
     async function initializeAudioContextForIOS() {
         if (window.audioInitialized) return true;
         try {
+            // Créer un audio silencieux pour "débloquer" l'audio sur iOS
             const silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
             silentAudio.playsinline = true;
             await silentAudio.play();
             silentAudio.pause();
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            const ctx = new AudioCtx();
-            await ctx.resume();
             log('✅ Audio iOS initialisé', 'success');
             window.audioInitialized = true;
             return true;
         } catch (error) {
-            log('⚠️ Initialisation audio iOS échouée. Interaction requise.', 'warning');
+            log('⚠️ Initialisation audio iOS échouée. Une interaction utilisateur est requise.', 'warning');
             return false;
         }
     }
@@ -281,7 +258,9 @@
         if (!statusText || !voiceCircle) return;
         statusText.textContent = text;
         voiceCircle.innerHTML = `<i data-lucide="${iconName}" class="w-16 h-16 ${stateClass === 'processing' ? 'animate-spin' : ''}"></i>`;
+        
         processingIndicator?.classList.toggle('opacity-100', stateClass === 'processing');
+        
         let stateClasses = "";
         switch (stateClass) {
             case "listening": stateClasses = "bg-green-400/20 border-2 border-green-400/40 animate-pulse"; break;
@@ -294,9 +273,11 @@
         voiceCircle.className = `${baseCircleClasses} ${stateClasses}`;
         lucide.createIcons();
     }
-
+    
     function updateButtonState() {
         if (!toggleButton || !toggleIconEl || !toggleText) return;
+        
+        let isRecording = isContinuRecording || isPushToTalkRecording;
         toggleButton.disabled = recordingMode === 'continu' && (isPlaying || isProcessingTTS);
 
         if (recordingMode === 'push-to-talk') {
@@ -314,7 +295,7 @@
                 toggleIconEl.setAttribute('data-lucide', 'mic');
                 toggleText.textContent = 'Maintenir & Parler';
             }
-        } else {
+        } else { // Continu
             const baseClass = "w-full py-4 rounded-2xl font-semibold text-base transition-all backdrop-blur-xl text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2";
             if (isContinuRecording) {
                 toggleButton.className = `${baseClass} bg-red-500/80 hover:bg-red-600/80`;
@@ -338,7 +319,10 @@
             modePushToTalk.className = "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all bg-blue-500/80 text-white";
         }
     }
-
+    
+    // =============================================
+    // 🎤 RECORDING & VAD
+    // =============================================
     async function requestMicrophonePermission() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -346,8 +330,8 @@
             log('Permission microphone accordée', 'success');
             return true;
         } catch (error) {
-            log('Permission microphone refusée.', 'error');
-            alert('Autorisez le micro pour utiliser l’assistant vocal.');
+            log('Permission microphone refusée ou non disponible.', 'error');
+            alert('Veuillez autoriser l\'accès au microphone pour utiliser l\'assistant vocal.');
             return false;
         }
     }
@@ -358,16 +342,18 @@
         } else {
             const hasPermission = await requestMicrophonePermission();
             if (!hasPermission) return;
+            
             if (recordingMode === 'continu') await startContinuRecording();
             else await startPushToTalkRecording();
         }
     }
-
+    
     async function togglePushToTalk() {
         if (isPlaying || isProcessingTTS) {
             interruptTTS();
             await new Promise(resolve => setTimeout(resolve, 100));
         }
+    
         if (isPushToTalkRecording) {
             await stopPushToTalkRecording();
         } else {
@@ -376,16 +362,18 @@
         }
     }
 
+    // ✅ MODIFIÉ : `startContinuRecording` avec initialisation iOS
     async function startContinuRecording() {
         if (!drawerGroqKey.value.trim() || !drawerOpenaiKey.value.trim()) {
             alert('Veuillez configurer vos clés API dans le panneau de contrôle.');
             return;
         }
+        
+        // ✅ iOS : Initialiser l'audio d'abord
         if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
             await initializeAudioContextForIOS();
         }
-        await ensureVadLoaded();
-
+        
         toggleButton.disabled = true;
         updateStatus("Initialisation...", "loader-circle", "processing");
 
@@ -424,27 +412,23 @@
             alert('Veuillez configurer vos clés API dans le panneau de contrôle.');
             return;
         }
-        if (!('MediaRecorder' in window) || (MediaRecorder.isTypeSupported && !MediaRecorder.isTypeSupported('audio/webm'))) {
-            log("MediaRecorder non supporté", 'warning');
-            alert("Push-to-Talk n'est pas supporté sur ce navigateur. Utilisez le mode Continu.");
-            return;
-        }
 
         updateStatus("Parlez maintenant...", "mic", "speaking");
         isPushToTalkRecording = true;
         updateButtonState();
-        log("🎤 Push-to-Talk démarré", 'info');
+        log("🎤 Push-to-Talk (direct) démarré", 'info');
 
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             recordedChunks = [];
+
             mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
             mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
             mediaRecorder.onstop = async () => {
                 const blob = new Blob(recordedChunks, { type: 'audio/webm' });
                 const arrayBuffer = await blob.arrayBuffer();
-                const wavBuffer = await convertWebmToWavBuffer(arrayBuffer);
-                await transcribeAudioUltraFast(wavBuffer);
+                const audioBuffer = await convertWebmToWavBuffer(arrayBuffer);
+                await transcribeAudioUltraFast(audioBuffer);
             };
             mediaRecorder.start();
         } catch (error) {
@@ -453,9 +437,11 @@
             updateButtonState();
         }
     }
-
+    
     async function stopPushToTalkRecording() {
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
         isPushToTalkRecording = false;
         updateButtonState();
         updateStatus("Traitement...", "loader-circle", "processing");
@@ -464,24 +450,32 @@
     async function stopAllRecording() {
         if (myVad) { myVad.destroy(); myVad = null; }
         await cleanupPipeline();
+        
         reflectionAudios.forEach(URL.revokeObjectURL);
         reflectionAudios.clear();
         isPlayingReflection = false;
+        
         isContinuRecording = false;
         isPushToTalkRecording = false;
+        
         updateButtonState();
         updateStatus("Prêt", "power-off", "");
         log("🛑 Enregistrement arrêté", 'info');
     }
 
     function switchToMode(mode) {
-        if (isContinuRecording || isPushToTalkRecording) stopAllRecording();
+        if (isContinuRecording || isPushToTalkRecording) {
+            stopAllRecording();
+        }
         recordingMode = mode;
         updateModeButtons();
         updateButtonState();
         log(`Mode changé vers : ${mode}`, 'info');
     }
 
+    // =============================================
+    // 🔉 TTS & AUDIO PROCESSING
+    // =============================================
     function analyzeAudioQuality(audioData) {
         const energy = audioData.reduce((s, x) => s + x * x, 0) / audioData.length;
         if (energy < 0.0008) { log('Audio trop silencieux', 'warning'); return false; }
@@ -503,19 +497,18 @@
     }
 
     async function convertWebmToWavBuffer(webmBuffer) {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        const audioCtx = new AudioCtx();
-        const audioBuffer = await audioCtx.decodeAudioData(webmBuffer.slice(0));
+        const audioCtx = new OfflineAudioContext(1, 48000 * 10, 48000); // max 10 sec
+        const audioBuffer = await audioCtx.decodeAudioData(webmBuffer);
         const samples = audioBuffer.getChannelData(0);
         return encodeWAV(samples, audioBuffer.sampleRate);
     }
-
+    
     async function preGenerateSimpleReflections() {
         if (reflectionAudios.size > 0) return;
         log('🗣️ Pré-génération des réflexions...', 'info');
         const promises = SIMPLE_REFLECTIONS.map(async (phrase) => {
             try {
-                const audioUrl = await generateTTSForSentence(phrase, drawerVoiceSelect.value, { cache: false });
+                const audioUrl = await generateTTSForSentence(phrase, drawerVoiceSelect.value, -1);
                 reflectionAudios.set(phrase, audioUrl);
             } catch (error) { /* ignore */ }
         });
@@ -531,84 +524,124 @@
             isPlayingReflection = true;
             lastPlayedReflection = randomReflection;
             const reflectionAudio = new Audio(audioUrl);
-            reflectionAudio.playsinline = true;
             reflectionAudio.play().catch(e => log('Erreur lecture réflexion', 'error'));
             reflectionAudio.onended = () => { isPlayingReflection = false; };
         }
     }
-
+    
     function splitIntoSentences(text) {
         return text.match(/[^.!?]+[.!?]*|[^.!?]+$/g)?.map(s => s.trim()).filter(s => s.length > 3) || [];
     }
 
-    async function generateTTSForSentence(sentence, voice, { cache = true } = {}) {
+    async function generateTTSForSentence(sentence, voice) {
         const cacheKey = `${voice}_${sentence}`;
-        if (cache && ttsCache.has(cacheKey)) return ttsCache.get(cacheKey);
+        if (ttsCache.has(cacheKey)) return ttsCache.get(cacheKey);
+        
         try {
             const response = await fetch("https://chatbot-20102024-8c94bbb4eddf.herokuapp.com/synthesize", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text: sentence, voice }),
+                body: JSON.stringify({ text: sentence, voice: voice }),
             });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const audioBlob = await response.blob();
             const audioUrl = URL.createObjectURL(audioBlob);
-            if (cache) {
-                if (ttsCache.size >= MAX_CACHE_SIZE) {
-                    const [firstKey, firstUrl] = ttsCache.entries().next().value;
-                    URL.revokeObjectURL(firstUrl);
-                    ttsCache.delete(firstKey);
-                }
-                ttsCache.set(cacheKey, audioUrl);
+            if (ttsCache.size >= MAX_CACHE_SIZE) {
+                const [firstKey, firstUrl] = ttsCache.entries().next().value;
+                URL.revokeObjectURL(firstUrl);
+                ttsCache.delete(firstKey);
             }
+            ttsCache.set(cacheKey, audioUrl);
             return audioUrl;
         } catch (error) {
             log(`❌ Erreur TTS: ${error.message}`, 'error'); throw error;
         }
     }
 
+    // ✅ ENTIÈREMENT REMPLACÉE : `playAudioPipeline` pour iOS
     async function playAudioPipeline(sentences, voice) {
         for (let i = 0; i < sentences.length && pipelineActive; i++) {
             while (!readyAudioBuffer.has(i) && pipelineActive) await new Promise(r => setTimeout(r, 50));
             if (!pipelineActive) break;
+
             const audioData = readyAudioBuffer.get(i);
             readyAudioBuffer.delete(i);
             updateStatus(`IA parle... (${i + 1}/${sentences.length})`, "volume-2", "tts-playing");
+            
+            // ✅ Fix iOS : Créer un nouvel élément audio pour chaque phrase
             const audioElement = new Audio();
             audioElement.preload = 'auto';
-            audioElement.playsinline = true;
+            audioElement.playsinline = true; // Important pour iOS
             audioElement.src = audioData.audioUrl;
-            await new Promise((resolve) => {
-                audioElement.oncanplaythrough = async () => { try { await audioElement.play(); } catch {} };
-                audioElement.onended = () => { audioElement.src=''; resolve(); };
-                audioElement.onerror = () => resolve();
-                setTimeout(() => { if (!audioElement.ended) { audioElement.pause(); resolve(); } }, 30000);
+
+            await new Promise((resolve, reject) => {
+                // ✅ iOS nécessite un gestionnaire d'événements plus robuste
+                audioElement.oncanplaythrough = async () => {
+                    try {
+                        // ✅ iOS : Forcer le focus avant de jouer
+                        await audioElement.play();
+                    } catch (error) {
+                        console.warn('Erreur lecture audio iOS:', error);
+                        reject(error);
+                    }
+                };
+                
+                audioElement.onended = () => {
+                    audioElement.src = ''; // Libérer la mémoire
+                    resolve();
+                };
+                
+                audioElement.onerror = (error) => {
+                    console.error('Erreur audio:', error);
+                    reject(error);
+                };
+                
+                // ✅ Timeout de sécurité pour iOS
+                setTimeout(() => {
+                    if (!audioElement.ended) {
+                        audioElement.pause();
+                        resolve();
+                    }
+                }, 30000); // 30s max par phrase
+                
                 if (!pipelineActive) resolve();
             });
         }
     }
-
+    
+    // ✅ MODIFIÉ : `speakTextWithPipeline` avec initialisation iOS
     async function speakTextWithPipeline(text) {
         if (isProcessingTTS) return;
-        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) await initializeAudioContextForIOS();
+        
+        // ✅ iOS : S'assurer que l'audio est initialisé
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            await initializeAudioContextForIOS();
+        }
+        
         isProcessingTTS = isPlaying = pipelineActive = true;
         updateButtonState();
+
         const sentences = splitIntoSentences(text);
         if (sentences.length === 0) { await cleanupPipeline(); return; }
+        
         log(`🚀 Démarrage pipeline TTS pour ${sentences.length} phrases`, 'info');
         readyAudioBuffer.clear();
         generationWorkers = [];
+
         try {
             const worker = (async () => {
                 for (let i = 0; i < sentences.length && pipelineActive; i++) {
-                    if (readyAudioBuffer.size >= MAX_BUFFER_SIZE) { await new Promise(r => setTimeout(r, 100)); i--; continue; }
+                    if (readyAudioBuffer.size >= MAX_BUFFER_SIZE) {
+                        await new Promise(r => setTimeout(r, 100)); i--; continue;
+                    }
                     try {
                         const audioUrl = await generateTTSForSentence(sentences[i], drawerVoiceSelect.value);
                         if (pipelineActive) readyAudioBuffer.set(i, { audioUrl, sentence: sentences[i] });
-                    } catch {}
+                    } catch { /* ignore */ }
                 }
             })();
             generationWorkers.push(worker);
+            
             await playAudioPipeline(sentences, drawerVoiceSelect.value);
         } catch (error) {
             log(`Erreur pipeline: ${error.message}`, 'error');
@@ -616,15 +649,16 @@
             await cleanupPipeline();
         }
     }
-
+    
     async function cleanupPipeline() {
         pipelineActive = false;
         isProcessingTTS = false;
         isPlaying = false;
+        readyAudioBuffer.forEach(data => URL.revokeObjectURL(data.audioUrl));
         readyAudioBuffer.clear();
         await Promise.allSettled(generationWorkers);
         generationWorkers = [];
-        if (ttsAudio) { ttsAudio.pause(); ttsAudio.src = ""; }
+        if (ttsAudio) { ttsAudio.pause(); ttsAudio.src = ""; } // Sécurité
         updateButtonState();
         if (isContinuRecording) updateStatus("En écoute...", "mic", "listening");
         else if (!isPushToTalkRecording) updateStatus("Prêt", "power-off", "");
@@ -633,11 +667,13 @@
     function interruptTTS() {
         if ((isPlaying || isProcessingTTS) && drawerAllowInterrupt.checked) {
             log('🛑 TTS Interrompu !', 'warning');
-            cleanupPipeline();
+            cleanupPipeline(); // cleanupPipeline gère déjà la pause/reset de ttsAudio
             updateStatus("Interruption !", "zap-off", "interrupted");
             showInterruptIndicator();
             addToConversation('system', 'Réponse interrompue');
-            setTimeout(() => { if(isContinuRecording) updateStatus("En écoute...", "mic", "listening"); }, 800);
+            setTimeout(() => {
+                if(isContinuRecording) updateStatus("En écoute...", "mic", "listening");
+            }, 800);
             return true;
         }
         return false;
@@ -648,17 +684,22 @@
         setTimeout(() => interruptIndicator?.classList.remove('opacity-100'), 1500);
     }
 
+    // =============================================
+    // 🧠 TRANSCRIPTION & LLM
+    // =============================================
     async function transcribeAudioUltraFast(audioData) {
         if (recordingMode !== 'push-to-talk' && audioData instanceof Float32Array && !analyzeAudioQuality(audioData)) {
             updateStatus("En écoute...", "mic", "listening"); return;
         }
         updateStatus("Transcription...", "loader-circle", "processing");
+
         try {
             const wavBuffer = audioData instanceof ArrayBuffer ? audioData : encodeWAV(audioData);
             const formData = new FormData();
             formData.append('file', new Blob([wavBuffer], { type: 'audio/wav' }), 'audio.wav');
             formData.append('model', 'whisper-large-v3');
             formData.append('language', 'fr');
+
             const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${drawerGroqKey.value}` },
@@ -667,6 +708,7 @@
             if (!response.ok) throw new Error(`Transcription échouée: ${response.statusText}`);
             const result = await response.json();
             const userText = result.text?.trim();
+            
             const parasiteFilters = [/sous-titrage/i, /radio-canada/i, /src subtitle/i];
             if (!userText || parasiteFilters.some(f => f.test(userText))) {
                 log('Transcription vide ou parasite ignorée.', 'warning');
@@ -685,72 +727,73 @@
     async function processUserMessage(userText) {
         if (!userText) return;
         addToConversation('user', userText);
-        const aiResponse = await getLLMResponse(userText);
+        
+        const aiResponse = await getLLMResponseStreaming(userText);
         if (aiResponse) {
             addToConversation('assistant', aiResponse);
-            if (drawerAutoSpeak.checked) speakTextWithPipeline(aiResponse);
+            if (drawerAutoSpeak.checked) {
+                speakTextWithPipeline(aiResponse);
+            }
         }
-        if (isContinuRecording && !isProcessingTTS) updateStatus("En écoute...", "mic", "listening");
-        else if (!isContinuRecording && !isPushToTalkRecording) updateStatus("Prêt", "power-off", "");
+        if (isContinuRecording && !isProcessingTTS) {
+             updateStatus("En écoute...", "mic", "listening");
+        } else if (!isContinuRecording && !isPushToTalkRecording) {
+            updateStatus("Prêt", "power-off", "");
+        }
     }
 
-    async function getLLMResponse(userMessage) {
+    async function getLLMResponseStreaming(userMessage) {
         log('🚀 Requête OpenAI GPT-4o Mini...', 'info');
         updateStatus("IA réfléchit...", "brain-circuit", "processing");
+
         try {
-            const supportsStreaming = !!(window.ReadableStream && window.fetch);
             const messages = [
                 { role: "system", content: "Tu es un assistant vocal conversationnel naturel. Réponds en français parlé, sans émoticônes, astérisques ou formatage. Sois concis (2-3 phrases max)." },
                 ...conversationHistory.slice(-10),
                 { role: 'user', content: userMessage }
             ];
+            
             if (lastPlayedReflection) {
-                messages.push({ role: "system", content: `INFO CONTEXTE: Tu viens de dire "${lastPlayedReflection}". Ne le répète pas.` });
+                messages.push({ role: "system", content: `INFO CONTEXTE: Tu viens de dire "${lastPlayedReflection}". Ne le répète pas. Enchaîne directement.` });
             }
-            if (supportsStreaming) {
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${drawerOpenaiKey.value}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: 'gpt-4o-mini', messages, temperature: 0.5, max_tokens: 150, stream: true })
-                });
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error?.message || 'Erreur API OpenAI');
-                }
-                let fullResponse = '';
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n');
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            const data = line.slice(6);
-                            if (data === '[DONE]') { try { reader.cancel(); } catch {} break; }
-                            try {
-                                const parsed = JSON.parse(data);
-                                fullResponse += parsed.choices[0]?.delta?.content || '';
-                            } catch {}
-                        }
+
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${drawerOpenaiKey.value}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ model: 'gpt-4o-mini', messages, temperature: 0.5, max_tokens: 150, stream: true })
+            });
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error.message);
+            }
+
+            let fullResponse = '';
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6);
+                        if (data === '[DONE]') break;
+                        try {
+                            const parsed = JSON.parse(data);
+                            fullResponse += parsed.choices[0]?.delta?.content || '';
+                        } catch {}
                     }
                 }
-                lastPlayedReflection = "";
-                log('✅ Réponse OpenAI reçue', 'success');
-                return fullResponse.trim();
-            } else {
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${drawerOpenaiKey.value}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: 'gpt-4o-mini', messages, temperature: 0.5, max_tokens: 150, stream: false })
-                });
-                if (!response.ok) throw new Error('Erreur OpenAI');
-                const data = await response.json();
-                const txt = data.choices?.[0]?.message?.content?.trim() || '';
-                lastPlayedReflection = "";
-                return txt;
             }
+            
+            let cleanedResponse = fullResponse.trim();
+            if (lastPlayedReflection && cleanedResponse.toLowerCase().startsWith(lastPlayedReflection.toLowerCase())) {
+                cleanedResponse = cleanedResponse.substring(lastPlayedReflection.length).replace(/^[,.\s]+/, '');
+            }
+            lastPlayedReflection = "";
+            log('✅ Réponse OpenAI reçue', 'success');
+            return cleanedResponse;
         } catch (error) {
             log(`Erreur OpenAI: ${error.message}`, 'error');
             lastPlayedReflection = "";
@@ -758,38 +801,43 @@
         }
     }
 
+    // =============================================
+    // 💬 CONVERSATION UI
+    // =============================================
     function addToConversation(type, content) {
         if (!conversationHistoryEl || !content) return;
         if (conversationHistoryEl.querySelector('.italic')) conversationHistoryEl.innerHTML = '';
+        
         conversationHistory.push({ role: type, content });
-        if (conversationHistory.length > 30) conversationHistory.shift();
+        if(conversationHistory.length > 30) conversationHistory.shift();
 
-        const wrapper = document.createElement('div');
+        const div = document.createElement('div');
         const baseClasses = 'mb-3 px-4 py-3 rounded-2xl max-w-[85%] break-words shadow-md';
+        let specificClasses = '';
+        let header = '';
 
-        if (type === 'system') {
-            wrapper.className = `${baseClasses} text-center text-xs text-white/50 italic w-full`;
-            wrapper.textContent = `--- ${content} ---`;
-        } else {
-            const isUser = type === 'user';
-            wrapper.className = `${baseClasses} ${isUser ? 'bg-blue-500 text-white ml-auto rounded-br-md' : 'bg-white/90 text-gray-800 mr-auto rounded-bl-md'}`;
-            const header = document.createElement('div');
-            header.className = isUser ? 'text-xs opacity-80 mb-1' : 'text-xs text-gray-600 opacity-70 mb-1 flex justify-between items-center';
-            if (isUser) {
-                header.textContent = 'Vous';
-            } else {
-                const left = document.createElement('span'); left.textContent = 'Assistant';
-                const btn = document.createElement('button'); btn.textContent = '🔊'; btn.className = 'text-gray-600 hover:text-black transition-transform'; btn.onclick = () => speakTextWithPipeline(content);
-                header.appendChild(left); header.appendChild(btn);
-            }
-            const body = document.createElement('div'); body.textContent = content;
-            wrapper.appendChild(header); wrapper.appendChild(body);
+        if (type === 'user') {
+            specificClasses = 'bg-blue-500 text-white ml-auto rounded-br-md';
+            header = `<div class="text-xs opacity-80 mb-1">Vous</div>`;
+        } else if (type === 'assistant') {
+            specificClasses = 'bg-white/90 text-gray-800 mr-auto rounded-bl-md';
+            const speakFn = `speakTextWithPipeline('${content.replace(/'/g, "\\'")}')`;
+            header = `<div class="text-xs text-gray-600 opacity-70 mb-1 flex justify-between items-center"><span>Assistant</span><button onclick="${speakFn}" class="text-gray-600 hover:text-black transition-transform">🔊</button></div>`;
+        } else { // System
+             specificClasses = 'text-center text-xs text-white/50 italic w-full';
         }
-        conversationHistoryEl.appendChild(wrapper);
+        
+        div.className = `${baseClasses} ${specificClasses}`;
+        div.innerHTML = type === 'system' ? `--- ${content} ---` : `${header}<div>${content}</div>`;
+        conversationHistoryEl.appendChild(div);
         conversationHistoryEl.scrollTop = conversationHistoryEl.scrollHeight;
     }
-
+    
+    // =============================================
+    // 🚀 INITIALIZATION
+    // =============================================
     window.onload = () => {
+        // Assign DOM elements
         voiceCircle = document.getElementById('voice-circle');
         statusText = document.getElementById('status-text');
         toggleButton = document.getElementById('toggleButton');
@@ -800,7 +848,6 @@
         processingIndicator = document.getElementById('processing-indicator');
         textInput = document.getElementById('text-input');
         sendButton = document.getElementById('send-button');
-        modeButtons = document.getElementById('modeButtons');
         modeContinu = document.getElementById('modeContinu');
         modePushToTalk = document.getElementById('modePushToTalk');
         conversationDrawer = document.getElementById('conversationDrawer');
@@ -813,55 +860,54 @@
         drawerAllowInterrupt = document.getElementById('drawerAllowInterrupt');
         drawerVoiceSelect = document.getElementById('drawerVoiceSelect');
         drawerDebug = document.getElementById('drawerDebug');
-        legacyControls = document.getElementById('legacyControls');
-        legacyAudioInput = document.getElementById('legacyAudioInput');
-        legacyRecordBtn = document.getElementById('legacyRecordBtn');
 
+        // Initial state
         updateStatus("Prêt", "power-off", "");
         updateButtonState();
         updateModeButtons();
-
+        
+        // Load saved settings
         drawerGroqKey.value = localStorage.getItem('groq_api_key') || '';
         drawerOpenaiKey.value = localStorage.getItem('openai_api_key') || '';
         drawerAutoSpeak.checked = localStorage.getItem('auto_speak') !== 'false';
         drawerAllowInterrupt.checked = localStorage.getItem('allow_interrupt') !== 'false';
         drawerVoiceSelect.value = localStorage.getItem('selected_voice') || 'fr-FR-DeniseNeural';
 
-        toggleButton.onclick = () => { if (recordingMode === 'continu') toggleMasterRecording(); else togglePushToTalk(); };
+        // Attach event listeners
+        toggleButton.onclick = () => {
+             if (recordingMode === 'continu') toggleMasterRecording();
+             else togglePushToTalk();
+        };
         modeContinu.onclick = () => switchToMode('continu');
         modePushToTalk.onclick = () => switchToMode('push-to-talk');
+        sendButton.onclick = () => processUserMessage(textInput.value.trim());
+        textInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); processUserMessage(textInput.value.trim()); textInput.value = ''; } };
 
-        sendButton.onclick = () => {
-            const msg = textInput.value.trim();
-            if (!msg) return;
-            processUserMessage(msg);
-            textInput.value = '';
-        };
-        textInput.onkeydown = (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const msg = textInput.value.trim();
-                if (!msg) return;
-                processUserMessage(msg);
-                textInput.value = '';
-            }
-        };
-
+        // Drawer functionality
         document.getElementById('conversationToggle').onclick = () => { conversationDrawer.classList.remove('-translate-x-full'); drawerOverlay.classList.remove('opacity-0', 'pointer-events-none'); };
         document.getElementById('drawerToggle').onclick = () => { settingsDrawer.classList.remove('translate-x-full'); drawerOverlay.classList.remove('opacity-0', 'pointer-events-none'); };
-        const closeDrawers = () => { conversationDrawer.classList.add('-translate-x-full'); settingsDrawer.classList.add('translate-x-full'); drawerOverlay.classList.add('opacity-0', 'pointer-events-none'); };
+        const closeDrawers = () => {
+            conversationDrawer.classList.add('-translate-x-full');
+            settingsDrawer.classList.add('translate-x-full');
+            drawerOverlay.classList.add('opacity-0', 'pointer-events-none');
+        };
         document.getElementById('conversationDrawerClose').onclick = closeDrawers;
         document.getElementById('settingsDrawerClose').onclick = closeDrawers;
         drawerOverlay.onclick = closeDrawers;
         document.onkeydown = (e) => { if (e.key === 'Escape') closeDrawers(); };
-
+        
+        // Settings saving
         drawerGroqKey.oninput = () => localStorage.setItem('groq_api_key', drawerGroqKey.value);
         drawerOpenaiKey.oninput = () => localStorage.setItem('openai_api_key', drawerOpenaiKey.value);
         drawerAutoSpeak.onchange = () => localStorage.setItem('auto_speak', drawerAutoSpeak.checked);
         drawerAllowInterrupt.onchange = () => localStorage.setItem('allow_interrupt', drawerAllowInterrupt.checked);
         drawerVoiceSelect.onchange = () => localStorage.setItem('selected_voice', drawerVoiceSelect.value);
-
-        document.getElementById('drawerClearCache').onclick = () => { transcriptionCache.clear(); ttsCache.clear(); log('Cache vidé', 'success'); };
+        
+        // Drawer actions
+        document.getElementById('drawerClearCache').onclick = () => {
+            transcriptionCache.clear(); ttsCache.clear();
+            log('Cache vidé', 'success');
+        };
         document.getElementById('drawerExportConversation').onclick = () => {
             const data = JSON.stringify(conversationHistory, null, 2);
             const a = document.createElement('a');
@@ -871,274 +917,28 @@
             URL.revokeObjectURL(a.href);
             log('Conversation exportée', 'success');
         };
-
+        
+        // Update time
         const updateTime = () => { document.getElementById('time').textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); };
         updateTime();
         setInterval(updateTime, 10000);
 
         lucide.createIcons();
         log('🎯 Système initialisé avec succès!', 'success');
-
+        
+        // ✅ Détection iOS et ajustements
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         if (isIOS) {
+            log('📱 iOS détecté - Optimisations audio activées', 'info');
+            // Ajouter un gestionnaire pour initialiser l'audio au premier touch
             document.addEventListener('touchstart', async function initAudioOnFirstTouch() {
                 await initializeAudioContextForIOS();
                 document.removeEventListener('touchstart', initAudioOnFirstTouch);
             }, { once: true });
         }
-
-        // Mode legacy si pas de modules -> géré par <script nomodule> ci-dessous.
-        // Ici, on affiche les contrôles normaux.
-        legacyControls.classList.add('hidden');
-        toggleButton.style.display = '';
-        modeButtons.style.display = '';
+        
         window.onbeforeunload = stopAllRecording;
     };
-    </script>
-
-    <!-- Script LEGACY (sans modules) pour anciens Safari (iPad 2, etc.) -->
-    <script nomodule>
-    (function(){
-        var voiceCircle = document.getElementById('voice-circle');
-        var statusText = document.getElementById('status-text');
-        var toggleButton = document.getElementById('toggleButton');
-        var modeButtons = document.getElementById('modeButtons');
-        var conversationHistoryEl = document.getElementById('conversationHistory');
-        var sendButton = document.getElementById('send-button');
-        var textInput = document.getElementById('text-input');
-        var legacyControls = document.getElementById('legacyControls');
-        var legacyAudioInput = document.getElementById('legacyAudioInput');
-        var legacyRecordBtn = document.getElementById('legacyRecordBtn');
-        var drawerGroqKey = document.getElementById('drawerGroqKey');
-        var drawerOpenaiKey = document.getElementById('drawerOpenaiKey');
-        var drawerVoiceSelect = document.getElementById('drawerVoiceSelect');
-        var drawerAutoSpeak = document.getElementById('drawerAutoSpeak');
-
-        function updateStatus(text, iconName, stateClass) {
-            if (statusText) statusText.textContent = text;
-            if (voiceCircle) {
-                voiceCircle.innerHTML = '<i data-lucide="'+iconName+'" class="w-16 h-16"></i>';
-                voiceCircle.className = "w-[200px] h-[200px] rounded-full mx-auto mb-2.5 flex items-center justify-center text-6xl transition-all duration-300 bg-white/10 backdrop-blur-xl border-2 border-white/20";
-            }
-            if (window.lucide) window.lucide.createIcons();
-        }
-
-        function addBubble(type, content) {
-            if (!conversationHistoryEl || !content) return;
-            if (conversationHistoryEl.querySelector('.italic')) conversationHistoryEl.innerHTML = '';
-            var wrapper = document.createElement('div');
-            var base = 'mb-3 px-4 py-3 rounded-2xl max-w-[85%] break-words shadow-md';
-            if (type === 'system') {
-                wrapper.className = base + ' text-center text-xs text-white/50 italic w-full';
-                wrapper.textContent = '--- ' + content + ' ---';
-            } else {
-                var isUser = type === 'user';
-                wrapper.className = base + (isUser ? ' bg-blue-500 text-white ml-auto rounded-br-md' : ' bg-white/90 text-gray-800 mr-auto rounded-bl-md');
-                var header = document.createElement('div');
-                header.className = isUser ? 'text-xs opacity-80 mb-1' : 'text-xs text-gray-600 opacity-70 mb-1';
-                header.textContent = isUser ? 'Vous' : 'Assistant';
-                var body = document.createElement('div');
-                body.textContent = content;
-                wrapper.appendChild(header);
-                wrapper.appendChild(body);
-            }
-            conversationHistoryEl.appendChild(wrapper);
-            conversationHistoryEl.scrollTop = conversationHistoryEl.scrollHeight;
-        }
-
-        function xhrJSON(url, method, headers, body, onOk, onErr) {
-            try {
-                var xhr = new XMLHttpRequest();
-                xhr.open(method || 'GET', url, true);
-                if (headers) for (var k in headers) if (headers.hasOwnProperty(k)) xhr.setRequestHeader(k, headers[k]);
-                xhr.onreadystatechange = function(){
-                    if (xhr.readyState === 4) {
-                        if (xhr.status >= 200 && xhr.status < 300) {
-                            try { onOk(JSON.parse(xhr.responseText)); } catch(e){ onErr(e); }
-                        } else { onErr(new Error('HTTP ' + xhr.status)); }
-                    }
-                };
-                xhr.send(body || null);
-            } catch (e) { onErr(e); }
-        }
-
-        function xhrBlob(url, method, headers, body, onOk, onErr) {
-            try {
-                var xhr = new XMLHttpRequest();
-                xhr.open(method || 'GET', url, true);
-                if (headers) for (var k in headers) if (headers.hasOwnProperty(k)) xhr.setRequestHeader(k, headers[k]);
-                xhr.responseType = 'arraybuffer';
-                xhr.onload = function(){
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        try { onOk(new Blob([xhr.response])); } catch(e){ onErr(e); }
-                    } else { onErr(new Error('HTTP ' + xhr.status)); }
-                };
-                xhr.onerror = function(){ onErr(new Error('Network error')); };
-                xhr.send(body || null);
-            } catch (e) { onErr(e); }
-        }
-
-        function playTTS(text) {
-            var voice = drawerVoiceSelect.value || 'fr-FR-DeniseNeural';
-            var payload = JSON.stringify({ text: text, voice: voice });
-            xhrBlob('https://chatbot-20102024-8c94bbb4eddf.herokuapp.com/synthesize', 'POST', { 'Content-Type': 'application/json' }, payload, function(blob){
-                try {
-                    var url = URL.createObjectURL(blob);
-                    var a = new Audio();
-                    a.src = url;
-                    a.play();
-                    a.onended = function(){ URL.revokeObjectURL(url); };
-                } catch(e){}
-            }, function(err){
-                console.log('TTS err', err);
-            });
-        }
-
-        function legacyTranscribeAndReply(file) {
-            if (!file) return;
-            if (!drawerGroqKey.value || !drawerOpenaiKey.value) {
-                alert('Renseignez vos clés API dans le panneau de contrôle.');
-                return;
-            }
-            updateStatus('Transcription...', 'loader-circle', 'processing');
-
-            var form = new FormData();
-            form.append('file', file, file.name || 'audio.m4a');
-            form.append('model', 'whisper-large-v3');
-            form.append('language', 'fr');
-
-            xhrJSON('https://api.groq.com/openai/v1/audio/transcriptions', 'POST',
-                { 'Authorization': 'Bearer ' + drawerGroqKey.value },
-                form,
-                function(res){
-                    var userText = (res && res.text || '').trim();
-                    if (!userText) { updateStatus('Prêt', 'power-off', ''); return; }
-                    addBubble('user', userText);
-                    updateStatus('IA réfléchit...', 'brain-circuit', 'processing');
-
-                    var messages = [
-                        { role: "system", content: "Tu es un assistant vocal conversationnel naturel. Réponds en français parlé, sans émoticônes, astérisques ou formatage. Sois concis (2-3 phrases max)." },
-                        { role: "user", content: userText }
-                    ];
-                    var body = JSON.stringify({ model: 'gpt-4o-mini', messages: messages, temperature: 0.5, max_tokens: 150, stream: false });
-
-                    xhrJSON('https://api.openai.com/v1/chat/completions', 'POST',
-                        { 'Authorization': 'Bearer ' + drawerOpenaiKey.value, 'Content-Type': 'application/json' },
-                        body,
-                        function(data){
-                            try {
-                                var answer = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
-                                answer = (answer || '').trim();
-                                if (answer) {
-                                    addBubble('assistant', answer);
-                                    updateStatus('Prêt', 'power-off', '');
-                                    if (drawerAutoSpeak && drawerAutoSpeak.checked) playTTS(answer);
-                                } else {
-                                    updateStatus('Prêt', 'power-off', '');
-                                }
-                            } catch(e){
-                                updateStatus('Prêt', 'power-off', '');
-                            }
-                        },
-                        function(err){
-                            console.log('OpenAI err', err);
-                            addBubble('assistant', "Désolé, une erreur est survenue avec l'IA.");
-                            updateStatus('Prêt', 'power-off', '');
-                        }
-                    );
-                },
-                function(err){
-                    console.log('Groq err', err);
-                    updateStatus('Prêt', 'power-off', '');
-                }
-            );
-        }
-
-        // Activer le mode Legacy UI
-        toggleButton.style.display = 'none';
-        modeButtons.style.display = 'none';
-        legacyControls.classList.remove('hidden');
-        updateStatus('Mode iOS ancien prêt', 'power-off', '');
-
-        document.getElementById('conversationToggle').onclick = function(){
-            var drawer = document.getElementById('conversationDrawer');
-            var overlay = document.getElementById('drawerOverlay');
-            drawer.classList.remove('-translate-x-full');
-            overlay.classList.remove('opacity-0', 'pointer-events-none');
-        };
-        document.getElementById('drawerToggle').onclick = function(){
-            var drawer = document.getElementById('settingsDrawer');
-            var overlay = document.getElementById('drawerOverlay');
-            drawer.classList.remove('translate-x-full');
-            overlay.classList.remove('opacity-0', 'pointer-events-none');
-        };
-        var closeDrawers = function(){
-            document.getElementById('conversationDrawer').classList.add('-translate-x-full');
-            document.getElementById('settingsDrawer').classList.add('translate-x-full');
-            document.getElementById('drawerOverlay').classList.add('opacity-0', 'pointer-events-none');
-        };
-        document.getElementById('conversationDrawerClose').onclick = closeDrawers;
-        document.getElementById('settingsDrawerClose').onclick = closeDrawers;
-        document.getElementById('drawerOverlay').onclick = closeDrawers;
-
-        // Bouton legacy pour enregistrer/choisir un fichier audio
-        legacyRecordBtn.onclick = function(){
-            legacyAudioInput.click();
-        };
-        legacyAudioInput.onchange = function(e){
-            var file = (e.target && e.target.files && e.target.files[0]) || null;
-            if (!file) return;
-            legacyTranscribeAndReply(file);
-            // reset input (permet d’enregistrer deux fois de suite)
-            e.target.value = '';
-        };
-
-        // Envoi texte (fallback)
-        sendButton.onclick = function(){
-            var msg = textInput.value ? textInput.value.trim() : '';
-            if (!msg) return;
-            addBubble('user', msg);
-            textInput.value = '';
-            if (!drawerOpenaiKey.value) { addBubble('assistant', "Renseignez la clé OpenAI."); return; }
-            updateStatus('IA réfléchit...', 'brain-circuit', 'processing');
-            var messages = [
-                { role: "system", content: "Tu es un assistant vocal conversationnel naturel. Réponds en français parlé, sans émoticônes, astérisques ou formatage. Sois concis (2-3 phrases max)." },
-                { role: "user", content: msg }
-            ];
-            var body = JSON.stringify({ model: 'gpt-4o-mini', messages: messages, temperature: 0.5, max_tokens: 150, stream: false });
-            xhrJSON('https://api.openai.com/v1/chat/completions', 'POST',
-                { 'Authorization': 'Bearer ' + drawerOpenaiKey.value, 'Content-Type': 'application/json' },
-                body,
-                function(data){
-                    try {
-                        var answer = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
-                        answer = (answer || '').trim();
-                        if (answer) {
-                            addBubble('assistant', answer);
-                            if (drawerAutoSpeak && drawerAutoSpeak.checked) playTTS(answer);
-                        }
-                        updateStatus('Prêt', 'power-off', '');
-                    } catch(e){
-                        updateStatus('Prêt', 'power-off', '');
-                    }
-                },
-                function(err){
-                    addBubble('assistant', "Erreur OpenAI.");
-                    updateStatus('Prêt', 'power-off', '');
-                }
-            );
-        };
-    })();
-    </script>
-
-    <script>
-        // Horloge visible en legacy et moderne
-        function updateTime() {
-            var el = document.getElementById('time');
-            if (el) el.textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        }
-        updateTime();
-        setInterval(updateTime, 10000);
     </script>
 </body>
 </html>
