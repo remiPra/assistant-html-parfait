@@ -8,9 +8,17 @@
     {
       "src": "components/*.js",
       "use": "@vercel/static"
+    },
+    {
+      "src": "images/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
+    {
+      "src": "/images/(.*)",
+      "dest": "/images/$1"
+    },
     {
       "src": "/components/(.*)",
       "dest": "/components/$1"
@@ -36,19 +44,14 @@
       "dest": "/safari.html"
     },
     {
-      "src": "/safari",
-      "dest": "/safari.html"
-    },
-   
-    {
       "src": "/emilie",
       "dest": "/emilie.html"
     },
-      {
+    {
       "src": "/remi",
       "dest": "/remi.html"
     },
-        {
+    {
       "src": "/lilian",
       "dest": "/lilianportoflio.html"
     },
@@ -56,11 +59,9 @@
       "src": "/sylvaine-site",
       "dest": "/sylvaine.html"
     },
-     {
+    {
       "src": "/(.*)",
       "dest": "/openai.html"
     }
-
-    
   ]
 }
