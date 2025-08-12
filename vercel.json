@@ -59,6 +59,10 @@
       "src": "/sylvaine-site",
       "dest": "/sylvaine.html"
     },
+     {
+      "src": "/patricerosso",
+      "dest": "/patricerosso.html"
+    },
     {
       "src": "/(.*)",
       "dest": "/openai.html"

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patrice Rosso - Sculpteur d'Être</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'serif': ['Playfair Display', 'serif'],
+                        'sans': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'bordeaux': {
+                            50: '#fdf2f2',
+                            100: '#fce7e7',
+                            200: '#f9d1d1',
+                            300: '#f4a8a8',
+                            400: '#ec7878',
+                            500: '#dc4c4c',
+                            600: '#c73030',
+                            700: '#a52424',
+                            800: '#881f1f',
+                            900: '#721e1e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .hero-bg {
+            background: linear-gradient(135deg, rgba(114, 30, 30, 0.8) 0%, rgba(165, 36, 36, 0.7) 100%);
+        }
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(199, 48, 48, 0.1);
+        }
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(114, 30, 30, 0.15);
+        }
+        .nav-item {
+            background: linear-gradient(135deg, #a52424, #881f1f);
+            transition: all 0.3s ease;
+        }
+        .nav-item:hover {
+            background: linear-gradient(135deg, #c73030, #a52424);
+            transform: translateY(-2px);
+        }
+        .nav-item.active {
+            background: linear-gradient(135deg, #dc4c4c, #c73030);
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-800 bg-gradient-to-br from-red-50 to-orange-50">
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-effect">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2024/02/Logo-Simple.webp" alt="Logo du site Patrice Rosso" class="h-10 w-auto">
+                    <span class="ml-3 font-serif text-xl font-semibold text-bordeaux-800">Patrice Rosso</span>
+                </div>
+                <div class="hidden md:flex space-x-2">
+                    <a href="#synchronisation" class="nav-item px-4 py-2 rounded-full text-white text-sm font-medium">Synchronisation</a>
+                    <a href="#emergence" class="nav-item px-4 py-2 rounded-full text-white text-sm font-medium">Émergence</a>
+                    <a href="#creation" class="nav-item px-4 py-2 rounded-full text-white text-sm font-medium">Création</a>
+                    <a href="#aller-plus-loin" class="nav-item px-4 py-2 rounded-full text-white text-sm font-medium">Plus Loin</a>
+                    <a href="#contact" class="nav-item px-4 py-2 rounded-full text-white text-sm font-medium">Contact</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 hero-bg"></div>
+        <img src="https://patricerosso.fr/wp-content/uploads/2024/02/PA-001.jpg" alt="Bannière de la section Synchronisation avec l'univers" class="absolute inset-0 w-full h-full object-cover opacity-40">
+        
+        <div class="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
+            <h1 class="font-serif text-5xl md:text-7xl font-bold mb-6 fade-in">
+                Patrice Rosso
+            </h1>
+            <h2 class="font-serif text-2xl md:text-3xl italic mb-8 fade-in" style="animation-delay: 0.2s">
+                Sculpteur d'Être
+            </h2>
+            <p class="text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed fade-in" style="animation-delay: 0.4s">
+                Artiste-Auteur explorant les traits d'union entre l'art, la géométrie des bâtisseurs et l'être. 
+                Création d'espaces de paix, de conscience et de ressourcement.
+            </p>
+            <button class="bg-white text-bordeaux-700 px-8 py-4 rounded-full font-semibold text-lg hover:bg-red-50 transition-all hover-lift fade-in" style="animation-delay: 0.6s">
+                Découvrir l'Univers
+            </button>
+        </div>
+        
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Section Synchronisation -->
+    <section id="synchronisation" class="py-20 bg-gradient-to-r from-red-50 to-orange-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-bordeaux-800 mb-6">
+                    Synchronisation avec l'Univers
+                </h2>
+                <p class="text-xl text-bordeaux-600 max-w-3xl mx-auto">
+                    Sculptures, peintures et espaces de ressourcement pour harmoniser l'homme, la terre et le ciel
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover-lift fade-in">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2024/05/notre-vie-blog.webp" alt="Image pour l'article Être au cœur de notre vie" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="font-serif text-2xl font-semibold text-bordeaux-800 mb-3">Être au cœur de notre vie</h3>
+                        <p class="text-bordeaux-600">Une approche holistique qui unit le corps, l'âme et l'esprit</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover-lift fade-in" style="animation-delay: 0.2s">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2024/04/Miniature-assise-perso.webp" alt="Image pour l'article Assise personnalisée" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="font-serif text-2xl font-semibold text-bordeaux-800 mb-3">Assises personnalisées</h3>
+                        <p class="text-bordeaux-600">Formes énergétiques inspirées des traditions anciennes</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover-lift fade-in" style="animation-delay: 0.4s">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2024/04/sceptre-blog.webp" alt="Image pour l'article Sceptre personnalisé" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="font-serif text-2xl font-semibold text-bordeaux-800 mb-3">Sceptres rituels</h3>
+                        <p class="text-bordeaux-600">Objets de pouvoir pour la connexion spirituelle</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Émergence -->
+    <section id="emergence" class="py-20 bg-gradient-to-r from-bordeaux-50 to-red-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-bordeaux-800 mb-6">
+                    Émergence
+                </h2>
+                <p class="text-xl text-bordeaux-700 max-w-3xl mx-auto">
+                    Prendre le temps de s'arrêter devant une forme, s'initier à regarder autrement sa vie
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="fade-in">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2024/08/Coffret-emergence-accueil.webp" alt="Bannière pour le livre d'artiste Émergence" class="w-full rounded-2xl shadow-2xl">
+                </div>
+                
+                <div class="space-y-8 fade-in" style="animation-delay: 0.3s">
+                    <div class="bg-white p-8 rounded-2xl shadow-lg hover-lift">
+                        <div class="w-20 h-20 bg-bordeaux-100 rounded-lg mb-4 flex items-center justify-center">
+                            <svg class="w-10 h-10 text-bordeaux-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-serif text-2xl font-semibold text-bordeaux-800 mb-3">Le Livre de l'Émergence</h3>
+                        <p class="text-bordeaux-600 mb-4">Un guide pour éveiller la sensibilité et la créativité</p>
+                        <span class="text-bordeaux-700 font-semibold">24.90 €</span>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-2xl shadow-lg hover-lift">
+                        <div class="w-20 h-20 bg-bordeaux-100 rounded-lg mb-4 flex items-center justify-center">
+                            <svg class="w-10 h-10 text-bordeaux-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-serif text-2xl font-semibold text-bordeaux-800 mb-3">L'Oracle de l'Émergence</h3>
+                        <p class="text-bordeaux-600 mb-4">Cartes divinatoires pour la guidance spirituelle</p>
+                        <span class="text-bordeaux-700 font-semibold">29.90 €</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Le Fil de la Création -->
+    <section id="creation" class="py-20 bg-gradient-to-r from-red-50 to-bordeaux-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-bordeaux-800 mb-6">
+                    Le Fil de la Création
+                </h2>
+                <p class="text-xl text-bordeaux-700 max-w-3xl mx-auto">
+                    Dans quelle intention et comment j'ai créé ces œuvres
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="fade-in">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2024/02/DESSIN.jpg" alt="Bannière de la section Le Fil de la Création" class="w-full rounded-2xl shadow-2xl">
+                </div>
+                
+                <div class="space-y-6 fade-in" style="animation-delay: 0.3s">
+                    <h3 class="font-serif text-3xl font-semibold text-bordeaux-800">Processus créatif</h3>
+                    <p class="text-lg text-bordeaux-700 leading-relaxed">
+                        Je suis influencé par ma connexion profonde avec la nature et une spiritualité que j'ai développée 
+                        avec ma respiration, mon corps. Je crée des sculptures, des peintures et des espaces de ressourcement, 
+                        en explorant les thèmes de l'émergence et de la synchronisation avec l'univers.
+                    </p>
+                    <p class="text-lg text-bordeaux-700 leading-relaxed">
+                        Ma démarche vise à harmoniser l'individu avec son espace de vie, en intégrant des rituels et des 
+                        pratiques basées sur l'observation de la nature et des cycles cosmiques.
+                    </p>
+                    
+                    <!-- Vidéo de présentation -->
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <img src="https://i.ytimg.com/vi_webp/inkDZCr2q24/maxresdefault.webp" alt="Miniature de la vidéo de présentation de l'artiste" class="w-full h-48 object-cover rounded-lg mb-4">
+                        <h4 class="font-serif text-xl font-semibold text-bordeaux-800 mb-2">Vidéo de présentation</h4>
+                        <p class="text-bordeaux-600">Découvrez l'univers artistique de Patrice Rosso</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Espaces et Services -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-bordeaux-800 mb-6">
+                    Espaces de Ressourcement
+                </h2>
+                <p class="text-xl text-bordeaux-600 max-w-3xl mx-auto">
+                    Créations d'espaces de paix, de conscience et de transformation intérieure
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="text-center fade-in">
+                    <div class="bg-gradient-to-br from-bordeaux-50 to-red-100 rounded-2xl p-8 hover-lift">
+                        <img src="https://patricerosso.fr/wp-content/uploads/2024/05/salle-ressourcement-blog.webp" alt="Image pour l'article Salle de ressourcement" class="w-full h-48 object-cover rounded-xl mb-6">
+                        <h3 class="font-serif text-xl font-semibold text-bordeaux-800 mb-3">Salle de Ressourcement</h3>
+                        <p class="text-bordeaux-600">Espaces dédiés à la méditation et au ressourcement</p>
+                    </div>
+                </div>
+                
+                <div class="text-center fade-in" style="animation-delay: 0.2s">
+                    <div class="bg-gradient-to-br from-red-50 to-bordeaux-100 rounded-2xl p-8 hover-lift">
+                        <img src="https://patricerosso.fr/wp-content/uploads/2024/04/espace-perso-miniature.webp" alt="Image pour l'article Espace personnalisé" class="w-full h-48 object-cover rounded-xl mb-6">
+                        <h3 class="font-serif text-xl font-semibold text-bordeaux-800 mb-3">Espace Personnalisé</h3>
+                        <p class="text-bordeaux-600">Aménagements sur mesure pour votre bien-être</p>
+                    </div>
+                </div>
+                
+                <div class="text-center fade-in" style="animation-delay: 0.4s">
+                    <div class="bg-gradient-to-br from-bordeaux-100 to-red-50 rounded-2xl p-8 hover-lift">
+                        <img src="https://patricerosso.fr/wp-content/uploads/2024/04/0051-1024x1024.webp" alt="Image pour l'article Sculpture Énergétique" class="w-full h-48 object-cover rounded-xl mb-6">
+                        <h3 class="font-serif text-xl font-semibold text-bordeaux-800 mb-3">Sculpture Énergétique</h3>
+                        <p class="text-bordeaux-600">Œuvres sculptées pour l'harmonisation énergétique</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Pour Aller Plus Loin -->
+    <section id="aller-plus-loin" class="py-20 bg-gradient-to-r from-bordeaux-50 to-red-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-bordeaux-800 mb-6">
+                    Pour Aller Plus Loin
+                </h2>
+                <p class="text-xl text-bordeaux-700 max-w-3xl mx-auto">
+                    Rencontres, fêtes et ateliers pour partager la démarche créative
+                </p>
+            </div>
+            
+            <!-- Produits Ebooks -->
+            <div class="grid md:grid-cols-2 gap-8 mb-16">
+                <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover-lift fade-in">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2024/08/Dans-la-beaute-02-1024x576.webp" alt="Image du produit Ebook - Dans la beauté je marche" class="w-full h-64 object-cover">
+                    <div class="p-8">
+                        <h3 class="font-serif text-2xl font-semibold text-bordeaux-800 mb-4">Ebook - Dans la beauté je marche</h3>
+                        <p class="text-bordeaux-600 mb-6">Exploration personnelle et transformation intérieure à travers des rencontres authentiques</p>
+                        <span class="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full font-semibold">GRATUIT</span>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover-lift fade-in" style="animation-delay: 0.3s">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2024/08/Souffle-de-lenjeu-03-1024x576.webp" alt="Image du produit Ebook - Le Souffle de l'enjeu" class="w-full h-64 object-cover">
+                    <div class="p-8">
+                        <h3 class="font-serif text-2xl font-semibold text-bordeaux-800 mb-4">Ebook - Le Souffle de l'enjeu</h3>
+                        <p class="text-bordeaux-600 mb-6">Événements communautaires pour célébrer la connexion avec la nature et les cycles cosmiques</p>
+                        <span class="inline-block bg-bordeaux-100 text-bordeaux-800 px-4 py-2 rounded-full font-semibold">19.00 €</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Événements -->
+            <div class="text-center mb-8 fade-in">
+                <h3 class="font-serif text-3xl font-semibold text-bordeaux-800 mb-4">Événements et Ateliers</h3>
+                <p class="text-bordeaux-600">Découvrez nos prochains événements et ateliers</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-xl overflow-hidden shadow-md hover-lift fade-in">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2024/08/Air-de-Rien.webp" alt="Image de l'évènement Chemin de vie" class="w-full h-40 object-cover">
+                    <div class="p-4">
+                        <h4 class="font-serif text-lg font-semibold text-bordeaux-800 mb-2">Chemin de vie</h4>
+                        <p class="text-sm text-bordeaux-600">Air de Rien</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl overflow-hidden shadow-md hover-lift fade-in" style="animation-delay: 0.2s">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2024/08/Au-Coeur-de-sa-Vie.webp" alt="Image de l'évènement Au cœur de sa vie" class="w-full h-40 object-cover">
+                    <div class="p-4">
+                        <h4 class="font-serif text-lg font-semibold text-bordeaux-800 mb-2">Au cœur de sa vie</h4>
+                        <p class="text-sm text-bordeaux-600">Atelier de développement personnel</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl overflow-hidden shadow-md hover-lift fade-in" style="animation-delay: 0.4s">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2024/06/Souffle-de-lenjeu-miniature.webp" alt="Image de l'évènement Souffle de l'Enjeu" class="w-full h-40 object-cover">
+                    <div class="p-4">
+                        <h4 class="font-serif text-lg font-semibold text-bordeaux-800 mb-2">Souffle de l'Enjeu</h4>
+                        <p class="text-sm text-bordeaux-600">Atelier spirituel</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl overflow-hidden shadow-md hover-lift fade-in" style="animation-delay: 0.6s">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2024/08/Airmed.webp" alt="Image de l'évènement Champ des vivants" class="w-full h-40 object-cover">
+                    <div class="p-4">
+                        <h4 class="font-serif text-lg font-semibold text-bordeaux-800 mb-2">Champ des vivants</h4>
+                        <p class="text-sm text-bordeaux-600">Airmed</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl overflow-hidden shadow-md hover-lift fade-in" style="animation-delay: 0.8s">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2025/04/equilibrer-un-lieu.webp" alt="Image de l'évènement Équilibrer votre lieu" class="w-full h-40 object-cover">
+                    <div class="p-4">
+                        <h4 class="font-serif text-lg font-semibold text-bordeaux-800 mb-2">Équilibrer votre lieu</h4>
+                        <p class="text-sm text-bordeaux-600">Harmonisation d'espace</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl overflow-hidden shadow-md hover-lift fade-in" style="animation-delay: 1s">
+                    <img src="https://patricerosso.fr/wp-content/uploads/2024/08/Atelier-Dans-la-beaute-00.webp" alt="Image de l'évènement Dans la Beauté je Marche" class="w-full h-40 object-cover">
+                    <div class="p-4">
+                        <h4 class="font-serif text-lg font-semibold text-bordeaux-800 mb-2">Dans la Beauté je Marche</h4>
+                        <p class="text-sm text-bordeaux-600">Atelier créatif</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Contact -->
+    <section id="contact" class="py-20 bg-gradient-to-r from-red-50 to-bordeaux-100">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="fade-in">
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-bordeaux-800 mb-8">
+                    Entrons en Contact
+                </h2>
+                <p class="text-xl text-bordeaux-700 mb-12 max-w-2xl mx-auto">
+                    Pour découvrir comment harmoniser votre espace de vie et favoriser votre connexion avec la force de vie
+                </p>
+                
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift">
+                    <div class="flex items-center justify-center mb-6">
+                        <img src="https://patricerosso.fr/wp-content/uploads/2024/02/speed-delivery.webp" alt="Icône illustrant la livraison gratuite" class="w-12 h-12 mr-4">
+                        <h3 class="font-serif text-2xl font-semibold text-bordeaux-800">Livraison gratuite en France</h3>
+                    </div>
+                    <p class="text-bordeaux-600 mb-8">Sur toutes les assises et les objets rituels</p>
+                    
+                    <button class="bg-bordeaux-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-bordeaux-700 transition-all hover-lift">
+                        Prendre Contact
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-bordeaux-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <img src="https://patricerosso.fr/wp-content/uploads/2024/02/Logo-Simple.webp" alt="Logo du site Patrice Rosso" class="h-12 w-auto mx-auto mb-6">
+            <p class="text-bordeaux-200 mb-4">© 2024 – PATRICE ROSSO</p>
+            <p class="text-bordeaux-300 text-sm">Sculpteur d'Être • Créateur d'Espaces Sacrés • Guide Spirituel</p>
+        </div>
+    </footer>
+
+    <script>
+        // Animation au scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observer tous les éléments avec la classe fade-in
+        document.addEventListener('DOMContentLoaded', () => {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            fadeElements.forEach(el => observer.observe(el));
+            
+            // Animation initiale pour le hero
+            setTimeout(() => {
+                document.querySelectorAll('.fade-in').forEach((el, index) => {
+                    if (el.closest('section').querySelector('h1')) {
+                        setTimeout(() => {
+                            el.classList.add('visible');
+                        }, index * 200);
+                    }
+                });
+            }, 500);
+        });
+
+        // Smooth scroll pour la navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Navigation active state
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section[id]');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === `#${current}`) {
+                    item.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
