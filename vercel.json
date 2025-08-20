@@ -63,6 +63,10 @@
       "src": "/patricerosso",
       "dest": "/patricerosso.html"
     },
+     {
+      "src": "/prieres",
+      "dest": "/prieres.html"
+    },
     {
       "src": "/(.*)",
       "dest": "/openai.html"

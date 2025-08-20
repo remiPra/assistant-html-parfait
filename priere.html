@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vortex Quantique de Guérison - Technique Énergétique Parfaite</title>
+    <meta name="description" content="Découvrez la technique de rotation énergétique parfaite combinant Reiki, magnétisme quantique et visualisation pour la guérison holistique.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React Icons via CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e3a8a',
+                        secondary: '#7c3aed',
+                        accent: '#f59e0b',
+                        neutral: '#f3f4f6'
+                    },
+                    animation: {
+                        'spin-slow': 'spin 3s linear infinite',
+                        'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom Styles -->
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #f59e0b 100%);
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .vortex-animation {
+            animation: spin 8s linear infinite;
+        }
+        
+        .vortex-reverse {
+            animation: spin 8s linear infinite reverse;
+        }
+        
+        .energy-pulse {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        .text-gradient {
+            background: linear-gradient(135deg, #1e3a8a, #7c3aed, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white overflow-x-hidden">
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-effect">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center">
+                        <span class="text-white font-bold">V</span>
+                    </div>
+                    <span class="text-xl font-bold text-gradient">Vortex Quantique</span>
+                </div>
+                
+                <div class="hidden md:flex space-x-8">
+                    <a href="#accueil" class="hover:text-accent transition-colors">Accueil</a>
+                    <a href="#technique" class="hover:text-accent transition-colors">La Technique</a>
+                    <a href="#benefices" class="hover:text-accent transition-colors">Bénéfices</a>
+                    <a href="#contact" class="hover:text-accent transition-colors">Contact</a>
+                </div>
+                
+                <button class="md:hidden text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="accueil" class="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <!-- Background -->
+        <div class="absolute inset-0 gradient-bg opacity-90"></div>
+        <div class="absolute inset-0 bg-black opacity-50"></div>
+        
+        <!-- Animated Background Elements -->
+        <div class="absolute top-20 left-10 w-32 h-32 opacity-20">
+            <img src="images/vortex-blue.jpg" alt="Vortex" class="w-full h-full object-cover rounded-full vortex-animation">
+        </div>
+        <div class="absolute bottom-20 right-10 w-24 h-24 opacity-20">
+            <img src="images/vortex-purple.jpg" alt="Vortex" class="w-full h-full object-cover rounded-full vortex-reverse">
+        </div>
+        
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <div class="animate-float">
+                <h1 class="text-5xl md:text-7xl font-bold mb-6 text-gradient">
+                    Vortex Quantique
+                    <span class="block text-4xl md:text-6xl mt-2">de Guérison</span>
+                </h1>
+                
+                <p class="text-xl md:text-2xl mb-8 text-gray-200 max-w-3xl mx-auto">
+                    La technique de rotation énergétique parfaite combinant <strong>Reiki</strong>, 
+                    <strong>magnétisme quantique</strong> et <strong>visualisation</strong> 
+                    pour une guérison holistique profonde.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+                    <button class="bg-accent hover:bg-yellow-500 text-black font-bold py-4 px-8 rounded-full transition-all duration-300 transform hover:scale-105 energy-pulse">
+                        Découvrir la Technique
+                    </button>
+                    <button class="border-2 border-white hover:bg-white hover:text-black font-bold py-4 px-8 rounded-full transition-all duration-300">
+                        En Savoir Plus
+                    </button>
+                </div>
+                
+                <!-- Key Features -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                    <div class="glass-effect rounded-lg p-6 hover:scale-105 transition-transform duration-300">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-primary rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">Énergie Reiki</h3>
+                        <p class="text-gray-300">Positions de mains douces pour réduire stress et douleur</p>
+                    </div>
+                    
+                    <div class="glass-effect rounded-lg p-6 hover:scale-105 transition-transform duration-300">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-secondary rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">Magnétisme Quantique</h3>
+                        <p class="text-gray-300">Visualisation des spins atomiques pour l'alignement cellulaire</p>
+                    </div>
+                    
+                    <div class="glass-effect rounded-lg p-6 hover:scale-105 transition-transform duration-300">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-accent rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">Guérison Holistique</h3>
+                        <p class="text-gray-300">Approche complémentaire aux traitements médicaux</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="py-20 bg-gray-800">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6 text-gradient">À Propos de la Technique</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Cette version raffinée intègre les meilleures pratiques de guérison énergétique, 
+                    basée sur des études scientifiques et des traditions millénaires.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Reiki Vibes</h3>
+                            <p class="text-gray-300">Positions de mains douces, flux d'énergie vitale (ki), pour réduire stress et douleur selon la méta-analyse 2025.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Magnétisme Quantique</h3>
+                            <p class="text-gray-300">Visualisation des "spins" atomiques - anti-horaire pour désaligner les blocages, horaire pour réaligner les cellules saines.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Optimisations</h3>
+                            <p class="text-gray-300">Durée courte pour boost immédiat, ou longue pour effet cumulatif. 7-21 cercles pour l'harmonie des chiffres sacrés.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <img src="images/reiki-hands.jpg" alt="Mains Reiki" class="rounded-lg shadow-2xl w-full">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technique Section -->
+    <section id="technique" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6 text-gradient">La Technique en 4 Étapes</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Suivez ce protocole étape par étape pour une session de guérison optimale. 
+                    Chaque phase a été conçue pour maximiser l'efficacité énergétique.
+                </p>
+            </div>
+            
+            <div class="space-y-16">
+                <!-- Étape 1 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div class="order-2 lg:order-1">
+                        <div class="flex items-center mb-6">
+                            <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mr-4">
+                                <span class="text-2xl font-bold text-white">1</span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-gradient">Préparation : Alignement Quantique</h3>
+                        </div>
+                        <div class="bg-gray-800 rounded-lg p-6 space-y-4">
+                            <div class="flex items-center text-accent mb-4">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="font-semibold">Durée : 5-10 minutes</span>
+                            </div>
+                            <ul class="space-y-3 text-gray-300">
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Asseyez-vous ou allongez-vous confortablement
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Placez vos mains sur votre cœur ou la zone cible
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Respirez en 4-7-8 : Inspirez 4 sec, retenez 7 sec, expirez 8 sec
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Visualisez votre corps comme un champ magnétique harmonieux
+                                </li>
+                            </ul>
+                            <div class="bg-primary/20 rounded-lg p-4 mt-4">
+                                <p class="text-sm italic text-gray-200">
+                                    <strong>Intention :</strong> "Je suis un vortex quantique. J'aspire les ombres et infuse guérison, 
+                                    en harmonie avec mon traitement médical."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-1 lg:order-2">
+                        <div class="relative">
+                            <img src="images/golden-light.jpg" alt="Méditation dorée" class="rounded-lg shadow-2xl w-full">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Étape 2 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div class="relative">
+                        <img src="images/vortex-blue.jpg" alt="Vortex anti-horaire" class="rounded-lg shadow-2xl w-full vortex-reverse">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
+                        <div class="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            Anti-horaire ↺
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center mb-6">
+                            <div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mr-4">
+                                <span class="text-2xl font-bold text-white">2</span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-gradient">Phase Anti-Horaire : Aspiration des Blocages</h3>
+                        </div>
+                        <div class="bg-gray-800 rounded-lg p-6 space-y-4">
+                            <div class="flex items-center text-accent mb-4">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="font-semibold">7-21 cercles, 5-10 minutes</span>
+                            </div>
+                            <ul class="space-y-3 text-gray-300">
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Placez votre main à 10-20 cm au-dessus de la zone
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Tournez lentement anti-horaire (droite vers gauche)
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Visualisez un vortex noir aspirant les blocages
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Secouez vos mains après pour "jeter" le négatif
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Étape 3 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div class="order-2 lg:order-1">
+                        <div class="flex items-center mb-6">
+                            <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mr-4">
+                                <span class="text-2xl font-bold text-white">3</span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-gradient">Phase Horaire : Infusion de Vitalité</h3>
+                        </div>
+                        <div class="bg-gray-800 rounded-lg p-6 space-y-4">
+                            <div class="flex items-center text-accent mb-4">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="font-semibold">7-21 cercles, 5-10 minutes</span>
+                            </div>
+                            <ul class="space-y-3 text-gray-300">
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Sans pause, inversez le sens de rotation
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Tournez horaire (gauche vers droite)
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Visualisez une lumière dorée réalignant les cellules
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Infusez force et régénération quantique
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="order-1 lg:order-2">
+                        <div class="relative">
+                            <img src="images/vortex-purple.jpg" alt="Vortex horaire" class="rounded-lg shadow-2xl w-full vortex-animation">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
+                            <div class="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                                Horaire ↻
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Étape 4 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div class="relative">
+                        <img src="images/healing-background.jpeg" alt="Clôture et intégration" class="rounded-lg shadow-2xl w-full">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
+                    </div>
+                    <div>
+                        <div class="flex items-center mb-6">
+                            <div class="w-16 h-16 bg-accent rounded-full flex items-center justify-center mr-4">
+                                <span class="text-2xl font-bold text-black">4</span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-gradient">Clôture et Intégration</h3>
+                        </div>
+                        <div class="bg-gray-800 rounded-lg p-6 space-y-4">
+                            <div class="flex items-center text-accent mb-4">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="font-semibold">Durée : 5 minutes</span>
+                            </div>
+                            <ul class="space-y-3 text-gray-300">
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Posez doucement les mains sur la zone (position Reiki)
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Dites : "Merci, univers, pour cette guérison alignée"
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Respirez profondément et ouvrez les yeux lentement
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-accent mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                                    </svg>
+                                    Buvez de l'eau (magnétisée si souhaité)
+                                </li>
+                            </ul>
+                            <div class="bg-accent/20 rounded-lg p-4 mt-4">
+                                <p class="text-sm italic text-gray-200">
+                                    <strong>Conseil :</strong> Notez vos sensations dans un journal. 
+                                    Une "crise de guérison" temporaire est normale.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section id="benefices" class="py-20 bg-gray-800">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6 text-gradient">Bénéfices Prouvés</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Cette technique combine les bénéfices scientifiquement documentés du Reiki 
+                    avec les principes avancés du magnétisme quantique.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-gray-900 rounded-lg p-6 hover:scale-105 transition-transform duration-300 border border-primary/20">
+                    <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Réduction du Stress</h3>
+                    <p class="text-gray-300">Diminution significative du stress et de l'anxiété selon les études Reiki 2025.</p>
+                </div>
+                
+                <div class="bg-gray-900 rounded-lg p-6 hover:scale-105 transition-transform duration-300 border border-secondary/20">
+                    <div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Soulagement de la Douleur</h3>
+                    <p class="text-gray-300">Réduction de la perception de douleur grâce aux techniques énergétiques.</p>
+                </div>
+                
+                <div class="bg-gray-900 rounded-lg p-6 hover:scale-105 transition-transform duration-300 border border-accent/20">
+                    <div class="w-16 h-16 bg-accent rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Boost Immunitaire</h3>
+                    <p class="text-gray-300">Renforcement du système immunitaire par l'alignement énergétique quantique.</p>
+                </div>
+                
+                <div class="bg-gray-900 rounded-lg p-6 hover:scale-105 transition-transform duration-300 border border-green-500/20">
+                    <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Support Oncologique</h3>
+                    <p class="text-gray-300">Amélioration du bien-être en complément des traitements contre le cancer.</p>
+                </div>
+                
+                <div class="bg-gray-900 rounded-lg p-6 hover:scale-105 transition-transform duration-300 border border-purple-500/20">
+                    <div class="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Clarté Mentale</h3>
+                    <p class="text-gray-300">Amélioration de la concentration et de la clarté d'esprit.</p>
+                </div>
+                
+                <div class="bg-gray-900 rounded-lg p-6 hover:scale-105 transition-transform duration-300 border border-pink-500/20">
+                    <div class="w-16 h-16 bg-pink-500 rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Équilibre Émotionnel</h3>
+                    <p class="text-gray-300">Harmonisation des émotions et réduction des troubles de l'humeur.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recommendations Section -->
+    <section class="py-20 bg-gray-900">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6 text-gradient">Recommandations d'Usage</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Pour maximiser les bénéfices, suivez ces recommandations basées sur les recherches scientifiques.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="space-y-8">
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-accent rounded-full flex items-center justify-center mr-4">
+                                <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white">Fréquence Optimale</h3>
+                        </div>
+                        <ul class="space-y-2 text-gray-300">
+                            <li class="flex items-center">
+                                <span class="w-2 h-2 bg-accent rounded-full mr-3"></span>
+                                2-3 sessions par jour
+                            </li>
+                            <li class="flex items-center">
+                                <span class="w-2 h-2 bg-accent rounded-full mr-3"></span>
+                                8 sessions minimum pour effets cumulatifs
+                            </li>
+                            <li class="flex items-center">
+                                <span class="w-2 h-2 bg-accent rounded-full mr-3"></span>
+                                Durée : 20-60 minutes par session
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mr-4">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white">Précautions Importantes</h3>
+                        </div>
+                        <ul class="space-y-2 text-gray-300">
+                            <li class="flex items-center">
+                                <span class="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                                Toujours en complément des traitements médicaux
+                            </li>
+                            <li class="flex items-center">
+                                <span class="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                                Consultez votre médecin avant de commencer
+                            </li>
+                            <li class="flex items-center">
+                                <span class="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                                Arrêtez si vous ressentez un malaise
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <img src="images/chakras.png" alt="Système des chakras" class="rounded-lg shadow-2xl w-full">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-lg"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-gray-800">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6 text-gradient">Contact & Avertissement</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Cette technique est un complément aux soins médicaux traditionnels, 
+                    jamais un remplacement.
+                </p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-red-900/20 border border-red-500/50 rounded-lg p-8 mb-12">
+                    <div class="flex items-center mb-4">
+                        <svg class="w-8 h-8 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <h3 class="text-2xl font-bold text-red-400">Avertissement Médical Important</h3>
+                    </div>
+                    <div class="space-y-4 text-gray-300">
+                        <p>
+                            <strong>Cette technique de guérison énergétique est strictement complémentaire</strong> 
+                            aux traitements médicaux conventionnels. Elle ne doit jamais remplacer :
+                        </p>
+                        <ul class="list-disc list-inside space-y-2 ml-4">
+                            <li>Les consultations médicales régulières</li>
+                            <li>Les traitements prescrits par votre médecin</li>
+                            <li>Les médicaments ou thérapies en cours</li>
+                            <li>Les examens de dépistage recommandés</li>
+                        </ul>
+                        <p class="font-semibold text-red-300">
+                            En cas de maladie grave comme le cancer, cette technique vise uniquement 
+                            à améliorer votre bien-être en parallèle de vos traitements médicaux.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <div class="bg-gray-900 rounded-lg p-8 inline-block">
+                        <h3 class="text-2xl font-bold mb-4 text-gradient">Prêt à Commencer ?</h3>
+                        <p class="text-gray-300 mb-6">
+                            Commencez votre voyage de guérison énergétique dès aujourd'hui. 
+                            Rappelez-vous : la constance est la clé du succès.
+                        </p>
+                        <button class="bg-accent hover:bg-yellow-500 text-black font-bold py-4 px-8 rounded-full transition-all duration-300 transform hover:scale-105 energy-pulse">
+                            Commencer Ma Première Session
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-12">
+        <div class="container mx-auto px-6">
+            <div class="text-center">
+                <div class="flex items-center justify-center space-x-2 mb-4">
+                    <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center">
+                        <span class="text-white font-bold">V</span>
+                    </div>
+                    <span class="text-2xl font-bold text-gradient">Vortex Quantique de Guérison</span>
+                </div>
+                <p class="text-gray-400 mb-6">
+                    Technique de rotation énergétique parfaite - Reiki • Magnétisme Quantique • Visualisation
+                </p>
+                <div class="border-t border-gray-700 pt-6">
+                    <p class="text-gray-500 text-sm">
+                        © 2025 Vortex Quantique de Guérison. Cette technique est à des fins de bien-être uniquement. 
+                        Consultez toujours un professionnel de santé qualifié.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript for smooth scrolling and interactions -->
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Add scroll effect to navigation
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 100) {
+                nav.classList.add('bg-black/80');
+            } else {
+                nav.classList.remove('bg-black/80');
+            }
+        });
+    </script>
+</body>
+</html>
+

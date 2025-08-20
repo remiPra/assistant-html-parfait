@@ -1,75 +1,75 @@
 <!DOCTYPE html>
 <html lang="fr" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patrice Rosso - Sculpteur d'Être</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'serif': ['Playfair Display', 'serif'],
-                        'sans': ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        'bordeaux': {
-                            50: '#fdf2f2',
-                            100: '#fce7e7',
-                            200: '#f9d1d1',
-                            300: '#f4a8a8',
-                            400: '#ec7878',
-                            500: '#dc4c4c',
-                            600: '#c73030',
-                            700: '#a52424',
-                            800: '#881f1f',
-                            900: '#721e1e',
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Patrice Rosso - Sculpteur d'Être</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            'serif': ['Playfair Display', 'serif'],
+                            'sans': ['Inter', 'sans-serif'],
+                        },
+                        colors: {
+                            'bordeaux': {
+                                50: '#fdf2f2',
+                                100: '#fce7e7',
+                                200: '#f9d1d1',
+                                300: '#f4a8a8',
+                                400: '#ec7878',
+                                500: '#dc4c4c',
+                                600: '#c73030',
+                                700: '#a52424',
+                                800: '#881f1f',
+                                900: '#721e1e',
+                            }
                         }
                     }
                 }
             }
-        }
-    </script>
-    <style>
-        .fade-in {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease-out;
-        }
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .hero-bg {
-            background: linear-gradient(135deg, rgba(114, 30, 30, 0.8) 0%, rgba(165, 36, 36, 0.7) 100%);
-        }
-        .glass-effect {
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(199, 48, 48, 0.1);
-        }
-        .hover-lift {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .hover-lift:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(114, 30, 30, 0.15);
-        }
-        .nav-item {
-            background: linear-gradient(135deg, #a52424, #881f1f);
-            transition: all 0.3s ease;
-        }
-        .nav-item:hover {
-            background: linear-gradient(135deg, #c73030, #a52424);
-            transform: translateY(-2px);
-        }
-        .nav-item.active {
-            background: linear-gradient(135deg, #dc4c4c, #c73030);
-        }
-    </style>
-</head>
+        </script>
+        <style>
+            .fade-in {
+                opacity: 0;
+                transform: translateY(30px);
+                transition: all 0.8s ease-out;
+            }
+            .fade-in.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            .hero-bg {
+                background: linear-gradient(135deg, rgba(114, 30, 30, 0.8) 0%, rgba(165, 36, 36, 0.7) 100%);
+            }
+            .glass-effect {
+                backdrop-filter: blur(10px);
+                background: rgba(255, 255, 255, 0.95);
+                border: 1px solid rgba(199, 48, 48, 0.1);
+            }
+            .hover-lift {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .hover-lift:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 20px 40px rgba(114, 30, 30, 0.15);
+            }
+            .nav-item {
+                background: linear-gradient(135deg, #a52424, #881f1f);
+                transition: all 0.3s ease;
+            }
+            .nav-item:hover {
+                background: linear-gradient(135deg, #c73030, #a52424);
+                transform: translateY(-2px);
+            }
+            .nav-item.active {
+                background: linear-gradient(135deg, #dc4c4c, #c73030);
+            }
+        </style>
+    </head>
 <body class="font-sans text-gray-800 bg-gradient-to-br from-red-50 to-orange-50">
     
     <!-- Navigation -->
