@@ -10,6 +10,7 @@ class NavigationDrawer {
         if (path.includes('/nav') || path.includes('testp.html')) return 'nav';
         if (path.includes('/nora') || path.includes('test.html')) return 'nora';
         if (path.includes('/remi') || path.includes('remi.html')) return 'remi';
+        if (path.includes('/kevin') || path.includes('kevin.html')) return 'kevin';
 
         if (path.includes('/testo') || path.includes('speechr.html')) return 'testo';
         if (path.includes('/english')) return 'english';
@@ -21,7 +22,7 @@ class NavigationDrawer {
             <!-- Menu Drawer -->
             <div id="nav-drawer-overlay" class="fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
             
-            <div id="nav-drawer" class="fixed top-0 left-0 h-full w-80 bg-gradient-to-b from-[#1e3c72] to-[#2a5298] shadow-2xl transform -translate-x-full transition-transform duration-300 ease-out z-50">
+            <div id="nav-drawer" class="fixed z-50 top-0 left-0 h-full w-80 bg-gradient-to-b from-[#1e3c72] to-[#2a5298] shadow-2xl transform -translate-x-full transition-transform duration-300 ease-out z-50">
                 
                 <!-- Header du Drawer -->
                 <div class="flex items-center justify-between p-6 border-b border-white/20">
@@ -49,6 +50,7 @@ class NavigationDrawer {
                     ${this.createDrawerLink('/nav', 'nav', '🧭', 'Navigation', 'Interface de test navigation')}
                     ${this.createDrawerLink('/nora', 'nora', '🤖', 'Nora Assistant', 'Assistant vocal principal')}
                     ${this.createDrawerLink('/remi', 'remi', '🤖', 'remi Clone', 'Assistant vocal principal')}
+                    ${this.createDrawerLink('/kevin', 'kevin', '🤖', 'kevin Clone', 'Assistant vocal principal')}
 
                     ${this.createDrawerLink('/english', 'english', '🇬🇧', 'English Version', 'Version anglaise')}
                 </div>

@@ -35,9 +35,10 @@
       "src": "/english",
       "dest": "/english.html"
     },
-    {
-      "src": "/testo",
-      "dest": "/speechr.html"
+   
+     {
+      "src": "/kevin",
+      "dest": "/kevin.html"
     },
     {
       "src": "/safari",
