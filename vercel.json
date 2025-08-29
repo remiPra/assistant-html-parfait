@@ -28,6 +28,10 @@
       "dest": "/testp.html"
     },
     {
+      "src": "/testo",
+      "dest": "/speechr.html"
+    },
+    {
       "src": "/nora",
       "dest": "/test.html"
     },
