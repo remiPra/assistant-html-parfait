@@ -428,7 +428,7 @@
     const blob = new Blob(recordedChunks, { type: 'audio/webm' });
 
     // New check: stop if the recorded audio is too short or empty
-    if (blob.size < 1000) { // Blob size is in bytes. 1000 bytes is a good safe minimum.
+    if (blob.size < 0) { // Blob size is in bytes. 1000 bytes is a good safe minimum.
         log('Enregistrement Push-to-Talk trop court.', 'warning');
         updateStatus("Message trop court", "alert-circle", "error");
         await new Promise(r => setTimeout(r, 1500)); // Show message for 1.5 seconds
