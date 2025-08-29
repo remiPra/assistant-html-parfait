@@ -425,12 +425,22 @@
             mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
             mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
             mediaRecorder.onstop = async () => {
-                const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-                const arrayBuffer = await blob.arrayBuffer();
-                const audioBuffer = await convertWebmToWavBuffer(arrayBuffer);
-                await transcribeAudioUltraFast(audioBuffer);
-            };
-            mediaRecorder.start();
+    const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+
+    // New check: stop if the recorded audio is too short or empty
+    if (blob.size < 1000) { // Blob size is in bytes. 1000 bytes is a good safe minimum.
+        log('Enregistrement Push-to-Talk trop court.', 'warning');
+        updateStatus("Message trop court", "alert-circle", "error");
+        await new Promise(r => setTimeout(r, 1500)); // Show message for 1.5 seconds
+        updateStatus("Prêt", "power-off", "");
+        return;
+    }
+
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioBuffer = await convertWebmToWavBuffer(arrayBuffer);
+    await transcribeAudioUltraFast(audioBuffer);
+};
+mediaRecorder.start();
         } catch (error) {
             log(`Erreur Push-to-Talk: ${error.message}`, 'error');
             isPushToTalkRecording = false;
