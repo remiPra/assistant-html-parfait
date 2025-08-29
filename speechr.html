@@ -505,14 +505,20 @@ mediaRecorder.start();
         }
         return buffer;
     }
-
     async function convertWebmToWavBuffer(webmBuffer) {
-        const audioCtx = new OfflineAudioContext(1, 48000 * 10, 48000); // max 10 sec
-        const audioBuffer = await audioCtx.decodeAudioData(webmBuffer);
-        const samples = audioBuffer.getChannelData(0);
-        return encodeWAV(samples, audioBuffer.sampleRate);
-    }
+    // Crée un contexte audio "hors ligne" pour la conversion.
+    // On passe de 48000 Hz (trop haute qualité) à 16000 Hz (parfait pour la voix).
+    const audioCtx = new OfflineAudioContext(1, 16000 * 10, 16000); 
     
+    // Décode l'audio WebM en un format que le navigateur comprend.
+    const audioBuffer = await audioCtx.decodeAudioData(webmBuffer);
+    
+    // Extrait les données audio brutes.
+    const samples = audioBuffer.getChannelData(0);
+    
+    // Encode les données brutes dans un fichier WAV avec un taux d'échantillonnage de 16000 Hz.
+    return encodeWAV(samples, 16000); 
+}
     async function preGenerateSimpleReflections() {
         if (reflectionAudios.size > 0) return;
         log('🗣️ Pré-génération des réflexions...', 'info');
