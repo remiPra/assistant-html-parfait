@@ -846,7 +846,7 @@ Concision > complétude. Priorité au temps de parole de l’utilisateur.
             const response = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${drawerOpenaiKey.value}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: 'gpt-4o', messages, temperature: 0.5, max_tokens: 150, stream: true })
+                body: JSON.stringify({ model: 'gpt-4o', messages, temperature: 0.5, max_tokens: 800, stream: true })
             });
             if (!response.ok) {
                 const err = await response.json();
