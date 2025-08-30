@@ -32,6 +32,10 @@
       "dest": "/speechr.html"
     },
     {
+      "src": "/gpt4o",
+      "dest": "/speechrghpt4.html"
+    },
+    {
       "src": "/nora",
       "dest": "/test.html"
     },

@@ -11,7 +11,7 @@ class NavigationDrawer {
         if (path.includes('/nora') || path.includes('test.html')) return 'nora';
         if (path.includes('/remi') || path.includes('remi.html')) return 'remi';
         if (path.includes('/kevin') || path.includes('kevin.html')) return 'kevin';
-
+        if (path.includes('/gpt4o') || path.includes('speechrghpt4.html')) return 'gpt4o';
         if (path.includes('/testo') || path.includes('speechr.html')) return 'testo';
         if (path.includes('/english')) return 'english';
         return 'home';
@@ -46,13 +46,12 @@ class NavigationDrawer {
                 <div class="p-6 space-y-2">
                     <h3 class="text-white/60 text-xs uppercase tracking-wider font-semibold mb-4">Pages Principales</h3>
                     ${this.createDrawerLink('/testo', 'testo', '🧭', 'simple', 'super simple')}
-
-                    ${this.createDrawerLink('/nav', 'nav', '🧭', 'Navigation', 'Interface de test navigation')}
+                    ${this.createDrawerLink('/gpt4o', 'gpt4o', '🧭', 'GPT-4o', 'Version GPT-4o')}
+                    ${this.createDrawerLink('/english', 'english', '🇬🇧', 'English Version', 'Version anglaise')}
                     ${this.createDrawerLink('/nora', 'nora', '🤖', 'Nora Assistant', 'Assistant vocal principal')}
                     ${this.createDrawerLink('/remi', 'remi', '🤖', 'remi Clone', 'Assistant vocal principal')}
                     ${this.createDrawerLink('/kevin', 'kevin', '🤖', 'kevin Clone', 'Assistant vocal principal')}
 
-                    ${this.createDrawerLink('/english', 'english', '🇬🇧', 'English Version', 'Version anglaise')}
                 </div>
 
                 <!-- Section Actions -->
